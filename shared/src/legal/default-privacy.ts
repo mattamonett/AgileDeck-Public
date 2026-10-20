@@ -38,6 +38,7 @@ export function defaultPrivacyNotice(config: SiteConfig): LegalSection[] {
       heading: 'Who runs the site',
       paragraphs: [
         `${name} is a free planning poker tool. This copy is run by the person or organization you can reach at ${contactEmail} (the "site owner"). There are no accounts, ads, analytics, tracking pixels, or third-party scripts or fonts. Nothing is sold or shared for marketing.`,
+        'The site runs on open-source software. The people who wrote that software do not run this copy and receive none of its data.',
       ],
     },
     {

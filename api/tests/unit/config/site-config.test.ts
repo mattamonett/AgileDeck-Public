@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { agreementVersionOf } from '../../../src/config/legal-text';
+import { agreementVersionOf, legalSetupWarnings } from '../../../src/config/legal-text';
 import {
   getPublicSiteConfig,
   getSiteAgreement,
@@ -190,5 +190,23 @@ describe('site config loading', () => {
     delete process.env.SITE_PASSWORD;
     writeSettings({ access: { passwordProtects: 'nothing' } });
     expect(loadSiteConfig(directory).access.passwordProtects).toBe('nothing');
+  });
+});
+
+describe('legal setup warnings', () => {
+  afterEach(() => setSiteConfig());
+
+  it('flags the placeholder contact and governing law', () => {
+    const warnings = legalSetupWarnings(setSiteConfig());
+    expect(warnings).toHaveLength(2);
+    expect(warnings[0]).toContain('site.contactEmail');
+    expect(warnings[1]).toContain('site.governingLaw');
+  });
+
+  it('is quiet once the operator fills them in', () => {
+    const config = setSiteConfig({
+      site: { contactEmail: 'owner@team.example', governingLaw: 'England and Wales' },
+    });
+    expect(legalSetupWarnings(config)).toEqual([]);
   });
 });

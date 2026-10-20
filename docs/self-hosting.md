@@ -117,6 +117,14 @@ New feedback and replies from visitors stay private, shown to their author as wa
 
 What the site offers (moods, throwables, themes, features, limits, terms and an optional password) is set in `config/site.json`. Copy `config/site.example.json`, edit it and restart the API. Every key is described in [site settings](site-settings.md).
 
+### Your terms and privacy notice
+
+Whoever runs a copy is its operator, and the terms of use and privacy notice on that copy are the operator's responsibility. The project's authors are not a party to them. Before you open a copy to other people:
+
+- Set `site.contactEmail` and `site.governingLaw`. The defaults are placeholders (`admin@example.com` and "the state or country where the site owner lives"), and the API logs a warning at startup while either is unchanged.
+- Read the built-in agreement and privacy notice at `/terms` and `/privacy`. They describe what this software stores and follow your settings, but they are a template, not legal advice. Have them reviewed for where you operate, or replace them with your own files through `legal.termsFile` and `legal.privacyFile`.
+- If you add anything that collects more data, such as analytics, a CDN or a log service, update the privacy notice (`site.networkProviders` covers traffic providers).
+
 ## Updating
 
 ```sh

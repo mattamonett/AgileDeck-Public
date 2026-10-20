@@ -16,7 +16,7 @@ The API reads the file once at startup. If the file is not valid JSON or a value
 |-----|---------|---------|
 | `name` | `"Agile Deck"` | Shown in the app, the browser tab and the built-in terms. |
 | `contactEmail` | `"admin@example.com"` | Named in the terms and privacy notice as the way to reach you. **Change this.** |
-| `governingLaw` | `"the state or country where the site owner lives"` | Completes "These terms are governed by the laws of …". For example `"the State of Texas, USA"`. |
+| `governingLaw` | `"the state or country where the site owner lives"` | Completes "These terms are governed by the laws of …". For example `"the State of New York, USA"` or `"England and Wales"`. **Change this.** |
 | `networkProviders` | `[]` | Companies that carry visitor traffic before it reaches your server, such as a CDN or tunnel provider. Each is named in the privacy notice. |
 
 ## Room content: `content`
@@ -67,7 +67,7 @@ The privacy notice quotes these retention periods, so it stays accurate when you
 
 ## Terms and privacy notice: `legal`
 
-As the operator of a public copy, you are responsible for its terms of use and privacy notice. The app ships with a built-in site use agreement and privacy notice that fill in your `site` details and follow your settings: retention periods come from `limits`, and the notice leaves out feedback, issues, usage counts or agreement records when those are off. The provided text is a starting point, not legal advice.
+As the operator of a copy, you are responsible for its terms of use and privacy notice; the project's authors are not a party to them. The app ships with a built-in site use agreement and privacy notice that fill in your `site` details and follow your settings: retention periods come from `limits`, and the notice leaves out feedback, issues, usage counts or agreement records when those are off. The provided text is a starting point, not legal advice.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
