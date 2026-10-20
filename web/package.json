@@ -34,7 +34,7 @@
     "@angular/compiler-cli": "^21.2.25",
     "@types/qrcode": "^1.5.6",
     "@types/three": "^0.185.4",
-    "angular-eslint": "^21.4.0",
+    "angular-eslint": "^22.6.0",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.3",
     "vitest": "^4.1.11"
