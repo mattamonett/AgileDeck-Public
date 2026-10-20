@@ -20,6 +20,19 @@ COPY shared ./shared
 # Build shared library
 RUN npm run build -w shared
 
+# Replace built-in branding with any files from config/branding. Only these
+# names are accepted, so a misspelled file stops the build instead of being ignored.
+COPY config/branding /tmp/branding
+RUN allowed="apple-touch-icon.png favicon-48x48.png favicon.ico favicon.png icon-192.png icon-512.png manifest.webmanifest og-image.png robots.txt"; \
+    for file in /tmp/branding/*; do \
+      name="$(basename "$file")"; \
+      [ "$name" = "README.md" ] && continue; \
+      case " $allowed " in \
+        *" $name "*) cp "$file" "/app/web/public/$name" && echo "Branding: using $name" ;; \
+        *) echo "config/branding/$name is not a replaceable file. Use one of: $allowed" >&2; exit 1 ;; \
+      esac; \
+    done
+
 # Build Web app
 ARG BUILD_TIME
 RUN echo "{\"version\": \"$BUILD_TIME\"}" > /app/web/public/version.json

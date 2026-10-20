@@ -14,6 +14,8 @@ coverage/
 
 # Operator settings (see config/site.example.json)
 /config/site.json
+/config/branding/*
+!/config/branding/README.md
 
 # Local data
 *.db

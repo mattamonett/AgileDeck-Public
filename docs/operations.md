@@ -31,13 +31,21 @@ Compose reads `.env` (copy it from `.env.example`). The values that matter:
 | `COOKIE_SIGNING_SECRET` | none, required | Signs visitor cookies. Production refuses a value shorter than 32 characters or equal to the example placeholder. |
 | `COOKIE_SIGNING_SECRET_PREVIOUS` | empty | Accepted only to verify cookies during [rotation](#rotate-the-cookie-signing-secret). |
 | `POKER_FRONTEND_URL` | `http://localhost:8080` in Compose | The address people type, no trailing slash; separate several with commas. The API refuses to start in production when it is empty. Browser and socket requests must come from one of these origins. |
-| `COOKIE_SECURE` | empty | Secure cookies are on when every frontend URL is `https://`. Set `true` or `false` to override. |
-| `ADMIN_PASSWORD` | empty | Turns on the [admin page](#admin-page) at `/admin`. At least 12 characters; empty leaves it off. |
-| `TRUSTED_PROXY_IPS` | `172.30.0.10` | Proxies allowed to report the client address. See [client address](#client-address-and-trusted-proxies). |
+| `COOKIE_SECURE` | empty | Secure cookies are on when every frontend URL is `https://`. Set `true` or `false` to override; any other value stops the API at startup. |
+| `ADMIN_PASSWORD` | empty | Turns on the [admin page](#admin-page) at `/admin`. At least 12 characters; a shorter value stops the API at startup, and empty leaves it off. |
+| `TRUSTED_PROXY_IPS` | `POKER_WEB_IP` | Proxies allowed to report the client address. An entry that is not an address or CIDR range stops the API at startup. See [client address](#client-address-and-trusted-proxies). |
+| `POKER_SUBNET`, `POKER_WEB_IP` | `172.30.0.0/24`, `172.30.0.10` | The private Docker network and the web container's address on it. Change them together if the subnet clashes with another network. |
 | `WEB_BIND`, `WEB_PORT` | `127.0.0.1`, `8080` | Where the web container is published. |
-| `ALLOW_MISSING_SOCKET_ORIGIN` | `false` | In production, requests without an `Origin` header are refused unless this is `true`. |
+| `ALLOW_MISSING_SOCKET_ORIGIN` | `false` | In production, requests without an `Origin` header are refused unless this is `true`. Any value other than `true` or `false` stops the API at startup. |
+| `LOG_LEVEL` | `info` | `error`, `warn`, `info` or `debug`. Messages below the level are dropped. |
+| `LOG_FORMAT` | `text` | `json` writes one JSON object (`time`, `level`, `message`) per line. |
 | `POKER_VERSION` | `latest` | Image tag for `poker-api` and `poker-web`. |
 | `BUILD_TIME` | `Development` | Version string baked into the images and returned by `/api/version`. |
+
+`NODE_ENV`, `PORT`, `DATABASE_URL` and `SITE_CONFIG_DIR` are set by Compose; see
+[self-hosting](self-hosting.md#settings) for what they do and what is tied to
+them. Logos and icons come from `config/branding/` at build time; see
+[branding](self-hosting.md#branding).
 
 ## Start and upgrade
 
@@ -79,7 +87,9 @@ refuses requests without an allowed `Origin`. `/api/version` returns the
 directly inside its container and fetch `/` from nginx.
 
 The API logs one `[DIAG] Database connected` line with the room count at
-startup. Origin rejections are summarised at most once a minute.
+startup. Origin rejections are summarised at most once a minute. Set
+`LOG_LEVEL=warn` for quieter logs, or `LOG_FORMAT=json` to send them to a log
+collector as one JSON object per line.
 
 ## Backups
 
@@ -146,8 +156,9 @@ header from the right, skips trusted hops, and uses the first untrusted address.
 Entries further left were written by the caller and are never believed.
 `CF-Connecting-IP` and other vendor headers are not read.
 
-The default trusts only the bundled web container at `172.30.0.10`. The Docker
-gateway `172.30.0.1` is not trusted by default: traffic to a published port can
+The default trusts only the bundled web container at `172.30.0.10`
+(`POKER_WEB_IP`). The Docker gateway `172.30.0.1` (the `.1` address of
+`POKER_SUBNET`) is not trusted by default: traffic to a published port can
 arrive from the gateway, so trusting it would let any such caller choose its
 address. If you run your own reverse proxy on the same host in front of the web
 container, its requests arrive from the gateway. In that case add `172.30.0.1`

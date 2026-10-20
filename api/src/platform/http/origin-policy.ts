@@ -24,7 +24,7 @@ export function isSameOriginRequest(headers: IncomingHttpHeaders): boolean {
 export function originAllowList(allowedOrigins: readonly string[]): OriginCheck {
   return (origin) => {
     if (!origin) {
-      return !isStrictIdentityMode() || process.env.ALLOW_MISSING_SOCKET_ORIGIN === 'true';
+      return !isStrictIdentityMode() || process.env.ALLOW_MISSING_SOCKET_ORIGIN?.trim() === 'true';
     }
     return allowedOrigins.includes(origin);
   };
