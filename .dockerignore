@@ -16,6 +16,8 @@ backups
 docs
 tools
 config
+# Branding replaces web assets at build time; the rest of config/ is mounted at run time.
+!config/branding
 
 # Secrets and local databases
 **/.env

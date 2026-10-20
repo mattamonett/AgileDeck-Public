@@ -9,6 +9,10 @@ const KEYS = [
   'COOKIE_SIGNING_SECRET',
   'POKER_FRONTEND_URL',
   'ADMIN_PASSWORD',
+  'ALLOW_MISSING_SOCKET_ORIGIN',
+  'TRUSTED_PROXY_IPS',
+  'LOG_LEVEL',
+  'LOG_FORMAT',
 ] as const;
 
 describe('server environment', () => {
@@ -90,5 +94,33 @@ describe('server environment', () => {
     expect(() => readServerEnv()).toThrow('ADMIN_PASSWORD must be at least 12 characters');
     process.env.ADMIN_PASSWORD = 'a'.repeat(12);
     expect(readServerEnv().adminEnabled).toBe(true);
+  });
+
+  it('refuses true/false settings it cannot read', () => {
+    process.env.COOKIE_SECURE = '0';
+    expect(() => readServerEnv()).toThrow('COOKIE_SECURE must be true or false');
+    delete process.env.COOKIE_SECURE;
+    process.env.ALLOW_MISSING_SOCKET_ORIGIN = 'yes';
+    expect(() => readServerEnv()).toThrow('ALLOW_MISSING_SOCKET_ORIGIN must be true or false');
+    process.env.ALLOW_MISSING_SOCKET_ORIGIN = 'true';
+    expect(() => readServerEnv()).not.toThrow();
+  });
+
+  it('refuses trusted proxies that are not addresses or ranges', () => {
+    process.env.TRUSTED_PROXY_IPS = '172.30.0.10, 10.0.0.0/8';
+    expect(() => readServerEnv()).not.toThrow();
+    process.env.TRUSTED_PROXY_IPS = '172.30.0.10,proxy.local,10.0.0.0/33';
+    expect(() => readServerEnv()).toThrow('fix proxy.local, 10.0.0.0/33');
+  });
+
+  it('refuses an unknown log level or format', () => {
+    process.env.LOG_LEVEL = 'debug';
+    process.env.LOG_FORMAT = 'json';
+    expect(() => readServerEnv()).not.toThrow();
+    process.env.LOG_LEVEL = 'verbose';
+    expect(() => readServerEnv()).toThrow('LOG_LEVEL must be one of error, warn, info, debug');
+    process.env.LOG_LEVEL = 'info';
+    process.env.LOG_FORMAT = 'xml';
+    expect(() => readServerEnv()).toThrow('LOG_FORMAT must be one of text, json');
   });
 });
