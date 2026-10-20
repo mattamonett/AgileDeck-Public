@@ -24,14 +24,12 @@ import { hippieCharacter } from './characters/hippie/hippie-character';
 import { laxativeCharacter } from './characters/laxative/laxative-character';
 import { melloMaryCharacter } from './characters/mellomary/mellomary-character';
 import { monkeyCharacter } from './characters/monkey/monkey-character';
-import { nillCharacter } from './characters/nill/nill-character';
 import { pigeonCharacter } from './characters/pigeon/pigeon-character';
 import { reaperCharacter } from './characters/reaper/reaper-character';
 import { rocketCharacter } from './characters/rocket/rocket-character';
 import { sharkCharacter } from './characters/shark/shark-character';
 import { sunglassesCharacter } from './characters/sunglasses/sunglasses-character';
 import { tomatoCharacter } from './characters/tomato/tomato-character';
-import { trumpCharacter } from './characters/trump/trump-character';
 import { ufoCharacter } from './characters/ufo/ufo-character';
 import { unicornCharacter } from './characters/unicorn/unicorn-character';
 import { wrestlerCharacter } from './characters/wrestler/wrestler-character';
@@ -58,14 +56,12 @@ const CHARACTERS: readonly CharacterDefinition[] = [
   laxativeCharacter,
   melloMaryCharacter,
   monkeyCharacter,
-  nillCharacter,
   pigeonCharacter,
   reaperCharacter,
   rocketCharacter,
   sharkCharacter,
   sunglassesCharacter,
   tomatoCharacter,
-  trumpCharacter,
   ufoCharacter,
   unicornCharacter,
   wrestlerCharacter,

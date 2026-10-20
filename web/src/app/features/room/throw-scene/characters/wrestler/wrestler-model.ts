@@ -79,7 +79,7 @@ function lettering(
 
 export function makeWrestler(): THREE.Group {
   const man = new THREE.Group();
-  man.name = 'john-schlee-na';
+  man.name = 'the-heel';
   const skin = 0xdca078;
   oval(man, 'orange-shirt', 0xf47b08, 0, 1, 0, 20, 21, 10);
   oval(man, 'neck', skin, 0, 23, 0, 9, 9, 7);
@@ -194,8 +194,8 @@ export function makeWrestler(): THREE.Group {
   oval(man, 'blue-cap', 0x184f80, 0, 53, -1, 17, 12, 12);
   oval(man, 'orange-cap-band', 0xf38b16, 0, 49, 6, 17, 2, 9);
   oval(man, 'orange-brim', 0xef8010, 0, 47, 13, 18, 2.5, 10);
-  lettering(man, ['NEVER', 'GIVE UP'], '#ff941b', 23, 12, 56, 11);
-  lettering(man, ['JOHN', 'SCHLEE-NA'], '#fff3db', 33, 20, 3, 10.5);
+  lettering(man, ['TAG', 'ME IN'], '#ff941b', 23, 12, 56, 11);
+  lettering(man, ['THE', 'HEEL'], '#fff3db', 33, 20, 3, 10.5);
   const body = new THREE.Group();
   body.name = 'wrestler-body';
   for (const child of [...man.children])

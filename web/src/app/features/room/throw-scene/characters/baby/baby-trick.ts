@@ -1,9 +1,8 @@
-import { clamp } from '../../kit';
+import { clamp, textSprite } from '../../kit';
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import type { Point } from '../../flight/flight-math';
 import type { TargetBounds } from '../../landing/landing-geometry';
-import { textSprite } from '../trump/trump-model';
 import { babyArmTo, babyPose, wet } from './baby-model';
 import {
   BABY_DURATION,

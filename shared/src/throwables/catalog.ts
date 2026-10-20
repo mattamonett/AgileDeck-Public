@@ -64,14 +64,9 @@ export const ALL_EMOJIS_WITH_TAGS = [
   { char: '🕶️', tags: 'sunglasses glasses shades cool explode shatter' },
   { char: '🐒', tags: 'monkey animal poop throw splat' },
   { char: '🦈', tags: 'shark fish ocean swim bite attack' },
-  { char: '✋', tags: 'nill smith hand slap backhand suit' },
   {
     char: '🏎️',
     tags: 'racing car race driver crash wreck damage vehicle fast',
-  },
-  {
-    char: '🇺🇸',
-    tags: 'donald trump usa us flag america maga suit hat pat yuge fired loser',
   },
   {
     char: '📐',
@@ -92,7 +87,7 @@ export const ALL_EMOJIS_WITH_TAGS = [
   },
   {
     char: '🥋',
-    tags: 'bullet time stick man men stickman kung fu karate fight agent tie dodge whoa',
+    tags: 'slow mo showdown bullet time stick man men stickman kung fu karate fight agent tie dodge whoa',
   },
   {
     char: '🗑️',
@@ -100,12 +95,12 @@ export const ALL_EMOJIS_WITH_TAGS = [
   },
   {
     char: '🤼',
-    tags: 'wrestler wrestling tackle john schlee-na cena orange jeans',
+    tags: 'the heel wrestler wrestling tackle tag orange jeans',
   },
   { char: '🐐', tags: 'goat herd animal horns king hill climb fight' },
   {
     char: '🪚',
-    tags: 'texas chainsaw massacre saw leatherface mask apron blood horror',
+    tags: 'chainsaw maniac saw hockey mask apron blood horror',
   },
   { char: '☠️', tags: 'grim reaper death skull sickle scythe blood slice' },
   { char: '🧟', tags: 'zombie undead monster bite grab blood flesh stumble' },
@@ -122,3 +117,6 @@ export const VALID_INTERACTION_CHARACTERS: ReadonlySet<string> = new Set<string>
   ...BASIC_THROWABLE_EMOJIS,
   ...ALL_EMOJIS_WITH_TAGS.map((e) => e.char),
 ]);
+
+/** Throwables that have been removed. Site settings may still name them, so they are accepted there and ignored. */
+export const RETIRED_THROWABLES: ReadonlySet<string> = new Set<string>(['✋', '🇺🇸']);

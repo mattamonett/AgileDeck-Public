@@ -77,9 +77,9 @@ function release(s: Setup) {
   disposeObject(s.trick.object);
 }
 
-describe('Bullet Time', () => {
+describe('Slow-Mo Showdown', () => {
   it('is named in the picker', () => {
-    expect(projectileName('🥋')).toBe('Bullet Time');
+    expect(projectileName('🥋')).toBe('Slow-Mo Showdown');
   });
 
   it('shares reproducible plans that vary every stage in order', () => {

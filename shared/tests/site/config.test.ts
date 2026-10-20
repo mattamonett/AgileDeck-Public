@@ -54,6 +54,11 @@ describe('site config', () => {
     expect(result.error?.issues.map((issue) => issue.message).join(' ')).toContain(message);
   });
 
+  it('ignores retired throwables that older settings still block', () => {
+    const config = SiteConfigSchema.parse({ content: { blockedThrowables: ['💩', '🇺🇸', '✋'] } });
+    expect(config.content.blockedThrowables).toEqual(['💩']);
+  });
+
   it('accepts legal files in the config folder', () => {
     const config = SiteConfigSchema.parse({
       legal: { termsFile: 'terms.md', privacyFile: 'privacy.txt' },

@@ -49,10 +49,10 @@ function plate(
   return mesh;
 }
 
-/** Chibi proportions and costume details follow the supplied appearance reference. */
+/** A chibi chainsaw maniac in a stained apron and a plain hockey mask. */
 export function makeChainsawCharacter(): THREE.Group {
   const man = new THREE.Group();
-  man.name = 'texas-chainsaw-massacre';
+  man.name = 'chainsaw-maniac';
   oval(man, 0xb3a5a1, 0, 0, 0, 21, 23, 12);
   for (let i = 0; i < 7; i++) oval(man, 0x746b70, 0, -17 + i * 6, 11, 19, 0.65, 0.7);
   for (const side of [-1, 1]) {
@@ -167,69 +167,21 @@ export function makeChainsawCharacter(): THREE.Group {
   }
   oval(man, 0x15191b, -22, 38, -1, 7, 15, 10);
   oval(man, 0x15191b, 21, 40, -1, 7, 15, 10);
-  plate(
-    man,
-    0xa79379,
-    [
-      [-20, 31],
-      [-12, 29],
-      [-9, 19],
-      [-17, 16],
-      [-21, 22],
-    ],
-    15.5,
-  );
-  plate(
-    man,
-    0xd1bda0,
-    [
-      [5, 46],
-      [17, 47],
-      [21, 38],
-      [17, 25],
-      [12, 27],
-      [13, 36],
-    ],
-    15.5,
-  );
-  for (let i = 0; i < 5; i++) {
-    const stitch = oval(man, 0x372c25, -18 + i * 1.2, 29 - i * 2.2, 16, 2, 0.45, 0.5);
-    stitch.rotation.z = -0.6;
-  }
+  // A plain white hockey mask: eye holes and rows of breathing holes, no markings.
+  oval(man, 0xefece2, 0, 33, 12, 19, 22, 4.5);
   for (const side of [-1, 1]) {
-    oval(man, 0x171b1d, side * 10, 36, 14, 7, 6, 2);
-    oval(man, 0x342c27, side * 10, 44, 13, 7, 1, 1);
+    oval(man, 0x171b1d, side * 8, 38, 16.2, 4.6, 3.6, 0.6);
+    oval(man, 0xd6d2c6, side * 8, 43, 16, 5.5, 0.9, 0.6);
   }
-  oval(man, 0xb7875d, -1, 28, 16, 3, 5, 2);
-  plate(
-    man,
-    0x251618,
-    [
-      [-10, 23],
-      [-7, 27],
-      [-4, 24],
-      [2, 26],
-      [8, 22],
-      [9, 17],
-      [4, 15],
-      [-5, 17],
-    ],
-    16,
-  );
-  oval(man, 0x842a2c, 8, 16, 16.7, 2, 4, 0.5);
-  for (let i = 0; i < 4; i++) oval(man, 0xffe6bd, -5 + i * 3, 22, 15, 1.2, 2, 0.7);
-  // Dark seam and cross-stitches across the forehead and down the mask's edge.
-  for (let i = 0; i < 7; i++) {
-    const x = -15 + i * 5;
-    oval(man, 0x78563b, x, 49 - i * 0.6, 12, 3.2, 0.55, 0.6);
-    const stitch = oval(man, 0x4a392b, x, 49 - i * 0.6, 12.8, 0.6, 2.5, 0.5);
-    stitch.rotation.z = (i % 2 ? 1 : -1) * 0.25;
+  for (const [row, count] of [
+    [0, 3],
+    [1, 4],
+    [2, 3],
+  ] as const) {
+    for (let i = 0; i < count; i++)
+      oval(man, 0x2a2e30, (i - (count - 1) / 2) * 4.2, 27 - row * 4, 16.4, 1, 1, 0.4);
   }
-  for (let i = 0; i < 5; i++) {
-    oval(man, 0x78563b, 19, 23 + i * 5, 11, 0.65, 3, 0.6);
-    const stitch = oval(man, 0x4a392b, 19, 23 + i * 5, 12, 2.5, 0.6, 0.5);
-    stitch.rotation.z = i % 2 ? 0.4 : -0.4;
-  }
+  oval(man, 0xd6d2c6, 0, 33, 16, 0.8, 9, 0.5);
 
   const rig = new THREE.Group();
   rig.name = 'saw-rig';

@@ -3,7 +3,7 @@ import type { EmojiDefinition } from '../throwables/emoji';
 
 export const CHRISTMAS_PROJECTILES = [
   { char: '🎅', tags: 'special delivery santa sack gift christmas december limited' },
-  { char: '🦌', tags: 'rudy rooftop rookie reindeer antlers christmas december limited' },
+  { char: '🦌', tags: 'dasher rooftop rookie reindeer antlers christmas december limited' },
   { char: '🧝', tags: 'tinsel gift wrapper elf ribbon bow christmas december limited' },
   { char: '⛄', tags: 'flurry snow sculptor snowman snow christmas december limited' },
   { char: '🍪', tags: 'ginger snap gingerbread cookie candy cane christmas december limited' },

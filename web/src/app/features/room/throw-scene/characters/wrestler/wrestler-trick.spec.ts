@@ -23,7 +23,7 @@ const b = { left: 360, top: 270, width: 84, height: 122 },
 function pos(root: THREE.Object3D, name: string) {
   return part(root, name).getWorldPosition(new THREE.Vector3());
 }
-describe('John Schlee-na', () => {
+describe('The Heel', () => {
   it('preserves the identifier and shares event choices across every phase', () => {
     expect(ProjectileSchema.safeParse({ targetUserId: 'player', emoji: '🤼' }).success).toBe(true);
     expect(landingKind('🤼')).toBe('🤼');
