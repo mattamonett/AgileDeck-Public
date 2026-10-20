@@ -1,0 +1,99 @@
+<div class="compose-layout">
+  <form class="feedback-form" (ngSubmit)="submitted.emit()">
+    <label for="category">Type</label>
+    <select
+      id="category"
+      name="category"
+      [ngModel]="category()"
+      (ngModelChange)="category.set($event)"
+    >
+      @for (kind of categories; track kind) {
+        <option [value]="kind">{{ labels[kind] }}</option>
+      }
+    </select>
+
+    <label for="title"
+      >Title <span>{{ title().length }}/{{ titleMax }}</span></label
+    >
+    <input
+      id="title"
+      name="title"
+      type="text"
+      [maxlength]="titleMax"
+      [ngModel]="title()"
+      (ngModelChange)="title.set($event)"
+      placeholder="A short summary"
+      required
+    />
+
+    @for (field of fields(); track category() + field.id) {
+      <label [for]="field.id">
+        {{ field.label }} <span>{{ field.required ? 'Required' : 'Optional' }}</span>
+      </label>
+      <textarea
+        [id]="field.id"
+        [name]="field.id"
+        [rows]="category() === 'general' ? 8 : 3"
+        [maxlength]="bodyMax"
+        [ngModel]="answer(field.id)"
+        (ngModelChange)="setAnswer(field.id, $event)"
+        [placeholder]="field.placeholder"
+        [required]="field.required"
+        aria-describedby="feedback-details-hint"
+      ></textarea>
+    }
+    <p id="feedback-details-hint" class="hint" [class.error]="bodyLength() > bodyMax">
+      {{ bodyLength() }}/{{ bodyMax }} characters, including section labels. Plain text only. Links
+      and markup are not accepted.
+    </p>
+    @if (agreementRequired()) {
+      <div class="feedback-agreement">
+        <p><strong>Site use agreement</strong></p>
+        <app-site-agreement />
+        <label for="agreement-accepted" class="agreement-choice">
+          <input
+            id="agreement-accepted"
+            name="agreementAccepted"
+            type="checkbox"
+            [ngModel]="agreementAccepted()"
+            (ngModelChange)="agreementAccepted.set($event)"
+            required
+          />
+          I am at least 13 and agree to the site use agreement.
+        </label>
+      </div>
+    }
+    <button
+      type="submit"
+      class="submit-button"
+      [disabled]="
+        saving() || (agreementRequired() && !agreementAccepted()) || bodyLength() > bodyMax
+      "
+    >
+      {{ saving() ? 'Sending…' : 'Submit feedback' }}
+    </button>
+  </form>
+
+  <aside class="guidance" aria-live="polite">
+    <p class="guidance-label">Writing guide · {{ labels[category()] }}</p>
+    <h2>{{ guidance[category()].heading }}</h2>
+    <h3>Useful details</h3>
+    <ul>
+      @for (tip of guidance[category()].helpful; track tip) {
+        <li>{{ tip }}</li>
+      }
+    </ul>
+    <h3>Leave out</h3>
+    <ul>
+      @for (tip of guidance[category()].skip; track tip) {
+        <li>{{ tip }}</li>
+      }
+    </ul>
+    @if (guidance[category()].example; as example) {
+      <div class="example">
+        <h3>Example request</h3>
+        <p>{{ example }}</p>
+      </div>
+    }
+  </aside>
+</div>

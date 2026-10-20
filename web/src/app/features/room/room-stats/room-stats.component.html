@@ -1,0 +1,276 @@
+<main>
+  <header class="top-bar">
+    <a class="brand" [routerLink]="['/room', roomId()]"
+      ><span aria-hidden="true">♠</span> {{ siteName() }}</a
+    >
+    <div class="room-navigation">
+      @if (atTable()) {
+        <span class="presence"><span aria-hidden="true">●</span> Still at the table</span>
+      }
+      <a [routerLink]="['/room', roomId()]">← Back to room</a>
+    </div>
+  </header>
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">A little friendly competition</p>
+      <h1>{{ stats()?.roomName || 'Room' }} stats</h1>
+      <p class="intro">All time · Every vote helps. Every flying character tells a story.</p>
+    </div>
+    <button
+      type="button"
+      (click)="load('refresh')"
+      [disabled]="loading()"
+      [class.busy]="reloadTrigger() === 'refresh'"
+      [attr.aria-busy]="reloadTrigger() === 'refresh'"
+    >
+      ↻ Refresh stats
+    </button>
+  </div>
+  @if (error()) {
+    <p role="alert" class="notice">{{ error() }}</p>
+  }
+  @if (loading() && !stats()) {
+    <p role="status" class="notice">Loading room stats…</p>
+  }
+  @if (!error() ? stats() : null; as data) {
+    <section class="totals" aria-label="Room totals">
+      <article>
+        <span>Rounds revealed</span><strong>{{ data.roundsRevealed | number }}</strong>
+      </article>
+      @for (metric of roomMetrics(); track metric.key) {
+        <article>
+          <span>{{ metric.label }}</span
+          ><strong>{{ data.totals[metric.key] | number }}</strong>
+        </article>
+      }
+      @if (issueStats(); as issues) {
+        <article>
+          <span>Issues estimated</span><strong>{{ issues.estimated | number }}</strong>
+        </article>
+      }
+    </section>
+    <section class="awards-section" aria-labelledby="awards-title">
+      <div class="section-heading">
+        <h2 id="awards-title">Room awards</h2>
+        <span>A different way for everyone to shine</span>
+      </div>
+      <div class="awards">
+        @for (award of playerAwards(); track award.title) {
+          <article class="award">
+            <span class="award-icon" aria-hidden="true">{{ award.icon }}</span>
+            <div>
+              <h3>{{ award.title }}</h3>
+              @if (award.score; as score) {
+                <p class="winners">
+                  @for (winner of score.winners; track winner.id; let last = $last) {
+                    <span
+                      >{{ winner.name }}
+                      @if (winner.isYou) {
+                        <small> · You</small>
+                      }
+                      @if (!last) {
+                        ,
+                      }
+                    </span>
+                  }
+                  @if (score.winnerCount > score.winners.length) {
+                    <span> +{{ score.winnerCount - score.winners.length }} tied</span>
+                  }
+                </p>
+                <strong>{{ score.score | number }} {{ award.unit }}</strong>
+                @if (score.winnerCount > 1) {
+                  <span class="award-note">Shared award</span>
+                }
+              } @else {
+                <p class="winners">
+                  Your next {{ award.metric === 'bestVoteStreak' ? 'reveal' : 'throw' }} could start
+                  it.
+                </p>
+                <strong class="empty-award">Up for grabs</strong>
+              }
+              <p class="award-note">{{ award.description }}</p>
+            </div>
+          </article>
+        }
+        <article class="award">
+          <span class="award-icon harmony" aria-hidden="true">🃏</span>
+          <div>
+            <h3>Perfect Harmony</h3>
+            <p class="winners">The whole room</p>
+            <strong>{{ data.unanimousRounds | number }} rounds</strong>
+            <p class="award-note">Everyone picked the same numeric card</p>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section class="leaderboard" aria-labelledby="leaderboard-title" [attr.aria-busy]="loading()">
+      <div class="section-heading">
+        <h2 id="leaderboard-title">Room leaderboard</h2>
+        <span>{{ data.participants | number }} members</span>
+      </div>
+      <div class="categories" role="group" aria-label="Rank members by">
+        @for (metric of metrics(); track metric.key) {
+          <button
+            type="button"
+            [attr.aria-pressed]="sort() === metric.key"
+            (click)="chooseMetric(metric.key)"
+            [attr.aria-disabled]="loading()"
+            [class.busy]="reloadTrigger() === metric.key"
+            [attr.aria-busy]="reloadTrigger() === metric.key"
+          >
+            {{ metric.label }}
+          </button>
+        }
+      </div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Member statistics">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Player</th>
+              <th scope="col" class="score">{{ selectedMetric()?.label }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (member of data.members; track member.id) {
+              <tr [class.you]="member.isYou">
+                <td>{{ member[loadedSort()] > 0 ? '#' + member.rank : '—' }}</td>
+                <th scope="row">
+                  {{ member.name }}
+                  @if (member.isYou) {
+                    <small> · You</small>
+                  }
+                </th>
+                <td class="score selected">{{ member[loadedSort()] | number }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3">
+                  A fresh scoreboard. Cast a vote{{
+                    throwingEnabled() ? ' or send a character' : ''
+                  }}
+                  to get started.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">
+        Equal scores share a rank. Includes members who are away from the table.
+      </p>
+      @if (pages() > 1) {
+        <nav aria-label="Leaderboard pages">
+          <button
+            type="button"
+            (click)="changePage(-1)"
+            [disabled]="loading() || page() <= 1"
+            [class.busy]="reloadTrigger() === 'previous'"
+            [attr.aria-busy]="reloadTrigger() === 'previous'"
+          >
+            Previous
+          </button>
+          <span>Page {{ page() }} of {{ pages() }}</span>
+          <button
+            type="button"
+            (click)="changePage(1)"
+            [disabled]="loading() || page() >= pages()"
+            [class.busy]="reloadTrigger() === 'next'"
+            [attr.aria-busy]="reloadTrigger() === 'next'"
+          >
+            Next
+          </button>
+        </nav>
+      }
+    </section>
+    @if (issueStats(); as issues) {
+      <section class="issue-highlights" aria-labelledby="issues-title">
+        <h2 id="issues-title">Issue highlights</h2>
+        <div class="highlights">
+          <article class="award">
+            <span class="award-icon" aria-hidden="true">🌶️</span>
+            <div>
+              <h3>Spiciest Discussion</h3>
+              @if (issues.spiciest; as issue) {
+                <p class="winners">{{ issue.title }}</p>
+                <strong>{{ issue.firstMin | number }}–{{ issue.firstMax | number }}</strong>
+                <p class="award-note">Widest first-round numeric card spread</p>
+                @if (issue.tiedCount > 1) {
+                  <span class="award-note">{{ issue.tiedCount }} issues tied</span>
+                }
+              } @else {
+                <p class="winners">
+                  Reveal different numeric cards on an active issue to start this highlight.
+                </p>
+              }
+            </div>
+          </article>
+          <article class="award">
+            <span class="award-icon" aria-hidden="true">🌱</span>
+            <div>
+              <h3>Found Common Ground</h3>
+              @if (issues.commonGround; as issue) {
+                <p class="winners">{{ issue.title }}</p>
+                <strong class="spread"
+                  >{{ issue.firstMin | number }}–{{ issue.firstMax | number }}
+                  <span aria-label="to">→</span> {{ issue.latestMin | number }}–{{
+                    issue.latestMax | number
+                  }}</strong
+                >
+                <p class="award-note">Biggest spread reduction · first to latest reveal</p>
+                @if (issue.tiedCount > 1) {
+                  <span class="award-note">{{ issue.tiedCount }} issues tied</span>
+                }
+              } @else {
+                <p class="winners">
+                  Discuss an active issue and vote again. A narrower spread earns this highlight.
+                </p>
+              }
+            </div>
+          </article>
+        </div>
+      </section>
+    }
+    <footer>
+      <p>
+        @if (data.startedAt) {
+          Totals tracked since {{ data.startedAt | date: 'mediumDate' }}.
+        }
+        @if (data.awardsStartedAt) {
+          New awards tracked since {{ data.awardsStartedAt | date: 'mediumDate' }}.
+        } @else {
+          New awards begin with your next reveal{{ throwingEnabled() ? ' or accepted throw' : '' }}.
+        }
+        Earlier activity cannot be recovered.
+      </p>
+      <details>
+        <summary>What counts?</summary>
+        <p>
+          Votes count once per person per round, even if you change or clear your card.
+          @if (throwingEnabled()) {
+            A barrage counts as one throw and one barrage. Character variety counts different
+            accepted throwables, including seasonal characters.
+          }
+        </p>
+        <p>
+          Your best vote streak counts consecutive reveals where you participated and had a card
+          selected, including “?”. Missing a vote breaks the streak; time away and observer rounds
+          pause it. Perfect Harmony needs at least two players, all choosing the same numeric card.
+        </p>
+        @if (issueStats()) {
+          <p>
+            Issues estimated counts saved issues with an estimate, including imports. Highlights use
+            at least two numeric votes on the active issue; “?” is excluded. Turning Issues off
+            hides these sections and pauses issue tracking without erasing history. Deleting an
+            issue removes its highlights.
+          </p>
+        }
+        <p>
+          Stats stay with your browser identity when you leave and return. Deleting a member removes
+          their personal stats; room-level awards remain. Deleting the room clears its stats.
+          Refresh for the latest totals.
+        </p>
+      </details>
+    </footer>
+  }
+</main>

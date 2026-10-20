@@ -1,0 +1,92 @@
+.user-card.is-overheated .card-display {
+  border-color: #fb704d;
+  box-shadow:
+    0 0 12px #ef593e99,
+    0 0 28px #ef593e44,
+    inset 0 0 20px #ef593e55;
+}
+
+.throwing-blocked {
+  cursor: default;
+}
+
+.overheat-badge {
+  position: absolute;
+  top: calc(100% - 8px);
+  z-index: 3;
+  width: 142px;
+  padding: 6px 8px;
+  border: 1px solid #fb704d;
+  border-radius: 8px;
+  background: #431f20;
+  color: #ffe0c9;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+}
+
+.overheat-meter {
+  height: 4px;
+  margin-top: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #ffffff26;
+}
+.overheat-meter > div {
+  height: 100%;
+  background: linear-gradient(90deg, #ffc47a, #fb704d);
+  transition: width 100ms linear;
+}
+
+.overheat-steam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 70px;
+  height: 35px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 4;
+}
+.overheat-steam i {
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  width: 10px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffe7d3;
+  filter: blur(4px);
+  animation: cooling-steam 1.8s ease-out infinite;
+}
+.overheat-steam i:nth-child(2) {
+  left: 30px;
+  animation-delay: -0.6s;
+}
+.overheat-steam i:nth-child(3) {
+  left: 52px;
+  animation-delay: -1.2s;
+}
+@keyframes cooling-steam {
+  from {
+    opacity: 0;
+    transform: translateY(0) scaleX(0.6);
+  }
+  25% {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-35px) scaleX(1.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overheat-steam i {
+    animation: none;
+    opacity: 0.35;
+  }
+  .overheat-meter > div {
+    transition: none;
+  }
+}

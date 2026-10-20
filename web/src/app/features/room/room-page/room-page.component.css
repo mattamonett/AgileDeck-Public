@@ -1,0 +1,187 @@
+.room-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+  color: white;
+  overflow-x: hidden;
+  transition: background-color 0.5s ease;
+  position: relative;
+}
+
+.main-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  gap: 1rem;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .main-layout {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+}
+
+.room-topbar {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+
+@media (min-width: 1101px) {
+  .room-topbar {
+    display: grid;
+    align-items: center;
+  }
+
+  .room-topbar > .room-branding,
+  .room-topbar > app-room-header {
+    grid-area: 1 / 1;
+  }
+
+  .room-topbar > .room-branding {
+    justify-self: center;
+  }
+}
+
+.room-branding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.room-logo {
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4));
+  animation: float 6s ease-in-out infinite;
+}
+
+.room-branding-title {
+  margin: 0;
+  font-size: 1.5rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  text-shadow: 0 0 24px rgba(var(--primary-rgb), 0.22);
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Base Theme Variables & Backgrounds */
+[data-theme='default'] {
+  --bg-color: #0f172a;
+  --primary: #6366f1;
+  --primary-rgb: 99, 102, 241;
+  --secondary: #a855f7;
+  background:
+    radial-gradient(circle at 0% 0%, #312e81 0%, #0f172a 50%),
+    radial-gradient(circle at 100% 100%, #1e1b4b 0%, #0f172a 50%);
+}
+
+.app-footer {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.version-tag {
+  font-size: 0.65rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.session-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  align-items: start;
+  gap: 24px;
+}
+.session-layout.issues-disabled {
+  grid-template-columns: minmax(0, 1fr);
+}
+.session-layout app-issues-panel[hidden] {
+  display: none;
+}
+.voting-area {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.active-issue {
+  text-align: center;
+  color: var(--color-text);
+  padding: 0 16px;
+}
+.active-issue:empty {
+  display: none;
+}
+.active-issue-label {
+  color: var(--primary);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.active-issue h2 {
+  font: 500 clamp(18px, 2vw, 26px) / 1.4 var(--font-display);
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+}
+.next-issue {
+  margin-top: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+.next-issue:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.session-layout app-issues-panel {
+  position: sticky;
+  top: 20px;
+}
+.room-container .main-layout {
+  max-width: 1800px;
+}
+@media (max-width: 1100px) {
+  .session-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .session-layout app-issues-panel {
+    position: static;
+  }
+}

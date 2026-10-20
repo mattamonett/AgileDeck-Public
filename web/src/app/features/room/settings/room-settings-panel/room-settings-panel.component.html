@@ -1,0 +1,232 @@
+<div class="setting-item">
+  <h4>Room Name</h4>
+  <div class="input-group">
+    <input [(ngModel)]="editRoomName" placeholder="Enter room name" />
+    <button type="button" (click)="saveRoomName.emit(editRoomName())" class="btn-sm">Update</button>
+  </div>
+</div>
+
+@if (pendingApprovals().length > 0) {
+  <div class="setting-item">
+    <h4>Pending Requests</h4>
+    <div class="pending-approvals">
+      @for (user of pendingApprovals(); track user.id) {
+        <div class="pending-user">
+          <span>{{ user.name }}</span>
+          <div class="actions">
+            <button type="button" class="approve-btn" (click)="approveUser.emit(user.id)">
+              Approve
+            </button>
+            <button type="button" class="deny-btn" (click)="denyUser.emit(user.id)">Deny</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<div class="setting-item">
+  <h4>
+    Reveal Mode
+    <span class="info-icon"
+      >i
+      <span class="tooltip-text"
+        >"Auto" mode reveals cards automatically once everyone has voted. "Manual" waits for a
+        manual Reveal.</span
+      >
+    </span>
+  </h4>
+  <div class="toggle-group">
+    <button
+      type="button"
+      [class.active]="!room()?.autoReveal"
+      (click)="toggleAutoReveal.emit('manual')"
+    >
+      Manual
+    </button>
+    <button
+      type="button"
+      [class.active]="room()?.autoReveal"
+      (click)="toggleAutoReveal.emit('auto')"
+    >
+      Auto
+    </button>
+  </div>
+</div>
+
+<div class="setting-item border-top">
+  <h4>
+    Result Multiplier
+    <span class="info-icon"
+      >i
+      <span class="tooltip-text"
+        >Applies a factor (e.g., 1.5x) to the final average calculation. Useful for time buffers or
+        risk adj.</span
+      >
+    </span>
+  </h4>
+  <div class="toggle-group">
+    <button type="button" [class.active]="!room()?.useMultiplier" (click)="toggleMultiplier.emit()">
+      Disabled
+    </button>
+    <button type="button" [class.active]="room()?.useMultiplier" (click)="toggleMultiplier.emit()">
+      Enabled
+    </button>
+  </div>
+
+  @if (room()?.useMultiplier) {
+    <div class="input-group margin-top">
+      <input type="number" step="0.05" [(ngModel)]="editMultiplier" placeholder="1.0" />
+      <button type="button" (click)="saveMultiplier.emit(editMultiplier())" class="btn-sm">
+        Set
+      </button>
+    </div>
+  }
+</div>
+
+@if (issuesAvailable()) {
+  <div class="setting-item">
+    <h4>
+      <span id="issues-setting-label">Issues</span>
+      <span
+        class="info-icon"
+        tabindex="0"
+        aria-label="About Issues"
+        aria-describedby="issues-setting-help"
+        >i
+        <span class="tooltip-text" id="issues-setting-help" role="tooltip"
+          >Shows the room's issue list so you can organize work and track estimates. Disable it to
+          hide the issue panels without deleting existing issues.</span
+        >
+      </span>
+    </h4>
+    <div class="toggle-group" role="group" aria-labelledby="issues-setting-label">
+      <button
+        type="button"
+        [class.active]="room()?.issuesEnabled === false"
+        [attr.aria-pressed]="room()?.issuesEnabled === false"
+        (click)="setIssuesEnabled.emit(false)"
+      >
+        Disabled
+      </button>
+      <button
+        type="button"
+        [class.active]="room()?.issuesEnabled !== false"
+        [attr.aria-pressed]="room()?.issuesEnabled !== false"
+        (click)="setIssuesEnabled.emit(true)"
+      >
+        Enabled
+      </button>
+    </div>
+  </div>
+}
+
+@if (themes().length > 1) {
+  <div class="setting-item">
+    <h4>Board Theme</h4>
+    <div class="theme-selector">
+      @for (t of themes(); track t.id) {
+        <button
+          [class.active]="room()?.theme === t.id"
+          (click)="setTheme.emit(t.id)"
+          class="theme-btn"
+        >
+          <span class="theme-icon">{{ t.icon }}</span>
+          <span class="theme-name">{{ t.name }}</span>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (roomMoods().length > 1) {
+  <div class="setting-item border-top">
+    <h4 id="room-mood-label">Room Mood</h4>
+    <p class="setting-hint">{{ moodHint() }}</p>
+    <div class="mood-options" role="group" aria-labelledby="room-mood-label">
+      @for (mood of roomMoods(); track mood.value) {
+        <button
+          type="button"
+          [class.active]="currentMood() === mood.value"
+          [attr.aria-pressed]="currentMood() === mood.value"
+          (click)="setRoomMood.emit(mood.value)"
+        >
+          {{ mood.label }}
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<div class="setting-item border-top health-section">
+  <div class="health-header">
+    <h4>System Health</h4>
+    <button
+      type="button"
+      class="icon-btn refresh-btn"
+      (click)="refreshHealth.emit(); $event.stopPropagation()"
+      title="Refresh Status"
+      [disabled]="!isConnected()"
+    >
+      🔄
+    </button>
+  </div>
+  <div class="health-indicators">
+    <div class="health-row">
+      <span>Socket</span>
+      <div
+        class="status-indicator"
+        [class.healthy]="isConnected()"
+        [class.unhealthy]="!isConnected()"
+      >
+        <span class="dot"></span>
+        {{ isConnected() ? 'Connected' : 'Disconnected' }}
+      </div>
+    </div>
+    <div class="health-row">
+      <span>API</span>
+      @if (healthStatus()) {
+        <div
+          class="status-indicator"
+          [class.healthy]="healthStatus()?.api === 'healthy'"
+          [class.unhealthy]="healthStatus()?.api === 'unhealthy'"
+        >
+          <span class="dot"></span>
+          {{ healthStatus()?.api === 'healthy' ? 'Healthy' : 'Unhealthy' }}
+        </div>
+      } @else {
+        <div class="status-indicator pending">
+          <span class="dot"></span>
+          Checking...
+        </div>
+      }
+    </div>
+    <div class="health-row">
+      <span>Database</span>
+      @if (healthStatus()) {
+        <div
+          class="status-indicator"
+          [class.healthy]="healthStatus()?.db === 'healthy'"
+          [class.unhealthy]="healthStatus()?.db === 'unhealthy'"
+        >
+          <span class="dot"></span>
+          {{ healthStatus()?.db === 'healthy' ? 'Healthy' : 'Unhealthy' }}
+        </div>
+      } @else {
+        <div class="status-indicator pending">
+          <span class="dot"></span>
+          Checking...
+        </div>
+      }
+    </div>
+  </div>
+  @if (healthStatus()) {
+    <p class="setting-hint">Verified at: {{ healthStatus()?.timestamp | date: 'HH:mm:ss' }}</p>
+  }
+  @if (!healthStatus()) {
+    <p class="setting-hint">Checking system connectivity...</p>
+  }
+  @if (!isConnected()) {
+    <p class="setting-hint error-hint">Lost connection to server. Attempting to reconnect...</p>
+  }
+</div>

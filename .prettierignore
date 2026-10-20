@@ -1,0 +1,5 @@
+# Markdown keeps hand-wrapped prose and compact tables.
+*.md
+package-lock.json
+api/prisma/migrations/
+web/public/

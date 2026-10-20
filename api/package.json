@@ -1,0 +1,44 @@
+{
+  "name": "@poker/api",
+  "private": true,
+  "description": "Agile Deck API: Express, Socket.IO and Prisma.",
+  "main": "dist/start.js",
+  "scripts": {
+    "start": "node ../scripts/start-local-api.mts",
+    "dev": "node ../scripts/start-local-api.mts --watch",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && prisma generate && tsc",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "lint": "eslint .",
+    "test": "jest --coverage"
+  },
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@poker/shared": "*",
+    "@prisma/client": "5.22.0",
+    "cookie": "^0.7.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "node-cron": "^4.2.1",
+    "prisma": "5.22.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.6.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^25.0.10",
+    "@types/node-cron": "^3.0.11",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.11",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3"
+  }
+}

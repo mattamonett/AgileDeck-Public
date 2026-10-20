@@ -1,0 +1,366 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #0c1b24;
+  color: #e8f4ef;
+  font-family: inherit;
+}
+main {
+  max-width: 1240px;
+  margin: auto;
+  padding: 0 28px 48px;
+}
+a {
+  color: #9ee5c3;
+  text-decoration: none;
+}
+.top-bar,
+.room-navigation,
+.page-heading,
+.section-heading,
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.top-bar {
+  min-height: 78px;
+  border-bottom: 1px solid #2c4650;
+}
+.brand {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: #e8f4ef;
+  font-weight: 700;
+}
+.brand span {
+  color: #9ee5c3;
+  margin-right: 8px;
+}
+.presence {
+  font-size: 0.85rem;
+  color: #bdd0cb;
+}
+.presence span {
+  color: #9ee5c3;
+  margin-right: 6px;
+}
+.page-heading {
+  margin: 36px 0 28px;
+}
+h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+h2 {
+  font-size: 1.35rem;
+}
+h3 {
+  font-family: inherit;
+  font-size: 1rem;
+  letter-spacing: normal;
+  line-height: 1.4;
+}
+p {
+  line-height: 1.6;
+  color: #bdd0cb;
+}
+.eyebrow {
+  color: #9ee5c3;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+.intro {
+  margin: 8px 0 0;
+}
+.page-heading button {
+  flex-shrink: 0;
+}
+.totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+article {
+  padding: 20px;
+  background: #152c35;
+  border: 1px solid #2c4650;
+  border-radius: 12px;
+  min-width: 0;
+}
+.totals article span {
+  color: #bdd0cb;
+  font-size: 0.8rem;
+}
+article strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.8rem;
+  color: #9ee5c3;
+}
+.awards-section,
+.issue-highlights {
+  margin-top: 28px;
+}
+.section-heading {
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.section-heading > span {
+  color: #bdd0cb;
+  font-size: 0.8rem;
+}
+.awards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.award {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.award > div {
+  min-width: 0;
+}
+.award-icon {
+  font-size: 2.8rem;
+  flex-shrink: 0;
+}
+.winners {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.award strong {
+  font-size: 1.3rem;
+}
+.award-note {
+  display: block;
+  font-size: 0.75rem;
+  color: #bdd0cb;
+  margin: 6px 0 0;
+}
+.empty-award {
+  font-size: 1rem;
+}
+.leaderboard {
+  margin-top: 28px;
+  padding: 24px;
+  background: #10242d;
+  border: 1px solid #2c4650;
+  border-radius: 14px;
+}
+.categories {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin: 20px 0;
+}
+button {
+  border: 1px solid #47636d;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #18323c;
+  color: #e8f4ef;
+  cursor: pointer;
+  font: inherit;
+}
+.categories button {
+  font-size: 0.8rem;
+  padding: 12px 6px;
+}
+button:hover:not(:disabled) {
+  border-color: #9ee5c3;
+}
+button[aria-pressed='true'] {
+  background: #9ee5c3;
+  color: #0c1b24;
+  border-color: #9ee5c3;
+  font-weight: 700;
+}
+button:disabled,
+button[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Hide the label in place so the spinner never changes the button's size. */
+button.busy {
+  position: relative;
+  opacity: 1;
+  cursor: progress;
+  --spinner-color: #e8f4ef;
+  color: transparent;
+}
+button.busy[aria-pressed='true'] {
+  --spinner-color: #0c1b24;
+}
+button.busy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 1em;
+  height: 1em;
+  margin: auto;
+  border: 2px solid var(--spinner-color);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.7s linear infinite;
+}
+@keyframes button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button.busy::after {
+    animation-duration: 2s;
+  }
+}
+:focus-visible {
+  outline: 3px solid #b5f5d8;
+  outline-offset: 4px;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+th,
+td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #29434d;
+}
+thead th {
+  color: #b5cbc5;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+tbody th {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+.score {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.selected {
+  color: #adf0cf;
+  font-weight: 700;
+}
+.you {
+  background: #1c3740;
+}
+small {
+  color: #9ee5c3;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.table-note {
+  font-size: 0.75rem;
+  margin: 16px 0 0;
+}
+nav {
+  margin-top: 20px;
+}
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.spread {
+  font-variant-numeric: tabular-nums;
+}
+.spread span {
+  padding: 0 6px;
+  color: #bdd0cb;
+}
+.notice {
+  padding: 16px;
+  border: 1px solid #50766c;
+  border-radius: 12px;
+}
+footer {
+  margin-top: 28px;
+}
+footer p {
+  font-size: 0.8rem;
+  max-width: 900px;
+}
+summary {
+  color: #9ee5c3;
+  cursor: pointer;
+  width: fit-content;
+}
+@media (max-width: 900px) {
+  .awards {
+    grid-template-columns: 1fr;
+  }
+  .award {
+    align-items: flex-start;
+  }
+  .award-icon {
+    width: 48px;
+    text-align: center;
+  }
+  .categories {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  main {
+    padding: 0 16px 32px;
+  }
+  .top-bar {
+    align-items: flex-start;
+    padding: 20px 0;
+    gap: 12px;
+  }
+  .brand {
+    font-size: 1.2rem;
+    white-space: nowrap;
+  }
+  .room-navigation {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+  .presence {
+    font-size: 0.7rem;
+  }
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  article {
+    padding: 16px;
+  }
+  .leaderboard {
+    padding: 16px;
+  }
+  .highlights {
+    grid-template-columns: 1fr;
+  }
+  .categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  th,
+  td {
+    padding: 14px 8px;
+  }
+}

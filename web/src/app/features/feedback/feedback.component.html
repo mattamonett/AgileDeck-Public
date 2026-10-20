@@ -1,0 +1,263 @@
+<main class="feedback-page">
+  <div class="feedback-shell" [class.composing]="tab() === 'write'">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">{{ siteName() }}</p>
+        <h1>Feedback</h1>
+        <p class="intro">Ideas and reports from approved room members.</p>
+      </div>
+      @if (returnRoom) {
+        <a [routerLink]="['/room', returnRoom]" class="back-link">← Back to room</a>
+      } @else {
+        <a routerLink="/" class="back-link">← Home</a>
+      }
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Feedback sections">
+      <button
+        type="button"
+        role="tab"
+        id="read-tab"
+        [attr.aria-selected]="tab() === 'read'"
+        aria-controls="read-panel"
+        [class.active]="tab() === 'read'"
+        (click)="switchTab('read')"
+      >
+        Feedback
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="write-tab"
+        [attr.aria-selected]="tab() === 'write'"
+        aria-controls="write-panel"
+        [class.active]="tab() === 'write'"
+        (click)="switchTab('write')"
+      >
+        Leave feedback
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="mine-tab"
+        [attr.aria-selected]="tab() === 'mine'"
+        aria-controls="mine-panel"
+        [class.active]="tab() === 'mine'"
+        (click)="switchTab('mine')"
+      >
+        My submissions
+        @if (feedbackUpdates.hasUpdates()) {
+          <span class="tab-dot" aria-hidden="true"></span>
+          <span class="sr-only">(updated)</span>
+        }
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="notice error" role="alert">{{ error() }}</p>
+    }
+    @if (success()) {
+      <p class="notice success" role="status">{{ success() }}</p>
+    }
+
+    @if (tab() === 'read') {
+      <section id="read-panel" role="tabpanel" aria-labelledby="read-tab">
+        <div class="type-tabs" role="tablist" aria-label="Feedback types">
+          @for (kind of categories; track kind) {
+            <button
+              type="button"
+              role="tab"
+              [id]="'feedback-type-' + kind"
+              aria-controls="feedback-type-panel"
+              [attr.aria-selected]="viewCategory() === kind"
+              [class.active]="viewCategory() === kind"
+              (click)="selectViewCategory(kind)"
+            >
+              <span>{{ labels[kind] }}</span>
+              @if (hasLoaded()) {
+                <span class="type-count">{{ counts()[kind] }}</span>
+              }
+            </button>
+          }
+        </div>
+        <div class="feed-toolbar">
+          <div class="sort-controls" role="group" aria-label="Sort feedback">
+            <span>Sort by</span>
+            <button
+              type="button"
+              [class.active]="sort() === 'newest'"
+              [attr.aria-pressed]="sort() === 'newest'"
+              (click)="selectSort('newest')"
+            >
+              Newest
+            </button>
+            <button
+              type="button"
+              [class.active]="sort() === 'top'"
+              [attr.aria-pressed]="sort() === 'top'"
+              (click)="selectSort('top')"
+            >
+              Top
+            </button>
+          </div>
+          <button
+            type="button"
+            class="closed-filter"
+            role="switch"
+            [attr.aria-checked]="showClosed()"
+            (click)="toggleClosed(!showClosed())"
+          >
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            <span>Show closed feedback</span>
+          </button>
+        </div>
+        <div
+          id="feedback-type-panel"
+          role="tabpanel"
+          [attr.aria-labelledby]="'feedback-type-' + viewCategory()"
+        >
+          @if (loading() && items().length === 0) {
+            <p class="empty">Loading feedback…</p>
+          } @else if (!hasLoaded() && error()) {
+            <button type="button" class="secondary-button retry-load" (click)="load()">
+              Try again
+            </button>
+          } @else if (hasLoaded() && items().length === 0) {
+            <p class="empty">
+              {{
+                showClosed()
+                  ? 'No entries in this category yet. You can be the first to share one.'
+                  : 'No open feedback in this category. Turn on Show closed feedback to see completed items.'
+              }}
+            </p>
+          }
+          <div class="feed">
+            @for (item of items(); track item.id) {
+              <article class="feedback-card">
+                <div class="card-meta">
+                  <span>{{ item.createdAt.slice(0, 10) }}</span>
+                  @if (item.isOwn) {
+                    <span>You</span>
+                  }
+                </div>
+                <h2>{{ item.title }}</h2>
+                <p class="body">{{ item.body }}</p>
+                <app-feedback-status [item]="item" />
+                <div class="vote-options" [attr.aria-label]="'Reactions to ' + item.title">
+                  @for (reaction of reactions[item.category]; track reaction) {
+                    <button
+                      type="button"
+                      class="vote-button"
+                      [class.selected]="item.userVote === reaction"
+                      [attr.aria-pressed]="item.userVote === reaction"
+                      [disabled]="item.isOwn || votingId() !== null"
+                      (click)="vote(item, reaction)"
+                    >
+                      {{ reactionLabels[reaction] }}
+                      <span class="vote-count">{{ item.voteCounts[reaction] }}</span>
+                    </button>
+                  }
+                  @if (item.isOwn) {
+                    <span class="own-vote-hint">You can’t vote on your own feedback.</span>
+                  }
+                </div>
+                <app-feedback-replies
+                  [feedbackId]="item.id"
+                  [baseUrl]="apiUrl + '/api'"
+                  [canReply]="item.isOwn"
+                  [hasUnread]="item.hasUnreadReplies"
+                  [replyCount]="item.replyCount"
+                  (unreadChange)="repliesRead(item.id, $event)"
+                />
+              </article>
+            }
+          </div>
+          @if (nextCursor()) {
+            <button
+              type="button"
+              class="secondary-button load-more"
+              [disabled]="loading()"
+              (click)="load(true)"
+            >
+              {{ loading() ? 'Loading…' : 'Load more' }}
+            </button>
+          }
+        </div>
+      </section>
+    } @else if (tab() === 'mine') {
+      <section id="mine-panel" role="tabpanel" aria-labelledby="mine-tab">
+        <p class="privacy-warning">
+          An admin reviews every submission before it is published. Only you can see a submission
+          while it is waiting for review or if it is not approved. Approved submissions appear in
+          the feedback feed.
+        </p>
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="ownLoading()"
+          (click)="loadOwn()"
+        >
+          Refresh status
+        </button>
+        @if (ownLoading() && ownItems().length === 0) {
+          <p class="empty">Loading your submissions…</p>
+        } @else if (!ownLoading() && ownItems().length === 0) {
+          <p class="empty">You have not submitted feedback yet.</p>
+        }
+        <div class="feed">
+          @for (item of ownItems(); track item.id) {
+            <article class="feedback-card">
+              <div class="card-meta">
+                <span>{{ item.createdAt.slice(0, 10) }}</span>
+                <span>{{ labels[item.category] }}</span>
+                @if (item.hasStatusUpdate || item.hasUnreadReplies) {
+                  <span class="updated-tag">Updated</span>
+                }
+              </div>
+              <h2>{{ item.title }}</h2>
+              <p class="body">{{ item.body }}</p>
+              <app-feedback-status [item]="item" [submission]="item" />
+              <app-feedback-replies
+                [feedbackId]="item.id"
+                [baseUrl]="apiUrl + '/api'"
+                [canReply]="true"
+                [hasUnread]="item.hasUnreadReplies"
+                [replyCount]="item.replyCount"
+                (unreadChange)="repliesRead(item.id, $event)"
+              />
+            </article>
+          }
+        </div>
+        @if (ownNextCursor()) {
+          <button
+            type="button"
+            class="secondary-button load-more"
+            [disabled]="ownLoading()"
+            (click)="loadOwn(true)"
+          >
+            Load more
+          </button>
+        }
+      </section>
+    } @else {
+      <section id="write-panel" role="tabpanel" aria-labelledby="write-tab">
+        <p class="privacy-warning">
+          <strong>Before you submit:</strong> Treat everything you enter here as public. Feedback
+          can be shown to approved users across all rooms without further notice. Do not include
+          personal, private, or confidential information. The
+          <a routerLink="/privacy">privacy notice</a> explains what is stored and for how long.
+        </p>
+        <app-feedback-form
+          [(category)]="category"
+          [(title)]="title"
+          [(body)]="body"
+          [(answers)]="answers"
+          [(agreementAccepted)]="agreementAccepted"
+          [agreementRequired]="agreementRequired()"
+          [saving]="saving()"
+          (submitted)="submit()"
+        />
+      </section>
+    }
+  </div>
+</main>

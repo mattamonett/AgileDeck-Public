@@ -1,0 +1,84 @@
+:host {
+  display: contents;
+}
+
+.update-banner {
+  background: linear-gradient(90deg, #4f46e5, #9333ea);
+  color: white;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.update-text {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.update-btn {
+  background: white;
+  color: #4f46e5;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.update-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.update-btn:active {
+  transform: scale(0.95);
+}
+
+/* Starts once the banner has been up for 5 seconds without being clicked. */
+.update-btn {
+  animation: updatePulse 1.4s ease-in-out 5s infinite;
+}
+
+@keyframes updatePulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 0 0 rgba(255, 255, 255, 0.85);
+  }
+  50% {
+    opacity: 0.45;
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 0 8px rgba(255, 255, 255, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-btn {
+    animation: none;
+    outline: 3px solid #facc15;
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,20 @@
+<div
+  class="qr-overlay"
+  role="button"
+  tabindex="0"
+  (click)="closeOverlay.emit()"
+  (keydown.enter)="closeOverlay.emit()"
+  (keydown.space)="closeOverlay.emit()"
+>
+  <div
+    class="qr-container glass-panel"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()"
+  >
+    <h3>Scan to Join</h3>
+    <img [src]="qrCodeDataUrl()" alt="Room QR Code" />
+    <p>Invite others to join the room</p>
+    <button (click)="closeOverlay.emit()" class="close-btn">Close</button>
+  </div>
+</div>

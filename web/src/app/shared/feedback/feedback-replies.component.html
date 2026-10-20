@@ -1,0 +1,90 @@
+<section class="conversation">
+  @if (displayedCount() > 0) {
+    <button
+      class="replies-toggle"
+      type="button"
+      (click)="toggle()"
+      [attr.aria-expanded]="expanded()"
+    >
+      {{ expanded() ? 'Hide replies' : 'View replies' }}
+      <span class="reply-count">{{ displayedCount() }}</span>
+      @if (hasUnread()) {
+        <strong> · New reply</strong>
+      }
+    </button>
+  }
+  @if (expanded()) {
+    <h3>Conversation</h3>
+    <button type="button" (click)="load()" [disabled]="loading() || saving()">
+      Refresh replies
+    </button>
+    @if (error()) {
+      <p role="alert">{{ error() }}</p>
+    }
+    @if (success()) {
+      <p role="status">{{ success() }}</p>
+    }
+    @if (loading()) {
+      <p role="status">Loading replies…</p>
+    }
+    @if (!loading() && items().length === 0) {
+      <p>No replies yet.</p>
+    }
+    @for (reply of items(); track reply.id) {
+      <article [class.admin]="reply.author === 'admin'">
+        <div class="meta">
+          <strong>{{ reply.author === 'admin' ? 'Admin' : 'Feedback author' }}</strong> ·
+          <time [attr.datetime]="reply.createdAt"
+            >{{ reply.createdAt.slice(0, 16).replace('T', ' ') }} UTC</time
+          >
+        </div>
+        <p class="body">{{ reply.body }}</p>
+        @switch (reply.status) {
+          @case ('pending') {
+            <p class="meta review-status pending">Waiting for review · Private</p>
+          }
+          @case ('rejected') {
+            <p class="meta review-status rejected">
+              Not approved · Private
+              @if (reply.rejectionReason; as reason) {
+                · Reason: {{ reason }}
+              }
+            </p>
+          }
+        }
+      </article>
+    }
+    @if (cursor()) {
+      <button type="button" (click)="load(true)" [disabled]="loading() || saving()">
+        Load more replies
+      </button>
+    }
+    @if (canReply() && permitted()) {
+      <form (ngSubmit)="send()">
+        <label [for]="'reply-' + feedbackId()">Reply</label>
+        <textarea
+          [id]="'reply-' + feedbackId()"
+          name="reply"
+          rows="4"
+          [maxlength]="max"
+          [ngModel]="body()"
+          (ngModelChange)="body.set($event)"
+          required
+        ></textarea>
+        <p class="meta">{{ body().length }}/{{ max }} · Plain text. Replies cannot be edited.</p>
+        <p class="meta">
+          {{
+            admin()
+              ? 'Admin replies are published right away and may be visible to approved users.'
+              : 'An admin reviews each reply before others can see it. Approved replies may be visible to approved users.'
+          }}
+          Leave out personal or confidential information. Replies do not change the feedback’s human
+          status.
+        </p>
+        <button type="submit" [disabled]="saving() || loading() || !body().trim()">
+          {{ saving() ? 'Sending…' : 'Send reply' }}
+        </button>
+      </form>
+    }
+  }
+</section>

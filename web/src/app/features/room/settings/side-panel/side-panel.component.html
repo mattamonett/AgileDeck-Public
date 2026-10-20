@@ -1,0 +1,16 @@
+<div
+  class="sidebar-overlay"
+  [class.active]="isOpen()"
+  (click)="closePanel.emit()"
+  (keyup.escape)="closePanel.emit()"
+  tabindex="0"
+></div>
+<div class="sidebar" [class.active]="isOpen()">
+  <div class="sidebar-header">
+    <h3>{{ panelTitle() }}</h3>
+    <button (click)="closePanel.emit()" class="icon-btn">✕</button>
+  </div>
+  <div class="sidebar-content">
+    <ng-content></ng-content>
+  </div>
+</div>

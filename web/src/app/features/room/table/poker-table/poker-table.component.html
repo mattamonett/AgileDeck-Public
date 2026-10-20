@@ -1,0 +1,196 @@
+<div class="table-area">
+  @if (isPerfectMatch() && !isCountdown() && isGardenTheme()) {
+    <app-garden-celebration />
+  } @else if (isPerfectMatch()) {
+    <app-confetti-celebration />
+  }
+  <div
+    #table
+    class="table glass-panel"
+    [class.perfect-match]="isPerfectMatch()"
+    [class.revealed]="revealed()"
+    [class.revelation-ceremony]="isCountdown()"
+  >
+    @if (theme() === 'vegas') {
+      <svg
+        class="casino-rail-lights"
+        viewBox="0 0 1000 430"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <rect
+          class="casino-rail-track"
+          x="14"
+          y="14"
+          width="972"
+          height="402"
+          rx="466"
+          ry="63"
+          pathLength="100"
+        ></rect>
+        <rect
+          class="casino-rail-bulbs"
+          x="14"
+          y="14"
+          width="972"
+          height="402"
+          rx="466"
+          ry="63"
+          pathLength="100"
+        ></rect>
+        <rect
+          class="casino-rail-chase"
+          x="14"
+          y="14"
+          width="972"
+          height="402"
+          rx="466"
+          ry="63"
+          pathLength="100"
+        ></rect>
+      </svg>
+    }
+
+    @if (revealed() && !isCountdown()) {
+      <app-reveal-celebration [vegas]="theme() === 'vegas'" />
+    }
+    <div class="table-ornament" aria-hidden="true">✧ ─── ❧ ─── ✧</div>
+    <div class="center-content">
+      @if (isCountdown()) {
+        <div class="countdown reveal-countdown">
+          <span class="ceremony-label">
+            {{ theme() === 'vegas' ? 'No more bets' : 'Final reveal' }}
+          </span>
+          <div class="countdown-circle">
+            <span class="countdown-number">{{ countdownValue() }}</span>
+          </div>
+        </div>
+      }
+      @if (theme() === 'vegas' && !isCountdown() && !revealed()) {
+        <div class="dealer-puck" [class.has-bets]="hasVotes()">
+          <span class="dealer-puck-mark">AD</span>
+          <span class="dealer-puck-status">
+            {{ hasVotes() ? 'Bets are in' : 'Place your bets' }}
+          </span>
+        </div>
+      }
+      @if (revealed() && !isCountdown()) {
+        <div class="results">
+          <div class="avg-group">
+            <h3>Average</h3>
+            <div class="big-number">{{ averageVote() }}</div>
+          </div>
+          @if (multipliedAverage()) {
+            <div class="avg-group multiplied">
+              <h3>Multiplied</h3>
+              <div class="big-number small">{{ multipliedAverage() }}</div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="users-grid">
+      @for (user of players(); track user.id) {
+        <app-player-card
+          [user]="user"
+          [throwBlockedUntil]="throwBlockedUntil()"
+          [throwable]="throwingEnabled()"
+          [revealState]="revealed()"
+          [garden]="isGardenTheme()"
+          [isCurrent]="user.id === currentUserId()"
+          [nudgeable]="stragglerIds().has(user.id)"
+          [nudged]="nudgedUserId() === user.id"
+          [nudgeCooldownSeconds]="nudgeCooldowns().get(user.id) ?? 0"
+          (throw)="throw.emit(user.id)"
+          (barrage)="barrage.emit(user.id)"
+          (nudge)="nudge.emit(user.id)"
+        >
+        </app-player-card>
+      }
+    </div>
+
+    @if (observers().length > 0) {
+      <section class="observers-row" aria-label="Observers">
+        <h3 class="obs-label">Observers · {{ observers().length }}</h3>
+        <div class="observers-grid">
+          @for (obs of observers(); track obs.id) {
+            <app-player-card
+              [user]="obs"
+              [throwBlockedUntil]="throwBlockedUntil()"
+              [throwable]="throwingEnabled()"
+              [revealState]="revealed()"
+              [isCurrent]="obs.id === currentUserId()"
+              (throw)="throw.emit(obs.id)"
+              (barrage)="barrage.emit(obs.id)"
+            />
+          }
+        </div>
+      </section>
+    }
+  </div>
+  <app-throw-scene [projectiles]="projectiles()"></app-throw-scene>
+</div>
+<div class="throw-dock">
+  <div class="dock-actions">
+    @if (!isCountdown()) {
+      <div class="table-controls">
+        <button (click)="reveal.emit()" class="btn-primary" [disabled]="revealed() || !hasVotes()">
+          Reveal Cards
+        </button>
+        <button
+          (click)="resetGame.emit()"
+          class="btn-secondary"
+          [disabled]="!revealed() && !hasVotes()"
+        >
+          Reset
+        </button>
+        @if (stragglerIds().size > 0) {
+          <button
+            (click)="requestNudgeStragglers()"
+            class="btn-secondary nudge-stragglers"
+            [class.cooling]="stragglersCooldown() > 0"
+            [attr.aria-disabled]="stragglersCooldown() > 0 ? 'true' : null"
+            [title]="
+              stragglersCooldown() > 0
+                ? 'Everyone waiting was just nudged. You can nudge again in ' +
+                  stragglersCooldown() +
+                  's.'
+                : 'Nudge everyone who hasn\'t voted yet'
+            "
+          >
+            @if (stragglersCooldown() > 0) {
+              📢 Nudge again in {{ stragglersCooldown() }}s
+            } @else {
+              📢 Nudge
+              {{ stragglerIds().size === 1 ? 'straggler' : stragglerIds().size + ' stragglers' }}
+            }
+          </button>
+        }
+      </div>
+    }
+    @if (throwingEnabled()) {
+      <button
+        class="equipped-projectile"
+        (click)="openPicker.emit()"
+        aria-label="Choose what to throw"
+        title="Choose what to throw"
+      >
+        <span>{{ selectedProjectile() }}</span
+        ><span>Change throwable</span><span aria-hidden="true">⌄</span>
+      </button>
+    }
+  </div>
+  @if (revealed() || roundClock()) {
+    <p>
+      @if (revealed()) {
+        Reset the cards to start another round
+        @if (roundClock()) {
+          ·
+        }
+      }
+      <app-round-timer [clock]="roundClock()" [theme]="theme() ?? 'default'" />
+    </p>
+  }
+</div>

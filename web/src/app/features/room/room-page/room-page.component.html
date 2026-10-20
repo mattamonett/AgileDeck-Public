@@ -1,0 +1,191 @@
+<div class="room-container" [attr.data-theme]="currentRoom()?.theme || 'default'">
+  @if (isGardenTheme()) {
+    <app-garden-atmosphere></app-garden-atmosphere>
+  }
+  <app-update-banner />
+  <main class="main-layout">
+    <div class="room-topbar">
+      <div class="room-branding">
+        <img src="favicon.png" [alt]="siteName() + ' logo'" class="room-logo" />
+        <h1 class="room-branding-title">{{ siteName() }}</h1>
+      </div>
+      @if (currentUser()?.isApproved) {
+        <app-room-header
+          [roomName]="currentRoom()?.name"
+          [roomId]="roomId()"
+          [hasFeedbackUpdates]="feedbackUpdates.hasUpdates()"
+          [showFeedback]="feedbackEnabled()"
+          [pendingCount]="store.pendingApprovals().length"
+          [isConnected]="store.isConnected()"
+          (copyLink)="copyLink()"
+          (toggleSettings)="toggleSettings()"
+          (toggleRoomSettings)="toggleRoomSettings()"
+          (openQrCode)="toggleQrCode()"
+          (openFeedback)="openFeedback()"
+        >
+        </app-room-header>
+      }
+    </div>
+
+    @if (currentUser(); as user) {
+      @if (user.isApproved) {
+        <div class="session-layout" [class.issues-disabled]="!issuesShown()">
+          <div class="voting-area">
+            <div
+              class="active-issue"
+              [hidden]="!issuesShown()"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              @if (issuesPanel.activeIssue(); as issue) {
+                <span class="active-issue-label">In progress</span>
+                <h2>
+                  @if (issue.issueNumber) {
+                    {{ issue.issueNumber }} ·
+                  }
+                  {{ issue.title }}
+                </h2>
+                <button
+                  type="button"
+                  class="next-issue"
+                  title="Close this issue and start a new round on the next open one"
+                  (click)="issuesPanel.store.startNext()"
+                  [disabled]="issuesPanel.store.saving() || !issuesPanel.store.context()"
+                >
+                  Close &amp; next issue →
+                </button>
+              }
+            </div>
+            <app-poker-table
+              [currentUserId]="user.id"
+              [theme]="currentRoom()?.theme ?? null"
+              [players]="store.mergedPlayers()"
+              [observers]="store.observers()"
+              [revealed]="revealState()"
+              [isCountdown]="isCountdown()"
+              [countdownValue]="store.countdownValue()"
+              [hasVotes]="store.hasVotes()"
+              [isPerfectMatch]="store.isPerfectMatch()"
+              [averageVote]="store.averageVote()"
+              [multipliedAverage]="store.multipliedAverage()"
+              [roundClock]="currentRoom()?.roundClock ?? null"
+              [throwBlockedUntil]="throwBlockedUntil()"
+              [projectiles]="interaction.thrownProjectiles()"
+              [nudgedUserId]="interaction.nudgedUserId()"
+              [nudgeCooldowns]="interaction.nudgeCooldowns()"
+              [selectedProjectile]="selectedProjectile() ?? ''"
+              [throwingEnabled]="throwingEnabled()"
+              (reveal)="reveal()"
+              (resetGame)="reset()"
+              (throw)="throwEquipped($event)"
+              (barrage)="barrageEquipped($event)"
+              (openPicker)="openEmojiPicker()"
+              (nudge)="interaction.nudge($event)"
+              (nudgeStragglers)="interaction.nudgeStragglers()"
+            ></app-poker-table>
+            <app-nudge-alert
+              [currentUserId]="user.id"
+              [mood]="roomMood()"
+              [waitingOnMe]="waitingOnMe()"
+            />
+
+            <app-poker-hand
+              [cards]="cards"
+              [isObserver]="isObserver()"
+              [selectedVote]="user.vote ?? null"
+              [revealed]="revealState()"
+              (vote)="vote($event)"
+              (toggleObserver)="toggleObserver()"
+            ></app-poker-hand>
+          </div>
+          <app-issues-panel #issuesPanel [hidden]="!issuesShown()"></app-issues-panel>
+        </div>
+      } @else {
+        <app-room-lobby
+          heading="Waiting for Approval"
+          message="Please wait until someone in the room grants you access."
+          [roomId]="roomId()"
+        />
+      }
+    } @else {
+      <app-room-lobby
+        heading="Joining Room"
+        message="Connecting to the room..."
+        [roomId]="roomId()"
+      />
+    }
+  </main>
+
+  <!-- Side Panels -->
+  <app-side-panel
+    [panelTitle]="'Player Settings'"
+    [isOpen]="showSettings()"
+    (closePanel)="showSettings.set(false)"
+  >
+    <app-player-settings
+      [panelOpen]="showSettings()"
+      [(editUserName)]="editUserName"
+      [isObserver]="isObserver()"
+      (toggleObserver)="toggleObserver()"
+      [nudgeSoundSetting]="nudgeSound.setting()"
+      [hasVoice]="nudgeSound.hasVoice()"
+      (nudgeSoundChange)="nudgeSound.setSetting($event)"
+      (testNudgeSound)="testNudgeSound()"
+      (updateUserName)="updateUserName($event)"
+    >
+    </app-player-settings>
+  </app-side-panel>
+
+  <app-side-panel
+    [panelTitle]="'Room Settings'"
+    [isOpen]="showRoomSettings()"
+    (closePanel)="showRoomSettings.set(false)"
+  >
+    <app-room-settings-panel
+      [(editRoomName)]="editRoomName"
+      [(editMultiplier)]="editMultiplier"
+      [themes]="themes()"
+      [moods]="content().moods"
+      [defaultMood]="content().defaultMood"
+      [throwingEnabled]="content().throwables"
+      [room]="currentRoom()"
+      [issuesAvailable]="issuesAvailable()"
+      [pendingApprovals]="store.pendingApprovals()"
+      [isConnected]="store.isConnected()"
+      [healthStatus]="healthStatus()"
+      (approveUser)="socket.approveUser($event)"
+      (denyUser)="socket.denyUser($event)"
+      (refreshHealth)="checkHealth()"
+      (setIssuesEnabled)="socket.toggleIssues($event)"
+      (setRoomMood)="socket.updateRoomMood($event)"
+      (saveRoomName)="saveRoomName($event)"
+      (toggleAutoReveal)="toggleAutoReveal($event)"
+      (setTheme)="setTheme($event)"
+      (toggleMultiplier)="toggleMultiplier()"
+      (saveMultiplier)="saveMultiplier($event)"
+    >
+    </app-room-settings-panel>
+  </app-side-panel>
+
+  @if (showEmojiPicker() && throwingEnabled()) {
+    <app-emoji-picker
+      title="Choose Your Weapon"
+      [presets]="topProjectiles()"
+      [allEmojis]="allEmojisWithTags()"
+      (emojiSelect)="selectProjectile($event)"
+      (closePicker)="showEmojiPicker.set(false)"
+    >
+    </app-emoji-picker>
+  }
+
+  <footer class="app-footer">
+    <div class="version-tag">Web: {{ store.formattedWebVersion() }}</div>
+    <div class="version-tag">API: {{ store.formattedApiVersion() }}</div>
+  </footer>
+
+  @if (showQrCode()) {
+    @defer (on immediate) {
+      <app-room-qr-overlay (closeOverlay)="toggleQrCode()" />
+    }
+  }
+</div>

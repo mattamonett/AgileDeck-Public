@@ -1,0 +1,324 @@
+<main>
+  <header>
+    <div>
+      <p class="eyebrow">Agile Deck · Admin</p>
+      <h1>Admin</h1>
+      <p>Approve new feedback, review it, explore room membership, and see how the app is used.</p>
+    </div>
+    @if (session.environment(); as environment) {
+      <div class="session">
+        <span class="environment" [class.production]="environment === 'production'"
+          >{{ environment }} database</span
+        >
+        <button type="button" class="secondary" (click)="signOut()">Sign out</button>
+      </div>
+    }
+  </header>
+  @switch (session.access()) {
+    @case ('checking') {
+      <p class="notice" role="status">Connecting to the admin service…</p>
+    }
+    @case ('unreachable') {
+      <p class="notice error" role="alert">
+        Could not reach the admin service. Check that the API is running, then reload this page.
+      </p>
+    }
+    @case ('off') {
+      <section class="notice" aria-label="Admin is off">
+        <h2>The admin page is off</h2>
+        <p>
+          The site operator turns it on by setting the <code>ADMIN_PASSWORD</code> environment
+          variable on the API server to a long random password (at least 12 characters) and
+          restarting it.
+        </p>
+      </section>
+    }
+    @case ('signed-out') {
+      <section class="sign-in" aria-label="Sign in">
+        <h2>Sign in</h2>
+        <app-site-password-form
+          prompt="Admin password"
+          inputId="admin-password"
+          [check]="checkPassword"
+          (unlocked)="signedIn()"
+        />
+      </section>
+    }
+    @case ('signed-in') {
+      <nav class="tabs" aria-label="Admin sections">
+        <button
+          type="button"
+          [class.active]="activeTab() === 'pending'"
+          [attr.aria-current]="activeTab() === 'pending' ? 'page' : null"
+          (click)="activeTab.set('pending')"
+        >
+          Pending Review
+          @if (pendingCount(); as count) {
+            <span class="tab-count">{{ count }}</span>
+          }
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab() === 'feedback'"
+          [attr.aria-current]="activeTab() === 'feedback' ? 'page' : null"
+          (click)="activeTab.set('feedback')"
+        >
+          Feedback Review
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab() === 'rooms'"
+          [attr.aria-current]="activeTab() === 'rooms' ? 'page' : null"
+          (click)="activeTab.set('rooms')"
+        >
+          Rooms
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab() === 'usage'"
+          [attr.aria-current]="activeTab() === 'usage' ? 'page' : null"
+          (click)="activeTab.set('usage')"
+        >
+          Usage
+        </button>
+      </nav>
+      <app-pending-review
+        [hidden]="activeTab() !== 'pending'"
+        (pendingCount)="pendingCount.set($event)"
+        (reviewed)="load()"
+      />
+      @if (activeTab() === 'usage') {
+        <app-usage-admin />
+      }
+      @if (activeTab() === 'rooms') {
+        <app-room-admin />
+      }
+      <section [hidden]="activeTab() !== 'feedback'" aria-label="Feedback Review">
+        <h2>Feedback Review</h2>
+        <p class="meta">
+          Publication is decided in Pending Review. The status here tracks what happens next.
+        </p>
+        @if (error()) {
+          <p class="notice error" role="alert">{{ error() }}</p>
+        }
+        @if (success()) {
+          <p class="notice success" role="status">{{ success() }}</p>
+        }
+        <form class="filters" (ngSubmit)="load()">
+          <label
+            >Type<select
+              name="category"
+              [ngModel]="category()"
+              (ngModelChange)="category.set($event)"
+            >
+              <option value="">All types</option>
+              @for (value of categories; track value) {
+                <option [value]="value">{{ labels[value] }}</option>
+              }
+            </select></label
+          >
+          <label
+            >Human status<select
+              name="statusFilter"
+              [ngModel]="statusFilter()"
+              (ngModelChange)="statusFilter.set($event)"
+            >
+              <option value="">All statuses</option>
+              @for (value of statuses; track value) {
+                <option [value]="value">{{ labels[value] }}</option>
+              }
+            </select></label
+          >
+          <label
+            >Publication<select
+              name="publication"
+              [ngModel]="publicationFilter()"
+              (ngModelChange)="publicationFilter.set($event)"
+            >
+              <option value="">All submissions</option>
+              @for (value of publicationStatuses; track value) {
+                <option [value]="value">{{ labels[value] }}</option>
+              }
+            </select></label
+          >
+          <label
+            >Search title<input
+              name="search"
+              maxlength="100"
+              [ngModel]="search()"
+              (ngModelChange)="search.set($event)"
+              placeholder="Find feedback"
+          /></label>
+          <button type="submit" [disabled]="saving()">
+            {{ loading() ? 'Loading…' : 'Apply / Refresh' }}
+          </button>
+          @if (!statusFilter()) {
+            <button
+              type="button"
+              class="closed-filter"
+              role="switch"
+              [attr.aria-checked]="showClosed()"
+              [disabled]="saving()"
+              (click)="toggleClosed(!showClosed())"
+            >
+              <span class="switch-track" aria-hidden="true"
+                ><span class="switch-thumb"></span
+              ></span>
+              <span>Show closed feedback</span>
+            </button>
+          }
+        </form>
+        <div class="workspace">
+          <section class="list" aria-label="Feedback submissions">
+            @if (!loading() && items().length === 0) {
+              <p class="empty">
+                {{
+                  statusFilter() || showClosed()
+                    ? 'No submissions match these filters.'
+                    : 'No open submissions match these filters. Turn on Show closed feedback to see completed items.'
+                }}
+              </p>
+            }
+            @for (item of items(); track item.id) {
+              <button
+                type="button"
+                class="entry"
+                [class.selected]="selected()?.id === item.id"
+                [disabled]="saving()"
+                (click)="select(item)"
+              >
+                <span class="meta"
+                  >{{ labels[item.category] }} · {{ item.createdAt.slice(0, 10) }}</span
+                >
+                <strong>{{ item.title }}</strong>
+                @if (item.hasUnreadReplies) {
+                  <span>New reply</span>
+                }
+                <span>{{ labels[item.workflowStatus] }} · {{ labels[item.status] }}</span>
+              </button>
+            }
+            @if (nextCursor()) {
+              <button type="button" [disabled]="loading() || saving()" (click)="load(true)">
+                Load more
+              </button>
+            }
+          </section>
+          <section class="review" aria-label="Review selected feedback">
+            @if (selected(); as item) {
+              <p class="meta">{{ labels[item.category] }} · {{ item.createdAt.slice(0, 10) }}</p>
+              <h2>{{ item.title }}</h2>
+              <p class="body">{{ item.body }}</p>
+              <app-feedback-status [item]="item" />
+              <p>
+                Publication: <strong>{{ labels[item.status] }}</strong>
+              </p>
+              @if (item.status === 'pending') {
+                <p class="meta">
+                  Only its author can see this until you approve it in Pending Review.
+                </p>
+              }
+              @if (item.rejectionReason) {
+                <p class="notice">Reason shown to the author: {{ item.rejectionReason }}</p>
+              }
+              <app-feedback-replies
+                [feedbackId]="item.id"
+                [baseUrl]="repliesUrl"
+                [admin]="true"
+                [canReply]="true"
+                [hasUnread]="item.hasUnreadReplies"
+                (unreadChange)="repliesRead(item.id, $event)"
+              />
+              <form class="resolution-form" (ngSubmit)="save()">
+                <fieldset [disabled]="saving()">
+                  <legend>Human review</legend>
+                  <label
+                    >Status<select
+                      name="workflow"
+                      [ngModel]="workflowStatus()"
+                      (ngModelChange)="setWorkflow($event)"
+                    >
+                      @for (value of statuses; track value) {
+                        <option [value]="value">{{ labels[value] }}</option>
+                      }
+                    </select></label
+                  >
+                  @if (workflowStatus() === 'closed') {
+                    <label
+                      >Resolution reason<select
+                        name="reason"
+                        [ngModel]="reason()"
+                        (ngModelChange)="setReason($event)"
+                      >
+                        @for (value of reasons; track value) {
+                          <option [value]="value">{{ labels[value] }}</option>
+                        }
+                      </select></label
+                    >
+                    <label
+                      >Resolution note
+                      <span class="meta">Optional · visible with published feedback</span>
+                      <textarea
+                        name="note"
+                        rows="3"
+                        maxlength="2000"
+                        [ngModel]="note()"
+                        (ngModelChange)="note.set($event)"
+                      ></textarea>
+                    </label>
+                    @if (reason() === 'duplicate') {
+                      <label
+                        >Original feedback reference<input
+                          name="duplicate"
+                          [ngModel]="duplicateId()"
+                          (ngModelChange)="duplicateId.set($event); original.set(null)"
+                          placeholder="Paste the original feedback reference"
+                          required
+                      /></label>
+                      <button type="button" (click)="openReference(duplicateId().trim(), true)">
+                        Check original
+                      </button>
+                      @if (original(); as originalItem) {
+                        <p>
+                          Original: <strong>{{ originalItem.title }}</strong> ·
+                          {{ labels[originalItem.status] }}
+                        </p>
+                      }
+                    }
+                  }
+                  <p class="meta">
+                    Changing human status does not change publication. Reopening clears the
+                    resolution.
+                  </p>
+                  <div class="actions">
+                    <button type="submit">{{ saving() ? 'Saving…' : 'Save status' }}</button>
+                    <button type="button" class="secondary" (click)="openReference(item.id)">
+                      Reload item
+                    </button>
+                  </div>
+                </fieldset>
+              </form>
+              <label class="reference"
+                >Feedback reference<input
+                  readonly
+                  [value]="item.id"
+                  aria-label="Feedback reference to copy"
+              /></label>
+              @if (item.duplicateOfId; as id) {
+                <button
+                  type="button"
+                  class="secondary"
+                  [disabled]="saving()"
+                  (click)="openReference(id)"
+                >
+                  View original feedback
+                </button>
+              }
+            } @else {
+              <p class="empty">Select a submission to review its details and update its status.</p>
+            }
+          </section>
+        </div>
+      </section>
+    }
+  }
+</main>

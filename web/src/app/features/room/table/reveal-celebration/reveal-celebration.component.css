@@ -1,0 +1,114 @@
+:host {
+  display: contents;
+}
+
+.reveal-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.vegas-reveal-banner {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  z-index: 38;
+  width: min(82%, 410px);
+  padding: 0.8rem 1.5rem;
+  border: 1px solid rgba(255, 215, 0, 0.82);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 4, 35, 0.96),
+    rgba(80, 8, 63, 0.96),
+    rgba(30, 4, 35, 0.96)
+  );
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(255, 215, 0, 0.5),
+    0 0 38px rgba(255, 0, 196, 0.35);
+  color: #fff8c9;
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.82);
+  animation: vegas-reveal-banner 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.vegas-reveal-banner::before,
+.vegas-reveal-banner::after {
+  content: '◆';
+  color: #ffd700;
+  margin: 0 0.6rem;
+  text-shadow: 0 0 8px #ffd700;
+}
+
+@keyframes vegas-reveal-banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+  18%,
+  62% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -72%) scale(1.04);
+  }
+}
+
+.reveal-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  box-shadow:
+    0 0 10px var(--color-primary),
+    0 0 18px var(--color-secondary);
+  transform: rotate(var(--spark-angle)) translateY(-14px);
+}
+
+.reveal-spark {
+  background: var(--color-primary);
+  transform: rotate(var(--spark-angle)) translateY(-8px);
+  animation: reveal-spark 1.1s cubic-bezier(0.12, 0.8, 0.2, 1) both;
+}
+
+@keyframes reveal-spark {
+  to {
+    opacity: 0;
+    transform: rotate(var(--spark-angle)) translateY(-330px) scale(0.3);
+  }
+}
+
+@media (max-width: 768px) {
+  .vegas-reveal-banner {
+    top: 34%;
+    width: min(88%, 330px);
+    padding: 0.65rem 0.75rem;
+    letter-spacing: 0.13em;
+  }
+
+  .vegas-reveal-banner::before,
+  .vegas-reveal-banner::after {
+    margin: 0 0.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vegas-reveal-banner {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -1,0 +1,36 @@
+@if (!isObserver()) {
+  <div class="hand-area glass-panel">
+    <div class="hand-caption">
+      <span>YOUR ESTIMATE</span><span class="fib-key"><b>F</b> Fibonacci</span>
+    </div>
+    <div class="cards">
+      @for (card of cards(); track card; let i = $index) {
+        <button
+          class="poker-card glass-card"
+          [class.selected]="selectedVote() === card"
+          [class.is-fibonacci]="isFibonacci(card)"
+          [attr.data-card]="card"
+          [attr.aria-label]="'Estimate ' + card + (isFibonacci(card) ? ' (Fibonacci)' : '')"
+          [attr.aria-pressed]="selectedVote() === card"
+          [style.--fan-y.px]="cardFanOffset(i)"
+          [style.--fan-rotation.deg]="cardFanRotation(i)"
+          (click)="vote.emit(card)"
+          [disabled]="revealed()"
+        >
+          <span class="card-corner card-corner-top" aria-hidden="true">{{ card }}</span>
+          <span class="card-value">{{ card }}</span>
+          <span class="card-corner card-corner-bottom" aria-hidden="true">{{ card }}</span>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (isObserver()) {
+  <div class="observer-mode-banner">
+    <p>
+      You are observing this session.
+      <button (click)="toggleObserver.emit()" class="link-btn">Switch to Player</button>
+    </p>
+  </div>
+}

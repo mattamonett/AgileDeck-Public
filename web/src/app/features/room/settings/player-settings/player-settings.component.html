@@ -1,0 +1,109 @@
+<div class="setting-item">
+  <h4>
+    Your Name
+    <span class="info-icon"
+      >i
+      <span class="tooltip-text">Set your display name visible to other players.</span>
+    </span>
+  </h4>
+  <div class="input-group">
+    <input [(ngModel)]="editUserName" placeholder="Enter name" />
+    <button (click)="updateName()" class="btn-sm">Update</button>
+  </div>
+</div>
+
+<div
+  class="setting-item sex-setting"
+  tabindex="-1"
+  #sexControl
+  (focusout)="sexFocusOut($event)"
+  (keydown)="sexKeydown($event)"
+>
+  <div class="sex-heading">
+    <h4 id="player-sex-label">Sex</h4>
+  </div>
+  <button
+    #sexTrigger
+    type="button"
+    class="sex-trigger"
+    aria-haspopup="listbox"
+    [attr.aria-expanded]="sexOpen()"
+    aria-controls="player-sex-options"
+    aria-labelledby="player-sex-label player-sex-value"
+    (click)="sexOpen.set(!sexOpen())"
+  >
+    <span id="player-sex-value">{{ sex() || 'Select...' }}</span>
+    <span aria-hidden="true">{{ sexOpen() ? '▴' : '▾' }}</span>
+  </button>
+  @if (sexOpen()) {
+    <div
+      id="player-sex-options"
+      class="sex-options"
+      role="listbox"
+      aria-labelledby="player-sex-label"
+    >
+      @for (choice of sexChoices; track choice) {
+        <button
+          type="button"
+          role="option"
+          [attr.aria-selected]="sex() === choice"
+          (click)="chooseSex(choice)"
+        >
+          {{ choice }}
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<div class="setting-item">
+  <h4>
+    Mode
+    <span class="info-icon"
+      >i
+      <span class="tooltip-text"
+        >Observers can watch the game but cannot vote or reveal cards.</span
+      >
+    </span>
+  </h4>
+  <div class="toggle-group">
+    <button [class.active]="!isObserver()" (click)="!isObserver() ? null : toggleObserver.emit()">
+      Player
+    </button>
+    <button [class.active]="isObserver()" (click)="isObserver() ? null : toggleObserver.emit()">
+      Observer
+    </button>
+  </div>
+</div>
+
+<div class="setting-item">
+  <h4 id="nudge-sound-label">
+    Nudge Sound
+    <span class="info-icon"
+      >i
+      <span class="tooltip-text"
+        >How loud it is when someone nudges you to vote. With Off you still see the nudge.</span
+      >
+    </span>
+  </h4>
+  <div class="toggle-group three" role="group" aria-labelledby="nudge-sound-label">
+    @for (choice of nudgeSoundSettings; track choice.value) {
+      <button
+        type="button"
+        [class.active]="nudgeSoundSetting() === choice.value"
+        [attr.aria-pressed]="nudgeSoundSetting() === choice.value"
+        (click)="nudgeSoundChange.emit(choice.value)"
+      >
+        {{ choice.label }}
+      </button>
+    }
+  </div>
+  <button type="button" class="btn-sm nudge-test" (click)="testNudgeSound.emit()">
+    🔊 Test nudge sound
+  </button>
+  @if (!hasVoice()) {
+    <p class="setting-hint">
+      Your browser has no speech voice, so the third nudge plays the horn without the yell.
+    </p>
+  }
+</div>

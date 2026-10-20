@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Character performances</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #121529;
+      color: #ece7df;
+      font: 15px system-ui;
+      min-height: 100vh;
+    }
+    main {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 30px;
+      margin: 8px 0;
+    }
+    p {
+      color: #aebbd0;
+      max-width: 640px;
+      line-height: 1.6;
+    }
+    .kicker {
+      color: #6ef6cc;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+    button,
+    select {
+      background: #253149;
+      color: #ecfff8;
+      border: 1px solid #617588;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #35506b;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+    .table {
+      height: 310px;
+      position: relative;
+      margin-top: 32px;
+      border-radius: 18px;
+      background: radial-gradient(ellipse at center, #24443d, #192c2d);
+      border: 1px solid #405c57;
+      box-shadow: inset 0 0 70px #0e2421;
+    }
+    .player {
+      position: absolute;
+      top: 92px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 24px;
+      width: 110px;
+    }
+    .source {
+      left: 12%;
+    }
+    .target {
+      left: 65%;
+    }
+    .card-display {
+      position: relative;
+      width: 84px;
+      height: 122px;
+      border-radius: 10px;
+      border: 2px solid #c6ab76;
+      background: repeating-linear-gradient(45deg, transparent 0 7px, #997cd82b 8px 11px), #1c1833;
+      box-shadow:
+        inset 0 0 0 4px #11152c,
+        0 7px 0 #101425;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      color: #e3ce9f;
+      overflow: hidden;
+    }
+    .target .card-display {
+      background: #f2ead8;
+      color: #243148;
+    }
+    .target .card-display:not(.flip) {
+      background: repeating-linear-gradient(45deg, transparent 0 7px, #997cd82b 8px 11px), #1c1833;
+      color: #e3ce9f;
+    }
+    .target .card-display:not(.flip) span {
+      opacity: 0;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 150;
+    }
+    #status {
+      min-height: 24px;
+      color: #88edc9;
+      margin-top: 18px;
+    }
+    #errors {
+      color: #ffb395;
+    }
+    body.light {
+      background: #f7f4ed;
+      color: #203247;
+    }
+    body.light p {
+      color: #566174;
+    }
+    body.light .table {
+      background: #d5e0d5;
+      border-color: #839d91;
+    }
+    body.light #status {
+      color: #225b50;
+    }
+    .table.narrow {
+      max-width: 360px;
+      margin-inline: auto;
+    }
+    .table.edge-left .target {
+      left: 4px;
+    }
+    .table.edge-right .target {
+      left: auto;
+      right: 4px;
+    }
+    @media (max-width: 500px) {
+      main {
+        padding: 12px;
+        margin: 12px auto;
+      }
+      .source {
+        left: 7%;
+      }
+      .target {
+        left: 61%;
+      }
+      .toolbar {
+        gap: 0;
+      }
+      button,
+      select {
+        padding: 8px;
+        margin: 3px;
+        font-size: 12px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+  <main>
+    <div class="kicker">CHARACTER PERFORMANCES</div>
+    <h1 id="title">👽 A very thorough inspection</h1>
+    <p id="description">
+      A curious visitor lifts your card, scans underneath, and occasionally discovers that its own
+      equipment is the problem. Watch the full routine or inspect a specific beat.
+    </p>
+    <div class="toolbar">
+      <label
+        >Character
+        <select id="character">
+          <option value="👽">Alien</option>
+          <option value="💊">Laxative</option>
+          <option value="🧟">Zombie</option>
+          <option value="🪚">Texas Chainsaw Massacre</option>
+          <option value="☠️">Grim Reaper</option>
+          <option value="🐶">Dog</option>
+          <option value="🐱">Cat</option>
+          <option value="🎩">Top hat</option>
+          <option value="🕊️">PO Pigeon</option>
+          <option value="🐒">Monkey</option>
+          <option value="🦈">Shark</option>
+          <option value="✋">Nill Smith</option>
+          <option value="🏎️">Racing Car</option>
+          <option value="🇺🇸">Donald Trump</option>
+          <option value="📐">Architect</option>
+          <option value="☮️">Hippie</option>
+          <option value="🎺">MelloMary</option>
+          <option value="🥋">Bullet Time</option>
+          <option value="👻">Ghost</option>
+          <option value="🗑️">Dumpster Fire</option>
+          <option value="👶">Baby Brent</option>
+          <option value="🤼">John Schlee-na</option>
+          <option value="🐐">Goat</option>
+          <option value="🛸">Flying saucer</option>
+          <option value="🕶️">Sunglasses</option>
+          <option value="🦄">Unicorn</option>
+          <option value="❤️">Heart</option>
+          <option value="🦖">Dinosaur</option>
+          <option value="🚀">Rocket</option>
+          <option value="🍅">Tomato</option>
+          <option value="💐">Bouquet</option>
+          <option value="🤕">Mummy</option>
+          <option value="🧛">Vampire</option>
+          <option value="🧙">Witch</option>
+          <option value="🪆">Possessed doll</option>
+          <option value="🕷️">Giant spider</option>
+          <option value="🎃">Pumpkin monster</option>
+          <option value="🦌">Rudy the Rooftop Rookie</option>
+          <option value="🍪">Ginger Snap</option>
+          <option value="🦃">Wild Turkey</option>
+          <option value="🫗">Gravy Boat Captain</option>
+          <option value="🎅">Special Delivery Santa</option>
+          <option value="🌽">Sleepy Scarecrow</option>
+          <option value="⛄">Flurry the Snow Sculptor</option>
+          <option value="🧝">Tinsel the Gift Wrapper</option>
+          <option value="🥷">Clumsy Pie Chef</option>
+          <option value="🐻">Hungry Bear</option>
+          <option value="🐿️">Acorn Hoarder</option>
+        </select></label
+      >
+      <button id="play">Play this performance</button><button id="next">Next variation</button
+      ><button id="theme">Light / dark</button><button id="flip">Face up / down</button
+      ><label
+        >Layout
+        <select id="layout">
+          <option value="">Table</option>
+          <option value="narrow">Narrow</option>
+          <option value="edge-left">Left edge</option>
+          <option value="edge-right">Right edge</option>
+        </select></label
+      ><label
+        >Cards
+        <select id="cards">
+          <option value="">Auto</option>
+          <option value="small-cards">58 × 84</option>
+          <option value="large-cards">84 × 122</option>
+        </select></label
+      ><label
+        >Zoom
+        <select id="zoom">
+          <option value="1">1×</option>
+          <option value="2">2×</option>
+          <option value="3">3×</option>
+        </select></label
+      >
+    </div>
+    <div class="toolbar" id="beats">
+      <button data-ms="0">Arrival</button><button data-ms="850">Lift</button
+      ><button data-ms="1500">Scan</button><button data-ms="2190">Surprise</button
+      ><button data-ms="3100">Settle</button><button data-ms="3860">Walk away</button
+      ><button data-ms="4440">Beam home</button><button data-ms="4700">Restored</button>
+    </div>
+    <style>
+      .target .card-display.flip {
+        transform: rotateY(180deg);
+      }
+      .target .card-display.flip span {
+        transform: rotateY(180deg);
+        display: inline-block;
+      }
+      @media (max-width: 768px) {
+        .card-display {
+          width: 58px;
+          height: 84px;
+        }
+        .player {
+          width: 76px;
+        }
+      }
+      body.small-cards .card-display {
+        width: 58px;
+        height: 84px;
+      }
+      body.large-cards .card-display {
+        width: 84px;
+        height: 122px;
+      }
+      .table.edge-left .source {
+        left: auto;
+        right: 12%;
+      }
+    </style>
+    <div class="table" id="table">
+      <div class="player source" data-player-id="source">
+        <div class="card-display">◆</div>
+        <span>Sender</span>
+      </div>
+      <div class="player target" data-player-id="target">
+        <div class="card-display flip"><span>8</span></div>
+        <span>Player</span>
+      </div>
+    </div>
+    <div id="status" role="status"></div>
+    <div id="errors" role="alert">Browser errors: 0</div>
+  </main>
+  <canvas id="live"></canvas
+  ><canvas id="still" hidden></canvas>
+  <script type="module" src="/preview.js"></script>
+</html>

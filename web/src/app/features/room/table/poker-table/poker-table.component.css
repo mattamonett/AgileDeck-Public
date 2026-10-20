@@ -1,0 +1,372 @@
+.table-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  padding: 0 0 16px;
+}
+
+.table {
+  /* Size to the players seated, from a minimum oval up to the full column. Every theme shares this size. */
+  width: fit-content;
+  min-width: min(100%, 640px);
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: clamp(340px, 42vh, 480px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 105px 45px 100px;
+  gap: var(--spacing-6);
+  position: relative;
+  border: 2px solid rgba(205, 173, 117, 0.52);
+  border-radius: 48% / 18%;
+  background:
+    url('/felt-texture.svg') 0 0 / 160px 160px repeat,
+    radial-gradient(ellipse at 50% 38%, rgba(68, 73, 116, 0.42), transparent 68%),
+    linear-gradient(155deg, #1a2143, #0b1127 84%);
+  background-blend-mode: soft-light, normal, normal;
+  box-shadow:
+    inset 0 0 0 8px rgba(7, 10, 24, 0.56),
+    inset 0 0 0 10px rgba(205, 173, 117, 0.2),
+    inset 0 -28px 60px rgba(0, 0, 0, 0.3),
+    0 22px 46px rgba(0, 0, 0, 0.34),
+    0 0 36px rgba(var(--color-primary-rgb), 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.table::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(225, 194, 132, 0.34);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.center-content {
+  text-align: center;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  pointer-events: none;
+  min-height: 0;
+  justify-content: center;
+  position: absolute;
+  inset: 1rem 0 auto;
+}
+
+.table.revealed:not(.revelation-ceremony) .center-content {
+  /* Keep both results above the cards, including the mobile grid at 110. */
+  z-index: 120;
+}
+
+.results {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(205, 173, 117, 0.3);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(22, 25, 48, 0.94), rgba(9, 13, 29, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 26px rgba(0, 0, 0, 0.3);
+}
+
+.avg-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 0 1.1rem;
+}
+
+.avg-group + .avg-group {
+  border-left: 1px solid rgba(205, 173, 117, 0.24);
+}
+
+.avg-group h3 {
+  margin: 0 0 0.25rem;
+  color: rgba(225, 194, 132, 0.78);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.big-number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  line-height: 1;
+}
+
+.big-number.small {
+  font-size: 2rem;
+}
+
+.countdown {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reveal-countdown {
+  position: relative;
+  z-index: 35;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.revelation-ceremony .center-content {
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 35;
+}
+
+.ceremony-label {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.75);
+}
+
+.countdown-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-full);
+  border: 6px solid var(--color-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.3);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  animation: pulse 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.revelation-ceremony::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 48% / 18%;
+  clip-path: inset(0 round 48% / 18%);
+  z-index: 8;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(var(--color-primary-rgb), 0.13),
+    rgba(2, 6, 23, 0.5)
+  );
+}
+
+.countdown-number {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+}
+
+.table-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+}
+
+.table-controls button {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 14px;
+}
+
+.table-controls button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.table-controls button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.users-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(var(--spacing-4), 3vw, 2.5rem);
+  width: 100%;
+  z-index: 10;
+}
+
+.observers-row {
+  display: flex;
+  flex-direction: column;
+  order: 3;
+  gap: var(--spacing-3);
+  align-items: center;
+  margin-top: var(--spacing-4);
+  justify-content: center;
+  width: 100%;
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(205, 173, 117, 0.25);
+}
+
+.obs-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.observers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+}
+
+.perfect-match {
+  border-color: var(--color-warning) !important;
+  box-shadow: 0 0 50px rgba(245, 158, 11, 0.4) !important;
+  animation: bounce-table 0.6s ease;
+}
+
+@keyframes bounce-table {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@media (min-width: 769px) and (max-height: 950px) {
+  .table {
+    min-height: 320px;
+    padding-top: 55px;
+    padding-bottom: 85px;
+  }
+
+  .table.revealed,
+  .table.revelation-ceremony {
+    padding-top: 105px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-area {
+    padding-bottom: 0;
+  }
+
+  .table {
+    width: 100%;
+    min-height: 310px;
+    padding: var(--spacing-8) var(--spacing-3) var(--spacing-5, 1.25rem);
+    gap: var(--spacing-4);
+    border-radius: 28px;
+    box-shadow:
+      inset 0 0 0 5px rgba(7, 10, 24, 0.5),
+      inset 0 0 0 6px rgba(205, 173, 117, 0.2),
+      0 16px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .table::before {
+    inset: 9px;
+    border-radius: 21px;
+  }
+
+  .revelation-ceremony::after {
+    border-radius: 28px;
+    clip-path: inset(0 round 28px);
+  }
+
+  .center-content {
+    position: relative;
+    inset: auto;
+    min-height: 52px;
+  }
+
+  .revelation-ceremony .center-content {
+    transform: none;
+  }
+
+  .table-controls {
+    gap: var(--spacing-4);
+  }
+
+  .table-controls button {
+    flex: 1;
+    max-width: 180px;
+    padding: var(--spacing-4) var(--spacing-3);
+    font-size: var(--font-size-base);
+    white-space: nowrap;
+  }
+
+  .big-number {
+    font-size: 2.35rem;
+  }
+
+  .big-number.small {
+    font-size: 1.75rem;
+  }
+
+  .results {
+    padding: 0.55rem 0.5rem;
+    border-radius: 14px;
+  }
+
+  .avg-group {
+    min-width: 88px;
+    padding: 0 0.7rem;
+  }
+
+  .users-grid {
+    gap: var(--spacing-1);
+    z-index: 110;
+  }
+}
+
+@media (max-width: 420px) {
+  .table-controls {
+    gap: var(--spacing-2);
+  }
+
+  .table-controls button {
+    padding: 0.72rem 0.55rem;
+    font-size: 0.82rem;
+  }
+}
+
+.nudge-stragglers.cooling {
+  opacity: 0.6;
+  cursor: not-allowed;
+  font-variant-numeric: tabular-nums;
+}

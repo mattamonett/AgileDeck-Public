@@ -1,0 +1,25 @@
+@if (active(); as nudge) {
+  <!-- Re-keying on each nudge restarts the shake. -->
+  @for (key of [nudge.seq]; track key) {
+    <div
+      class="nudge-alert"
+      [class.level-2]="nudge.level === 2"
+      [class.level-3]="nudge.level === 3"
+      role="alert"
+    >
+      <span class="nudge-icon" aria-hidden="true">📢</span>
+      <div class="nudge-text">
+        <strong>{{ headline() }}</strong>
+        <span>{{ nudge.from }} nudged you. The room is waiting on your vote.</span>
+      </div>
+      <div class="nudge-actions">
+        @if (sound.setting() !== 'off') {
+          <button type="button" class="nudge-mute" (click)="mute()">Mute nudges</button>
+        }
+        <button type="button" class="nudge-close" aria-label="Dismiss nudge" (click)="dismiss()">
+          ✕
+        </button>
+      </div>
+    </div>
+  }
+}

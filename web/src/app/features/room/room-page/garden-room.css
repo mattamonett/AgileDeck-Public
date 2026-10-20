@@ -1,0 +1,85 @@
+[data-theme='default'] {
+  --color-primary: #be9557;
+  --color-primary-rgb: 190, 149, 87;
+  --primary: #e0bf83;
+  --primary-rgb: 224, 191, 131;
+  --secondary: #f0b394;
+  --glass-bg: #092723ed;
+  --glass-border: #b391554a;
+  --glass-bg-hover: #163d34;
+  --color-text: #f7ecd7;
+  --color-text-muted: #b5bbaa;
+  color: #f7ecd7;
+  background: #031a1e;
+  isolation: isolate;
+}
+[data-theme='default']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(0deg, #03151922, transparent 45%),
+    url('/garden/garden.webp') center / cover;
+}
+[data-theme='default'] .main-layout {
+  max-width: 1800px;
+  padding: 24px 28px 32px;
+  gap: 22px;
+}
+[data-theme='default'] .room-branding {
+  gap: 14px;
+  padding: 0;
+}
+[data-theme='default'] .room-logo {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d3ae6d99;
+  border-radius: 11px;
+  box-shadow: 0 0 22px #d9b97b18;
+  animation: none;
+}
+[data-theme='default'] .room-branding-title {
+  color: #efcda0;
+  background: none;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 22px #dec98b22;
+}
+[data-theme='default'] .app-footer {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  justify-content: center;
+  padding: 12px;
+  opacity: 0.4;
+}
+@media (min-width: 1600px) {
+  [data-theme='default'] .main-layout {
+    padding-top: 36px;
+    gap: 28px;
+  }
+}
+@media (max-width: 768px) {
+  [data-theme='default'] .main-layout {
+    padding: 18px 14px 16px;
+    gap: 18px;
+  }
+  [data-theme='default'] .room-branding-title {
+    font-size: 28px;
+  }
+  [data-theme='default']::before {
+    background-image: url('/garden/garden-mobile.webp');
+    background-position: center top;
+    opacity: 0.85;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='default'] *,
+  [data-theme='default']::before {
+    animation: none;
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,88 @@
+:host {
+  display: block;
+  margin-top: 1rem;
+}
+.conversation {
+  border-top: 1px solid #cbd5e133;
+  padding-top: 1rem;
+}
+h3 {
+  margin: 1rem 0;
+}
+article {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #94a3b84d;
+  border-radius: 0.6rem;
+}
+article.admin {
+  border-left: 3px solid #818cf8;
+}
+.body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.meta {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+form {
+  margin-top: 1rem;
+}
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #94a3b880;
+  border-radius: 0.4rem;
+  font: inherit;
+}
+button {
+  padding: 0.5rem 0.8rem;
+  color: inherit;
+  background: #6366f11a;
+  border: 1px solid #818cf880;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.replies-toggle {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.reply-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.35rem;
+  box-sizing: border-box;
+  border: 1px solid #ffffff30;
+  border-radius: 999px;
+  background: #ffffff1f;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.review-status.pending {
+  color: #f2e2b6;
+}
+.review-status.rejected {
+  color: #f6d4cd;
+  overflow-wrap: anywhere;
+}

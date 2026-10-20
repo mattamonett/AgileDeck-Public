@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+h2 {
+  margin: 0 0 0.5rem;
+}
+h3 {
+  margin: 2rem 0 0.5rem;
+}
+.meta {
+  color: #b8cac2;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+tbody th {
+  color: inherit;
+  font-size: inherit;
+  white-space: normal;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+.throwables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+.throwables li {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #42635d;
+  border-radius: 0.7rem;
+  background: #132a2c;
+}
+.character {
+  font-size: 1.3rem;
+}
+.notice {
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  background: #6b2929;
+}
+@media (max-width: 850px) {
+  .section-heading {
+    flex-direction: column;
+  }
+}

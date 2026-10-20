@@ -1,0 +1,42 @@
+{
+  "name": "@poker/web",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --host localhost --port 4300 --hmr=false --live-reload=false --prebundle=false",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
+    "lint": "ng lint",
+    "test": "node ../scripts/web-test.mts",
+    "test:all": "ng test --watch=false"
+  },
+  "dependencies": {
+    "@angular/common": "^21.2.25",
+    "@angular/compiler": "^21.2.25",
+    "@angular/core": "^21.2.25",
+    "@angular/forms": "^21.2.25",
+    "@angular/platform-browser": "^21.2.25",
+    "@angular/router": "^21.2.25",
+    "@angular/service-worker": "^21.2.25",
+    "@ngrx/signals": "^21.1.0",
+    "@poker/shared": "*",
+    "qrcode": "^1.5.4",
+    "rxjs": "^7.8.2",
+    "socket.io-client": "^4.8.1",
+    "three": "^0.185.1",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.24",
+    "@angular/cli": "^21.2.24",
+    "@angular/compiler-cli": "^21.2.25",
+    "@types/qrcode": "^1.5.6",
+    "@types/three": "^0.185.4",
+    "angular-eslint": "^21.4.0",
+    "jsdom": "^27.1.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

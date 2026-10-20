@@ -1,0 +1,110 @@
+<section aria-labelledby="usage-heading">
+  <div class="section-heading">
+    <div>
+      <h2 id="usage-heading">Usage</h2>
+      <p class="meta">App-wide counts only. Nothing here identifies a room or a person.</p>
+    </div>
+    <button type="button" [disabled]="loading()" (click)="load()">
+      {{ loading() ? 'Loading…' : 'Refresh usage' }}
+    </button>
+  </div>
+  @if (error()) {
+    <p class="notice" role="alert">{{ error() }}</p>
+  }
+  @if (turnedOff()) {
+    <p class="notice" role="status">
+      Usage stats are turned off for this site, so no app-wide counts are recorded. Set
+      <code>features.usageStats</code> to <code>true</code> in <code>config/site.json</code> and
+      restart the API to turn them on.
+    </p>
+  }
+  @if (summary(); as summary) {
+    <h3>Room settings</h3>
+    <p class="meta">
+      {{ summary.rooms.active }} of {{ summary.rooms.total }} rooms were active in the last
+      {{ summary.activeDays }} days. Settings show each room's current value.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <caption class="sr-only">
+          Rooms using each setting
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Active rooms</th>
+            <th scope="col">All rooms</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of summary.settings; track row.setting) {
+            <tr>
+              <th scope="row">{{ settingLabels[row.setting] }}</th>
+              <td>{{ row.active }} ({{ percent(row.active, summary.rooms.active) }})</td>
+              <td>{{ row.total }} ({{ percent(row.total, summary.rooms.total) }})</td>
+            </tr>
+          }
+          @for (row of summary.themes; track row.theme) {
+            <tr>
+              <th scope="row">Theme: {{ themeName(row.theme) }}</th>
+              <td>{{ row.active }} ({{ percent(row.active, summary.rooms.active) }})</td>
+              <td>{{ row.total }} ({{ percent(row.total, summary.rooms.total) }})</td>
+            </tr>
+          }
+          @for (row of summary.moods; track row.mood) {
+            <tr>
+              <th scope="row" class="capitalize">Mood: {{ row.mood }}</th>
+              <td>{{ row.active }} ({{ percent(row.active, summary.rooms.active) }})</td>
+              <td>{{ row.total }} ({{ percent(row.total, summary.rooms.total) }})</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Feature use</h3>
+    <p class="meta">
+      @if (summary.trackingSince) {
+        Counted since {{ summary.trackingSince }} (UTC days).
+      } @else {
+        Nothing counted yet. Counting starts with the first action after this update.
+      }
+    </p>
+    <div class="table-scroll">
+      <table>
+        <caption class="sr-only">
+          Feature use over the last 7 and 30 days, most used first
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Action</th>
+            <th scope="col">Last 7 days</th>
+            <th scope="col">Last 30 days</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of events(); track row.metric) {
+            <tr>
+              <th scope="row">{{ metricLabels[row.metric] }}</th>
+              <td>{{ row.last7Days }}</td>
+              <td>{{ row.last30Days }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Top throwables, last 30 days</h3>
+    @if (summary.throwables.length) {
+      <ol class="throwables">
+        @for (row of summary.throwables; track row.character) {
+          <li>
+            <span class="character">{{ row.character }}</span> {{ row.last30Days }}
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="empty">No throws counted yet.</p>
+    }
+  }
+</section>

@@ -1,0 +1,103 @@
+<div
+  class="user-card"
+  [attr.data-player-id]="user().id"
+  [class.revealed]="revealState() && !user().isObserver"
+  [class.is-observer]="user().isObserver"
+  [class.is-current]="isCurrent()"
+  [class.has-voted]="user().hasVoted && !user().isObserver"
+  [class.is-overheated]="overheatSeconds() > 0"
+  [class.throwing-blocked]="throwingBlocked()"
+  [class.not-throwable]="!throwable()"
+  [class.is-nudged]="nudged()"
+>
+  @if (overheatSeconds() > 0) {
+    <div class="overheat-steam" aria-hidden="true"><i></i><i></i><i></i></div>
+  }
+  <div
+    class="card-display"
+    [attr.aria-disabled]="throwingBlocked() ? 'true' : null"
+    [attr.role]="isTarget() ? 'button' : null"
+    [attr.tabindex]="isTarget() ? 0 : null"
+    (keydown.enter)="handleKeyboardThrow($event)"
+    (keydown.space)="handleKeyboardThrow($event)"
+    [class.revealed]="revealState() && !user().isObserver"
+    [attr.aria-label]="
+      isTarget()
+        ? 'Throw at ' + user().name + (user().isObserver ? ' (observer)' : '')
+        : user().name +
+          (user().isObserver ? ' is observing' : user().hasVoted ? ' has voted' : ' is choosing')
+    "
+  >
+    @if (barrageProgress() > 0) {
+      <div class="card-charge" aria-hidden="true">
+        <div [style.width.%]="barrageProgress()"></div>
+      </div>
+    }
+    @if (user().isObserver) {
+      <span class="observer-icon" aria-hidden="true">👀</span>
+      <span class="observer-status">Observer</span>
+    } @else if (garden()) {
+      <div class="garden-card-back">
+        @if (!revealState() && user().hasVoted) {
+          <span class="vote-check" aria-hidden="true">✓</span>
+          <span class="vote-status">Voted</span>
+        }
+      </div>
+      <div class="garden-card-front">
+        <span>{{ revealState() ? user().vote || '—' : '' }}</span
+        ><i aria-hidden="true">❧</i>
+      </div>
+    } @else {
+      @if (revealState()) {
+        <span>{{ user().vote || '-' }}</span>
+      }
+      @if (!revealState() && user().hasVoted) {
+        <span class="vote-check" aria-hidden="true">✓</span>
+        <span class="vote-status">Voted</span>
+      }
+    }
+  </div>
+  @if (user().hasVoted && !user().isObserver) {
+    <div class="vote-chip" [class.revealed]="revealState()" aria-hidden="true">
+      <span>{{ revealState() ? user().vote || '—' : 'BET' }}</span>
+    </div>
+  }
+  @if (nudgeable()) {
+    <button
+      type="button"
+      class="nudge-btn"
+      [class.cooling]="nudgeCooldownSeconds() > 0"
+      [attr.aria-disabled]="nudgeCooldownSeconds() > 0 ? 'true' : null"
+      [attr.aria-label]="nudgeLabel()"
+      [title]="nudgeLabel()"
+      (click)="requestNudge()"
+    >
+      @if (nudgeCooldownSeconds() > 0) {
+        <span class="nudge-countdown">{{ nudgeCooldownSeconds() }}</span>
+      } @else {
+        📢
+      }
+    </button>
+  }
+  <span class="user-name">
+    {{ user().name }}
+    @if (isCurrent()) {
+      <span class="me-label">(You)</span>
+    }
+  </span>
+  @if (overheatSeconds() > 0) {
+    <div class="overheat-badge" title="Throwing too fast. Throws pause while cooling down.">
+      <span>♨ Overheated · {{ overheatSeconds() }}s</span>
+      <div
+        class="overheat-meter"
+        role="progressbar"
+        aria-label="Throw cooldown remaining"
+        [attr.aria-valuenow]="overheatSeconds()"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="heatDurationSeconds()"
+      >
+        <div [style.width.%]="heatPercent()"></div>
+      </div>
+    </div>
+  }
+</div>

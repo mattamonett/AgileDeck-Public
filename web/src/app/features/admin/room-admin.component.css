@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+h2 {
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+.meta {
+  color: #b8cac2;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+.secondary {
+  background: transparent;
+  color: #f2e2b6;
+}
+tbody tr.selected {
+  background: #234a42;
+}
+tbody tr:has(.room-name) {
+  cursor: pointer;
+}
+tbody tr:has(.room-name):hover {
+  background: #1d3d38;
+}
+.room-name {
+  display: block;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: #f2e2b6;
+  padding: 0;
+  min-width: 180px;
+}
+.room-id {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+}
+.details {
+  margin: 0;
+  padding: 1.5rem;
+  background: #132a2c;
+  border: 1px solid #739088;
+  border-radius: 1rem;
+}
+.notice {
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  background: #6b2929;
+}
+.load-more {
+  margin-top: 1rem;
+}
+@media (max-width: 850px) {
+  .section-heading {
+    flex-direction: column;
+  }
+  .details {
+    padding: 1rem;
+  }
+}
+
+dialog {
+  width: min(34rem, calc(100vw - 4rem));
+  border: 1px solid #ccd2dc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: #172033;
+}
+dialog::backdrop {
+  background: rgb(15 23 42 / 55%);
+}
+dialog .actions {
+  justify-content: flex-end;
+}

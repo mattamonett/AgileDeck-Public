@@ -1,0 +1,244 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+  line-height: 1;
+}
+.digits {
+  font-variant-numeric: tabular-nums;
+}
+.dial {
+  position: relative;
+  display: none;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.hand {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.35s cubic-bezier(0.4, 2.2, 0.6, 1);
+}
+
+/* Moonlit Garden: a brass pocket watch with a ticking hand. */
+:host([data-look='default']) .dial {
+  display: block;
+  border: 1.5px solid #c3a66d;
+  background: radial-gradient(circle at 40% 35%, #2c4a3c, #10241c 70%);
+  box-shadow:
+    0 0 0 2px #10241c,
+    0 0 10px #f3d38a44;
+}
+:host([data-look='default']) .dial::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #f3dfa6;
+  transform: translateX(-50%);
+}
+:host([data-look='default']) .dial::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c3a66d;
+  transform: translate(-50%, -50%);
+}
+:host([data-look='default']) .hand::before {
+  content: '';
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  width: 1.5px;
+  height: 7px;
+  border-radius: 1px;
+  background: #f3dfa6;
+  transform: translateX(-50%);
+}
+:host([data-look='default']) .label {
+  font-style: italic;
+}
+:host([data-look='default']) .digits {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #f0dca4;
+  text-shadow: 0 0 8px #f3d38a55;
+}
+:host([data-look='default'].stopped) .dial {
+  box-shadow: 0 0 0 2px #10241c;
+  filter: saturate(0.6);
+}
+
+/* Deep Space: a mission clock with a satellite orbiting once a minute. */
+:host([data-look='space']) .dial {
+  display: block;
+  border: 1px dashed rgba(0, 240, 255, 0.35);
+}
+:host([data-look='space']) .dial::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c084fc, #5b21b6 75%);
+  box-shadow: 0 0 6px #bc13fe88;
+  transform: translate(-50%, -50%);
+}
+:host([data-look='space']) .hand {
+  transition-timing-function: ease-out;
+}
+:host([data-look='space']) .hand::before {
+  content: '';
+  position: absolute;
+  top: -2.5px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #00f0ff;
+  box-shadow: 0 0 6px #00f0ff;
+  transform: translateX(-50%);
+}
+:host([data-look='space']) .label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d8a6ff;
+}
+:host([data-look='space']) .digits {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7df9ff;
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.65);
+}
+:host([data-look='space'].stopped) .hand::before {
+  background: #d8a6ff;
+  box-shadow: 0 0 6px #bc13fe;
+}
+
+/* Retro CRT: a terminal readout with a blinking block cursor. */
+:host([data-look='retro']) {
+  gap: 0;
+  padding: 6px 10px;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  border-radius: 3px;
+  background: rgba(0, 24, 8, 0.75);
+  box-shadow: inset 0 0 12px rgba(34, 197, 94, 0.15);
+  font-family: 'Courier New', monospace;
+  color: #4ade80;
+  text-shadow: 0 0 5px #22c55e;
+}
+:host([data-look='retro']) .label {
+  margin-right: 0.6ch;
+  opacity: 0.75;
+}
+:host([data-look='retro']) .digits {
+  font-size: 14px;
+  font-weight: 700;
+}
+:host([data-look='retro']) .digits::after {
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: 3px;
+  vertical-align: -0.15em;
+  background: #4ade80;
+  box-shadow: 0 0 6px #22c55e;
+  animation: cursor-blink 1s steps(1) infinite;
+}
+:host([data-look='retro'].stopped) .digits::after {
+  animation: none;
+  opacity: 0.35;
+}
+
+/* Las Vegas: a gold marquee with chasing bulbs and neon digits. */
+:host([data-look='vegas']) {
+  position: relative;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 2px solid #e4bd58;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2a0f24, #12060f);
+  box-shadow:
+    inset 0 0 10px rgba(255, 0, 196, 0.25),
+    0 0 14px rgba(255, 215, 0, 0.25);
+}
+:host([data-look='vegas'])::before {
+  content: '';
+  position: absolute;
+  inset: 1px 10px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, #fff3b0 0 1.3px, transparent 1.8px) 0 0 / 10px 3px repeat-x,
+    radial-gradient(circle, #fff3b0 0 1.3px, transparent 1.8px) 5px 100% / 10px 3px repeat-x;
+  filter: drop-shadow(0 0 2px #ffd700);
+  pointer-events: none;
+  animation: bulb-chase 0.6s steps(2) infinite;
+}
+:host([data-look='vegas']) .label {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffd76a;
+}
+:host([data-look='vegas']) .digits {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ff5cb8;
+  text-shadow:
+    0 0 4px #ff2d95,
+    0 0 12px rgba(255, 45, 149, 0.6);
+}
+:host([data-look='vegas'].stopped)::before {
+  animation: none;
+}
+:host([data-look='vegas'].stopped) .digits {
+  color: #ffe08a;
+  text-shadow:
+    0 0 4px #ffb800,
+    0 0 12px rgba(255, 184, 0, 0.6);
+}
+
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes bulb-chase {
+  to {
+    background-position:
+      10px 0,
+      15px 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hand {
+    transition: none;
+  }
+  :host([data-look='retro']) .digits::after,
+  :host([data-look='vegas'])::before {
+    animation: none;
+  }
+}

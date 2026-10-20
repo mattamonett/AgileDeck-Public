@@ -1,0 +1,223 @@
+/* Las Vegas theme: casino rail lights and the dealer puck. */
+.casino-rail-lights {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.casino-rail-track,
+.casino-rail-bulbs,
+.casino-rail-chase {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.casino-rail-track {
+  stroke: rgba(70, 39, 3, 0.86);
+  stroke-width: 13;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
+}
+
+.casino-rail-bulbs {
+  stroke: #ffd86a;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 0.12 2.08;
+  filter: drop-shadow(0 0 2px #fff6c4) drop-shadow(0 0 5px rgba(255, 184, 0, 0.9));
+  animation: casino-bulb-twinkle 2.4s steps(2, end) infinite;
+}
+
+.casino-rail-chase {
+  stroke: #fffbd7;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 8 92;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #ffd700)
+    drop-shadow(0 0 16px rgba(255, 0, 196, 0.75));
+}
+
+.table.revelation-ceremony .casino-rail-chase,
+.table.revealed .casino-rail-chase {
+  opacity: 1;
+  animation: casino-rail-chase 2.3s linear forwards;
+}
+
+.table.revelation-ceremony .casino-rail-bulbs,
+.table.revealed .casino-rail-bulbs {
+  animation-name: casino-bulb-reveal, casino-bulb-twinkle;
+  animation-duration: 0.38s, 2.4s;
+  animation-timing-function: steps(2, end), steps(2, end);
+  animation-delay: 0s, 2.28s;
+  animation-iteration-count: 6, infinite;
+}
+
+@keyframes casino-bulb-twinkle {
+  0%,
+  48%,
+  100% {
+    opacity: 0.78;
+  }
+  50%,
+  98% {
+    opacity: 1;
+  }
+}
+
+@keyframes casino-bulb-reveal {
+  0%,
+  100% {
+    stroke: #ffd86a;
+    opacity: 0.78;
+  }
+  50% {
+    stroke: #fffbd7;
+    opacity: 1;
+  }
+}
+
+@keyframes casino-rail-chase {
+  0% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: -200;
+  }
+}
+
+@media (max-width: 768px) {
+  .casino-rail-lights {
+    inset: 5px;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
+    border: 4px dotted rgba(255, 216, 106, 0.92);
+    border-radius: 22px;
+    box-shadow:
+      0 0 6px rgba(255, 246, 196, 0.85),
+      0 0 14px rgba(255, 184, 0, 0.5);
+  }
+
+  .casino-rail-lights rect {
+    display: none;
+  }
+
+  .table.revelation-ceremony .casino-rail-lights,
+  .table.revealed .casino-rail-lights {
+    animation: casino-mobile-rail-reveal 0.38s steps(2, end) 6;
+  }
+
+  @keyframes casino-mobile-rail-reveal {
+    50% {
+      border-color: #fffbd7;
+      box-shadow:
+        0 0 8px #fff,
+        0 0 18px rgba(255, 215, 0, 0.9),
+        0 0 28px rgba(255, 0, 196, 0.45);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .casino-rail-bulbs,
+  .casino-rail-chase,
+  .table.revelation-ceremony .casino-rail-bulbs,
+  .table.revelation-ceremony .casino-rail-chase,
+  .table.revealed .casino-rail-bulbs,
+  .table.revealed .casino-rail-chase,
+  .table.revelation-ceremony .casino-rail-lights,
+  .table.revealed .casino-rail-lights {
+    animation: none;
+  }
+
+  .casino-rail-chase {
+    opacity: 0;
+  }
+}
+
+:host-context([data-theme='vegas']) .dealer-puck {
+  width: 112px;
+  aspect-ratio: 1;
+  display: grid;
+  place-content: center;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  border: 3px solid #e4bd58;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.92), transparent 25%),
+    linear-gradient(145deg, #fff8df, #ddd0aa 82%);
+  color: #2c1a08;
+  box-shadow:
+    inset 0 0 0 3px #fff8dc,
+    inset 0 0 0 5px rgba(91, 54, 8, 0.34),
+    0 7px 0 #806018,
+    0 14px 24px rgba(0, 0, 0, 0.44),
+    0 0 22px rgba(255, 215, 0, 0.22);
+  transform: rotate(-2deg);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+:host-context([data-theme='vegas']) .dealer-puck.has-bets {
+  border-color: #ffcf37;
+  box-shadow:
+    inset 0 0 0 3px #fff8dc,
+    inset 0 0 0 5px rgba(91, 54, 8, 0.34),
+    0 7px 0 #806018,
+    0 14px 24px rgba(0, 0, 0, 0.44),
+    0 0 30px rgba(255, 215, 0, 0.7),
+    0 0 44px rgba(255, 0, 196, 0.25);
+  transform: rotate(2deg) scale(1.04);
+}
+
+:host-context([data-theme='vegas']) .dealer-puck-mark {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 1;
+}
+
+:host-context([data-theme='vegas']) .dealer-puck-status {
+  max-width: 82px;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  :host-context([data-theme='vegas']) .dealer-puck {
+    width: 88px;
+    gap: 0.18rem;
+    border-width: 2px;
+    box-shadow:
+      inset 0 0 0 2px #fff8dc,
+      inset 0 0 0 4px rgba(91, 54, 8, 0.34),
+      0 5px 0 #806018,
+      0 10px 18px rgba(0, 0, 0, 0.4),
+      0 0 16px rgba(255, 215, 0, 0.2);
+  }
+
+  :host-context([data-theme='vegas']) .dealer-puck-mark {
+    font-size: 1.05rem;
+  }
+
+  :host-context([data-theme='vegas']) .dealer-puck-status {
+    max-width: 70px;
+    font-size: 0.5rem;
+  }
+}

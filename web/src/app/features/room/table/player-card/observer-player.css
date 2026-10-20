@@ -1,0 +1,59 @@
+.user-card.is-observer,
+:host-context([data-theme='default']) .user-card.is-observer {
+  min-width: 76px;
+  max-width: 104px;
+  padding: 4px;
+  gap: 8px;
+}
+
+.user-card.is-observer .card-display,
+:host-context([data-theme='default']) .user-card.is-observer .card-display {
+  width: 64px;
+  height: 64px;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px dashed rgba(205, 173, 117, 0.65);
+  border-radius: 12px;
+  background: rgba(12, 24, 30, 0.65);
+  box-shadow: 0 4px 10px #0003;
+  overflow: hidden;
+}
+
+.user-card.is-observer .card-display::before {
+  display: none;
+}
+
+.observer-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.observer-status {
+  color: #e4d5b8;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.user-card.is-observer .user-name,
+:host-context([data-theme='default']) .user-card.is-observer .user-name {
+  max-width: 96px;
+  font-size: 12px;
+  text-align: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow-wrap: anywhere;
+}
+
+.user-card.is-observer.revealed,
+.user-card.is-observer:has(.card-display:not([role='button'])) {
+  cursor: default;
+}
+
+@media (max-width: 768px) {
+  .user-card.is-observer .card-display,
+  :host-context([data-theme='default']) .user-card.is-observer .card-display {
+    width: 56px;
+    height: 56px;
+  }
+}

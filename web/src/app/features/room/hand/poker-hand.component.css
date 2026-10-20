@@ -1,0 +1,309 @@
+.hand-area {
+  --playing-card-face: #f4eddf;
+  --playing-card-ink: #211842;
+  padding: 0 var(--spacing-6) var(--spacing-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-5, 1.25rem);
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-modal);
+  width: 100%;
+  margin-top: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(34, minmax(0, 1fr));
+  row-gap: 1.6rem;
+  justify-content: center;
+  max-width: 1240px;
+  width: 100%;
+  padding: 0.65rem 0.25rem 0;
+  perspective: 1200px;
+}
+
+.poker-card {
+  --fan-y: 0px;
+  --fan-rotation: 0deg;
+  grid-column: span 2;
+  width: min(100%, 64px);
+  height: auto;
+  aspect-ratio: 64 / 94;
+  justify-self: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.2vw, 2.15rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease,
+    color 220ms ease;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.72), transparent 36%),
+    url('/paper-texture.svg') 0 0 / 128px 128px repeat,
+    var(--playing-card-face);
+  border: 1px solid rgba(88, 66, 55, 0.34);
+  color: var(--playing-card-ink);
+  border-radius: 8px;
+  position: relative;
+  padding: 0;
+  isolation: isolate;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 -2px 0 rgba(70, 48, 38, 0.12) inset,
+    0 5px 0 #cfc4b3,
+    0 9px 16px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  will-change: transform;
+  transform: translateY(var(--fan-y)) rotate(var(--fan-rotation));
+}
+
+.poker-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.card-value {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+}
+
+.card-corner {
+  position: absolute;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: 0.48rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.card-corner-top {
+  top: 8px;
+  left: 8px;
+}
+
+.card-corner-bottom {
+  right: 8px;
+  bottom: 8px;
+  transform: rotate(180deg);
+}
+
+.poker-card:hover:not(:disabled) {
+  transform: translateY(calc(var(--fan-y) - 11px)) rotate(var(--fan-rotation));
+  border-color: rgba(var(--color-primary-rgb), 0.75);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 -2px 0 rgba(70, 48, 38, 0.12) inset,
+    0 5px 0 #cfc4b3,
+    0 15px 24px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(var(--color-primary-rgb), 0.22);
+}
+
+.poker-card:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 4px;
+}
+
+.poker-card.selected {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 38%),
+    url('/paper-texture.svg') 0 0 / 128px 128px repeat,
+    linear-gradient(155deg, var(--color-primary), #4c1d95 78%);
+  border-color: rgba(255, 255, 255, 0.72);
+  color: white;
+  transform: translateY(calc(var(--fan-y) - 16px)) rotate(calc(var(--fan-rotation) + 2deg))
+    scale(1.05);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.28) inset,
+    0 5px 0 #32136d,
+    0 18px 30px rgba(0, 0, 0, 0.48),
+    0 0 26px rgba(var(--color-primary-rgb), 0.58);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.poker-card.selected::before {
+  border-color: rgba(255, 255, 255, 0.54);
+}
+
+.poker-card.is-fibonacci::after {
+  content: 'F';
+  position: absolute;
+  top: -7px;
+  right: -7px;
+}
+
+.poker-card.is-fibonacci::after,
+.fib-key b {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: normal;
+  line-height: 1;
+  flex-shrink: 0;
+  color: white;
+  background: var(--color-primary);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 2px solid #11172a;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.48);
+  opacity: 1;
+  z-index: 2;
+}
+
+.poker-card.selected.is-fibonacci::after {
+  background: white;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.poker-card:nth-child(n + 18) {
+  grid-row: 2;
+}
+
+.poker-card:nth-child(18) {
+  grid-column: 12 / span 2;
+}
+
+.poker-card:nth-child(19) {
+  grid-column: 14 / span 2;
+}
+
+.poker-card:nth-child(20) {
+  grid-column: 16 / span 2;
+}
+
+.poker-card:nth-child(21) {
+  grid-column: 18 / span 2;
+}
+
+.poker-card:nth-child(22) {
+  grid-column: 20 / span 2;
+}
+
+.poker-card:nth-child(23) {
+  grid-column: 22 / span 2;
+}
+
+.observer-mode-banner {
+  padding: var(--spacing-6);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  width: 100%;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+  padding: 0;
+  margin-left: var(--spacing-2);
+}
+
+@media (max-width: 768px) {
+  .hand-area {
+    display: grid !important;
+    grid-template-areas:
+      'cards'
+      'projectiles';
+    gap: var(--spacing-4);
+    padding: var(--spacing-4) var(--spacing-2) var(--spacing-6);
+    width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    justify-items: center;
+    flex-direction: unset;
+    position: relative;
+    bottom: auto;
+    margin-top: 0;
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    grid-area: cards;
+    gap: 0.45rem 0.35rem;
+    max-width: 390px;
+    padding-top: 0.25rem;
+  }
+
+  .poker-card {
+    width: clamp(42px, 12vw, 48px);
+    height: clamp(62px, 17vw, 70px);
+    font-size: 1.35rem;
+    border-radius: 7px;
+    transform: none;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.7) inset,
+      0 3px 0 #cfc4b3,
+      0 6px 11px rgba(0, 0, 0, 0.28);
+  }
+
+  .poker-card:hover:not(:disabled) {
+    transform: translateY(-5px);
+  }
+
+  .poker-card.selected {
+    transform: translateY(-7px) rotate(1deg) scale(1.04);
+  }
+
+  .poker-card::before {
+    inset: 3px;
+  }
+
+  .card-corner {
+    font-size: 0.4rem;
+  }
+
+  .card-corner-top {
+    top: 6px;
+    left: 6px;
+  }
+
+  .card-corner-bottom {
+    right: 6px;
+    bottom: 6px;
+  }
+
+  .poker-card.is-fibonacci::after,
+  .fib-key b {
+    width: 16px;
+    height: 16px;
+    top: -5px;
+    right: -5px;
+    font-size: 9px;
+    border-width: 1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poker-card {
+    transition-duration: 0.01ms;
+  }
+}

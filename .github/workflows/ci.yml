@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # GitHub's machines run the checks, so this machine need not be on.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history, so the web tests can pick the character specs a change affects.
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          # Matches the Node version of the Docker build stages.
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+        env:
+          # Compare a PR with its base branch and a push with the commit before it.
+          TEST_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+
+  docker:
+    # Builds both images so Dockerfile, .dockerignore and nginx changes are tested.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose build
+        env:
+          COOKIE_SIGNING_SECRET: ci-only-secret-not-used-at-runtime-0123456789

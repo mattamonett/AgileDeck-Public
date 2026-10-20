@@ -1,0 +1,81 @@
+<section aria-labelledby="pending-heading">
+  <div class="section-heading">
+    <div>
+      <h2 id="pending-heading">Pending review</h2>
+      <p class="meta">
+        New feedback and author replies stay private until you approve them. Rejected submissions
+        stay private; the optional reason is shown only to their author.
+      </p>
+    </div>
+    <button type="button" [disabled]="loading() || busyId() !== null" (click)="load()">
+      {{ loading() ? 'Loading…' : 'Refresh queue' }}
+    </button>
+  </div>
+  @if (error()) {
+    <p class="notice error" role="alert">{{ error() }}</p>
+  }
+  @if (success()) {
+    <p class="notice success" role="status">{{ success() }}</p>
+  }
+  @if (review(); as review) {
+    <h3>Feedback ({{ review.feedbackCount }})</h3>
+    @if (review.feedbackCount > review.feedback.length) {
+      <p class="meta">Showing the oldest {{ review.feedback.length }}.</p>
+    }
+    @if (review.feedback.length === 0) {
+      <p class="empty">No feedback is waiting for review.</p>
+    }
+    <div class="queue">
+      @for (item of review.feedback; track item.id) {
+        <article class="pending-card" [attr.aria-label]="'Pending feedback: ' + item.title">
+          <p class="meta">
+            {{ categoryLabels[item.category] }} · {{ item.createdAt.slice(0, 10) }} ·
+            <span class="badge pending">{{ statusLabels[item.status] }}</span>
+          </p>
+          <h4>{{ item.title }}</h4>
+          <p class="body">{{ item.body }}</p>
+          <app-review-decision
+            [disabled]="busyId() !== null"
+            [saving]="busyId() === item.id"
+            (approve)="approve('feedback', item.id)"
+            (reject)="reject('feedback', item.id, $event)"
+          />
+        </article>
+      }
+    </div>
+
+    <h3>Replies ({{ review.replyCount }})</h3>
+    @if (review.replyCount > review.replies.length) {
+      <p class="meta">Showing the oldest {{ review.replies.length }}.</p>
+    }
+    @if (review.replies.length === 0) {
+      <p class="empty">No replies are waiting for review.</p>
+    }
+    <div class="queue">
+      @for (entry of review.replies; track entry.reply.id) {
+        <article
+          class="pending-card"
+          [attr.aria-label]="'Pending reply on ' + entry.feedback.title"
+        >
+          <p class="meta">
+            Reply from the feedback author · {{ entry.reply.createdAt.slice(0, 10) }} ·
+            <span class="badge pending">{{ statusLabels[entry.reply.status] }}</span>
+          </p>
+          <p class="meta">
+            On {{ categoryLabels[entry.feedback.category] }}:
+            <strong>{{ entry.feedback.title }}</strong> ({{ statusLabels[entry.feedback.status] }})
+          </p>
+          <p class="body">{{ entry.reply.body }}</p>
+          <app-review-decision
+            [disabled]="busyId() !== null"
+            [saving]="busyId() === entry.reply.id"
+            (approve)="approve('replies', entry.reply.id)"
+            (reject)="reject('replies', entry.reply.id, $event)"
+          />
+        </article>
+      }
+    </div>
+  } @else if (!error()) {
+    <p class="empty">Loading the review queue…</p>
+  }
+</section>

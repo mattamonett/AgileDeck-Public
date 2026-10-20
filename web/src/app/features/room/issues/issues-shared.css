@@ -1,0 +1,207 @@
+/* Rules shared by the issues panel, its cards and the import/export dialog. */
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.issues-panel {
+  color: var(--color-text);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 14px 40px #0003;
+  backdrop-filter: blur(18px);
+  overflow: hidden;
+}
+
+.panel-header,
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-header {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 22px 20px 16px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 500;
+  margin: 5px 0 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  color: var(--color-text);
+  background: #ffffff08;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+button:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--primary);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.primary {
+  background: var(--primary);
+  color: #101b21;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.primary:hover {
+  background: var(--primary);
+  filter: brightness(1.1);
+}
+
+h3 {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 10px 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.editor {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  background: #0002;
+}
+
+.editor h3 {
+  margin: 0 0 4px;
+}
+
+label {
+  font-size: 12px;
+}
+
+.optional {
+  color: var(--color-text-muted);
+}
+
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: var(--bg-color);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.form-actions {
+  justify-content: flex-end;
+}
+
+.error {
+  color: #ffaaa1;
+  font-size: 12px;
+  margin: 0;
+}
+
+.error:empty {
+  display: none;
+}
+
+.delete-confirm {
+  padding: 10px;
+  margin-top: 10px;
+  background: #c5545414;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.delete-confirm p {
+  margin: 0 0 8px;
+}
+
+.delete-confirm button + button {
+  margin-left: 8px;
+}
+
+.danger {
+  background: #9c3535;
+  color: white;
+}
+
+.empty {
+  text-align: center;
+  padding: 24px 10px;
+}
+
+.empty p {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+:host-context([data-theme='space']) .issues-panel {
+  --glass-bg: #09051fed;
+  --glass-border: #00f0ff35;
+}
+
+:host-context([data-theme='retro']) .issues-panel {
+  --glass-bg: #001007ed;
+  --glass-border: #22c55e55;
+  --color-text: #a2f6be;
+  --color-text-muted: #80b991;
+  border-radius: 4px;
+  text-shadow: none;
+}
+
+:host-context([data-theme='retro']) h2 {
+  font-family: inherit;
+}
+
+:host-context([data-theme='vegas']) .issues-panel {
+  --glass-bg: #050b18ed;
+  --glass-border: #ffd70040;
+}
+
+.issue-controls {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

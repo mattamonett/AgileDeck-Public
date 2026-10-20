@@ -1,0 +1,10 @@
+<div class="reveal-burst" aria-hidden="true">
+  @for (angle of sparkAngles; track $index) {
+    <span class="reveal-spark" [style.--spark-angle]="angle + 'deg'"></span>
+  }
+</div>
+@if (vegas()) {
+  <div class="vegas-reveal-banner" aria-hidden="true">
+    <span>The cards are in</span>
+  </div>
+}

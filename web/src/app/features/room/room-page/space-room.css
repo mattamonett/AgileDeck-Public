@@ -1,0 +1,54 @@
+[data-theme='space'] {
+  --bg-color: #030014;
+  --primary: #00f0ff;
+  --primary-rgb: 0, 240, 255;
+  --secondary: #bc13fe;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Drifting stars background */
+[data-theme='space']::before {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  width: 300%;
+  height: 300%;
+  background-image:
+    radial-gradient(white, rgba(255, 255, 255, 0.2) 1px, transparent 3px),
+    radial-gradient(white, rgba(255, 255, 255, 0.1) 1px, transparent 2px),
+    radial-gradient(#00f0ff, rgba(0, 240, 255, 0.3) 2px, transparent 4px);
+  background-size:
+    400px 400px,
+    200px 200px,
+    300px 300px;
+  animation: drift 100s linear infinite;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Second faster layer for depth */
+[data-theme='space']::after {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  width: 300%;
+  height: 300%;
+  background-image: radial-gradient(white, rgba(255, 255, 255, 0.4) 1px, transparent 2px);
+  background-size: 550px 550px;
+  animation: drift 60s linear infinite reverse;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes drift {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "name": "agile-deck",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "npm@10.9.4",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "workspaces": [
+    "api",
+    "web",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "node scripts/check-local-api-port.mts && npm run build && npm run db:migrate && concurrently --kill-others --names api,web \"npm run dev -w api\" \"npm run start -w web\"",
+    "start": "node scripts/check-local-api-port.mts && npm run build -w shared && npm run build -w api && npm run db:migrate && concurrently \"npm run start:api\" \"npm run start:web\"",
+    "start:api": "node scripts/start-local-api.mts",
+    "start:web": "npm run start -w web",
+    "build": "npm run build -w shared && npm run build -w api && npm run build -w web",
+    "db:migrate": "node scripts/check-local-api-port.mts && node scripts/db-migrate.mts",
+    "typecheck": "npm run typecheck -w shared -w api -w web && tsc -p scripts",
+    "lint": "npm run lint -w shared -w api -w web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build -w shared && npm run test -w shared && npm run test -w api && npm run test -w web",
+    "test:all": "npm run build -w shared && npm run test -w shared && npm run test -w api && npm run test:all -w web",
+    "check": "npm run build && npm run typecheck && npm run lint && npm run format:check && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "concurrently": "^9.2.4",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
+    "rxjs": "^7.8.2",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.53.1"
+  },
+  "overrides": {
+    "@angular-devkit/core": "21.2.24",
+    "@humanfs/node": "0.16.8",
+    "baseline-browser-mapping": "2.11.24",
+    "body-parser": "2.3.0",
+    "brace-expansion@^1.0.0": "1.1.18",
+    "brace-expansion@^2.0.0": "2.1.4",
+    "browserslist": "4.29.0",
+    "engine.io": "6.6.10",
+    "engine.io-client": "6.6.6",
+    "esbuild": "0.28.2",
+    "fast-uri": "3.1.6",
+    "immutable": "5.1.9",
+    "ip-address": "10.7.2",
+    "js-yaml@^3.0.0": "3.15.2",
+    "js-yaml@^4.0.0": "4.3.2",
+    "nanoid": "3.3.18",
+    "picomatch": "4.0.4",
+    "postcss": "8.5.28",
+    "qs": "6.16.0",
+    "rollup": "4.60.2",
+    "rxjs": "$rxjs",
+    "shell-quote": "1.10.0",
+    "socket.io-adapter": "2.5.8",
+    "socket.io-parser": "4.2.7",
+    "tar": "7.5.22",
+    "vite": "7.3.6",
+    "ws": "8.21.3"
+  }
+}

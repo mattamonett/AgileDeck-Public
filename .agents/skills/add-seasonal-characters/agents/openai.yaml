@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Add Seasonal Characters'
+  short_description: 'Propose five themed, limited-time throwable characters'
+  default_prompt: 'Use $add-seasonal-characters to propose five holiday-themed throwable characters and their availability window for review before adding any.'
+policy:
+  allow_implicit_invocation: true

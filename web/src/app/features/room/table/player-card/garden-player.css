@@ -1,0 +1,193 @@
+:host-context([data-theme='default']) .user-card {
+  min-width: 110px;
+  gap: 15px;
+  padding: 0;
+  perspective: 1000px;
+}
+:host-context([data-theme='default']) .card-display {
+  width: 105px;
+  height: 154px;
+  border: 1px solid #c9aa6c;
+  border-radius: 7px;
+  background: #07362e url('/garden/card-back.webp') center / cover;
+  box-shadow:
+    0 3px 0 #aa8a4e,
+    0 5px 0 #11261d,
+    0 12px 18px #0007;
+  transition:
+    transform 750ms cubic-bezier(0.22, 0.8, 0.2, 1),
+    box-shadow 350ms;
+}
+:host-context([data-theme='default']) .card-display::before {
+  content: '';
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  background: linear-gradient(115deg, transparent 15%, #fff2c01a 35%, transparent 52%);
+  box-shadow: none;
+  opacity: 0.65;
+  transition: opacity 0.4s;
+}
+:host-context([data-theme='default'])
+  .user-card:not(.is-current):hover
+  .card-display:not(.revealed) {
+  transform: translateY(-5px) rotateY(-7deg);
+  box-shadow:
+    0 3px 0 #aa8a4e,
+    0 18px 26px #0008,
+    0 0 20px #eec68822;
+}
+:host-context([data-theme='default']) .user-card.has-voted .card-display:not(.revealed) {
+  border-color: #f4d396;
+  box-shadow:
+    0 3px 0 #aa8a4e,
+    0 0 0 3px #d9bb6230,
+    0 0 30px #eacb6320,
+    0 14px 22px #0008;
+}
+:host-context([data-theme='default']) .card-display .vote-check {
+  position: absolute;
+  top: 10px;
+  right: 9px;
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+  color: #f4d79d;
+  background: #103b2eea;
+  box-shadow: 0 2px 6px #0008;
+}
+:host-context([data-theme='default']) .card-display .vote-status {
+  background: #092d24e8;
+  color: #edd5a3;
+  font-size: 8px;
+  bottom: 12px;
+}
+:host-context([data-theme='default']) .card-display.revealed {
+  background: linear-gradient(135deg, #fff9ec, #e8dcc2);
+  color: #173b30;
+  font-size: 48px;
+  box-shadow:
+    inset 0 0 0 4px #f5ead5,
+    inset 0 0 0 5px #b7985a77,
+    0 3px 0 #baaa8c,
+    0 12px 22px #0007;
+}
+:host-context([data-theme='default']) .user-name {
+  color: #f4e7ce;
+  font-size: 15px;
+  max-width: 150px;
+  text-align: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow-wrap: anywhere;
+}
+:host-context([data-theme='default']) .me-label {
+  color: #b8c4af;
+  font-size: 11px;
+}
+:host-context([data-theme='default']) .vote-chip {
+  display: none;
+}
+.card-display:focus-visible {
+  outline: 3px solid #e9bd7c;
+  outline-offset: 6px;
+}
+:host-context([data-theme='default']) .card-display {
+  overflow: visible;
+  background: transparent;
+}
+:host-context([data-theme='default']) .card-display.revealed {
+  background: transparent;
+}
+.garden-card-back,
+.garden-card-front {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.garden-card-back {
+  background: #07362e url('/garden/card-back.webp') center / cover;
+}
+.garden-card-front {
+  background: linear-gradient(135deg, #fff9ec, #e8dcc2);
+  box-shadow:
+    inset 0 0 0 4px #f5ead5,
+    inset 0 0 0 5px #b7985a77;
+  transform: rotateY(180deg);
+  display: grid;
+  place-items: center;
+  color: #173b30;
+}
+.garden-card-front i {
+  position: absolute;
+  bottom: 10px;
+  right: 11px;
+  color: #aa925e;
+  font-size: 24px;
+}
+:host-context([data-theme='default']) .card-display.revealed .garden-card-front span {
+  transform: none;
+}
+:host-context([data-theme='default']) .card-display::before {
+  z-index: 3;
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+.card-charge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background: #15291f;
+  z-index: 10;
+}
+.card-charge > div {
+  height: 100%;
+  background: linear-gradient(90deg, #c29854, #ffe9a9);
+  box-shadow: 0 0 18px #f3cb78;
+  transition: width 50ms linear;
+}
+@media (max-width: 768px) {
+  :host-context([data-theme='default']) .user-card {
+    min-width: 76px;
+    gap: 11px;
+  }
+  :host-context([data-theme='default']) .card-display {
+    width: 70px;
+    height: 103px;
+  }
+  :host-context([data-theme='default']) .user-name {
+    font-size: 12px;
+    max-width: 86px;
+  }
+  :host-context([data-theme='default']) .me-label {
+    font-size: 9px;
+  }
+  :host-context([data-theme='default']) .card-display.revealed {
+    font-size: 34px;
+  }
+  :host-context([data-theme='default']) .card-display .vote-status {
+    font-size: 6px;
+    bottom: 8px;
+  }
+  :host-context([data-theme='default']) .card-display .vote-check {
+    width: 17px;
+    height: 17px;
+    top: 7px;
+    right: 6px;
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-theme='default']) .card-display,
+  :host-context([data-theme='default']) .user-card {
+    transition: none;
+    animation: none;
+  }
+}

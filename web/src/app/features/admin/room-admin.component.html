@@ -1,0 +1,276 @@
+<section aria-labelledby="rooms-heading">
+  <div class="section-heading">
+    <div>
+      <h2 id="rooms-heading">Rooms</h2>
+      <p class="meta">Select a room to view current participants and remembered approvals.</p>
+    </div>
+    <button type="button" [disabled]="loading()" (click)="load()">
+      {{ loading() ? 'Loading…' : 'Refresh rooms' }}
+    </button>
+  </div>
+  @if (error()) {
+    <p class="notice" role="alert">{{ error() }}</p>
+  }
+  <div class="table-scroll" [attr.aria-busy]="loading()">
+    <table>
+      <caption class="sr-only">
+        All rooms, newest created first
+      </caption>
+      <thead>
+        <tr>
+          <th
+            [appSortColumn]="'name'"
+            label="Room name"
+            [activeSort]="roomSort()"
+            [direction]="roomDirection()"
+            [disabled]="loading()"
+            (sort)="sortRooms('name')"
+          ></th>
+          <th scope="col">Theme</th>
+          <th scope="col">Mood</th>
+          <th
+            [appSortColumn]="'approvedMemberCount'"
+            label="Approved members"
+            [activeSort]="roomSort()"
+            [direction]="roomDirection()"
+            [disabled]="loading()"
+            (sort)="sortRooms('approvedMemberCount')"
+          ></th>
+          <th
+            [appSortColumn]="'memberCount'"
+            label="Current participants"
+            [activeSort]="roomSort()"
+            [direction]="roomDirection()"
+            [disabled]="loading()"
+            (sort)="sortRooms('memberCount')"
+          ></th>
+          <th
+            [appSortColumn]="'issueCount'"
+            label="Issues"
+            [activeSort]="roomSort()"
+            [direction]="roomDirection()"
+            [disabled]="loading()"
+            (sort)="sortRooms('issueCount')"
+          ></th>
+          <th
+            [appSortColumn]="'lastActivityAt'"
+            label="Last activity"
+            [activeSort]="roomSort()"
+            [direction]="roomDirection()"
+            [disabled]="loading()"
+            (sort)="sortRooms('lastActivityAt')"
+          ></th>
+          <th
+            [appSortColumn]="'createdAt'"
+            label="Created"
+            [activeSort]="roomSort()"
+            [direction]="roomDirection()"
+            [disabled]="loading()"
+            (sort)="sortRooms('createdAt')"
+          ></th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (room of rooms(); track room.id) {
+          <tr [class.selected]="selected()?.id === room.id" (click)="select(room)">
+            <td>
+              <button
+                class="room-name"
+                type="button"
+                [attr.aria-expanded]="selected()?.id === room.id"
+                [attr.aria-controls]="selected()?.id === room.id ? 'room-details' : null"
+                (click)="$event.stopPropagation(); select(room)"
+              >
+                {{ room.name || 'Unnamed room' }}<span class="meta room-id">{{ room.id }}</span>
+              </button>
+            </td>
+            <td>{{ themeName(room.theme) }}</td>
+            <td>{{ room.mood | titlecase }}</td>
+            <td>{{ room.approvedMemberCount }}</td>
+            <td>{{ room.memberCount }}</td>
+            <td>{{ room.issueCount }}</td>
+            <td>
+              <time [attr.datetime]="room.lastActivityAt">{{
+                room.lastActivityAt | date: 'medium'
+              }}</time>
+            </td>
+            <td>
+              <time [attr.datetime]="room.createdAt">{{ room.createdAt | date: 'medium' }}</time>
+            </td>
+            <td>
+              <button
+                class="danger"
+                type="button"
+                (click)="$event.stopPropagation(); askDeleteRoom(room)"
+              >
+                Delete room
+              </button>
+            </td>
+          </tr>
+          @if (selected()?.id === room.id) {
+            <tr class="detail-row">
+              <td colspan="10">
+                <section
+                  id="room-details"
+                  class="details"
+                  aria-labelledby="members-heading"
+                  [attr.aria-busy]="loadingUsers()"
+                >
+                  <div class="section-heading">
+                    <div>
+                      <h2 id="members-heading">{{ room.name || 'Unnamed room' }} · Members</h2>
+                      <p class="meta">
+                        {{ themeName(room.theme) }} · Mood: {{ room.mood | titlecase }} ·
+                        {{ room.approvedMemberCount }} approved members ·
+                        {{ room.memberCount }} current participants · {{ room.issueCount }} issues
+                      </p>
+                    </div>
+                    <div class="actions">
+                      <button type="button" [disabled]="loadingUsers()" (click)="select(room)">
+                        Refresh members
+                      </button>
+                      <button class="secondary" type="button" (click)="close()">
+                        Close details
+                      </button>
+                    </div>
+                  </div>
+                  <h3>Approved-member roster</h3>
+                  <p class="meta">
+                    Names, roles, and last-joined times are retained after departure and updated
+                    when members return. Older approvals without a saved name show “Name
+                    unavailable” until that person rejoins using the same browser identity.
+                  </p>
+                  <app-approved-members-table
+                    [roomName]="room.name || 'Unnamed room'"
+                    [members]="approvedMembers()"
+                    [sort]="approvalSort()"
+                    [direction]="approvalDirection()"
+                    [loading]="loadingUsers()"
+                    [unavailable]="!!userError()"
+                    (sortBy)="sortApprovals($event)"
+                    (deleteMember)="askDeleteUser(room, $event)"
+                  />
+                  @if (nextApprovedOffset() !== null) {
+                    <button
+                      type="button"
+                      class="load-more"
+                      [disabled]="loadingUsers()"
+                      (click)="select(room, false, true)"
+                    >
+                      Load more approved members
+                    </button>
+                  }
+                  <p class="meta">
+                    Rate-limit hits count rejected requests for the same browser identity across all
+                    rooms and the API during the last 30 UTC calendar days. Collection starts with
+                    this release and usually updates within 10 seconds; counts are best-effort and
+                    may lag or undercount during overload or restarts. Shared-network limits can
+                    affect a member without that member causing the limit. Unauthenticated requests
+                    cannot be attributed.
+                  </p>
+                  <h3>Current participants</h3>
+                  @if (userError()) {
+                    <p class="notice" role="alert">{{ userError() }}</p>
+                  }
+                  <app-participants-table
+                    [roomName]="room.name || 'Unnamed room'"
+                    [members]="users()"
+                    [sort]="userSort()"
+                    [direction]="userDirection()"
+                    [loading]="loadingUsers()"
+                    [unavailable]="!!userError()"
+                    (sortBy)="sortUsers($event)"
+                    (deleteMember)="askDeleteUser(room, $event)"
+                  />
+                  @if (nextUserCursor()) {
+                    <button
+                      class="load-more"
+                      type="button"
+                      [disabled]="loadingUsers()"
+                      (click)="select(room, true)"
+                    >
+                      Load more members
+                    </button>
+                  }
+                </section>
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr>
+            <td colspan="10" class="empty">
+              {{
+                loading()
+                  ? 'Loading rooms…'
+                  : error()
+                    ? 'Rooms unavailable.'
+                    : 'No rooms have been created yet.'
+              }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (nextCursor()) {
+    <button class="load-more" type="button" [disabled]="loading()" (click)="load(true)">
+      Load more rooms
+    </button>
+  }
+  <p class="meta">
+    Current participants include observers, pending approvals, and people reconnecting within two
+    minutes. Counts refresh on request and are not a live online indicator. Approved member totals
+    count browser identities, so one person using different browsers may count more than once. Last
+    activity reflects the room’s stored activity timestamp.
+  </p>
+</section>
+
+<dialog #deleteDialog aria-labelledby="delete-heading" (cancel)="cancelDelete($event)">
+  @if (deleteTarget(); as target) {
+    <h2 id="delete-heading">Delete {{ target.kind === 'room' ? 'room' : 'user' }}?</h2>
+    @if (target.kind === 'room') {
+      <p>
+        <strong>{{ target.room.name || 'Unnamed room' }}</strong> ({{ target.room.id }})
+      </p>
+      <p>
+        Approved members: <strong>{{ target.room.approvedMemberCount }}</strong>
+      </p>
+      <p>
+        This permanently deletes the room, its issues, participants, approvals, preferences, and
+        saved results. People’s data in other rooms and feedback are preserved.
+      </p>
+    } @else {
+      <p>
+        <strong>{{ target.name ?? 'Name unavailable' }}</strong>
+      </p>
+      <p>
+        This permanently deletes this browser identity’s memberships across all rooms, approvals,
+        preferences, agreements, votes, and rate-limit history. Saved results in their rooms are
+        cleared.
+      </p>
+      <p>
+        Feedback and conversations are preserved, with the deleted identity detached. This does not
+        ban the person from joining again.
+      </p>
+    }
+    <p>This cannot be undone.</p>
+    @if (deleteError()) {
+      <p class="notice" role="alert">{{ deleteError() }}</p>
+    }
+    <div class="actions">
+      <button type="button" autofocus [disabled]="deleting()" (click)="cancelDelete()">
+        Cancel
+      </button>
+      <button class="danger" type="button" [disabled]="deleting()" (click)="confirmDelete()">
+        {{
+          deleting()
+            ? 'Deleting…'
+            : target.kind === 'room'
+              ? 'Permanently delete room'
+              : 'Permanently delete user'
+        }}
+      </button>
+    </div>
+  }
+</dialog>

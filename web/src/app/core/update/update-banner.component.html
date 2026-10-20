@@ -1,0 +1,6 @@
+@if (versionCheck.updateAvailable()) {
+  <div class="update-banner">
+    <span class="update-text">🚀 A new version of {{ siteName() }} is available!</span>
+    <button class="update-btn" (click)="appUpdate.reloadToLatest()">Update Now</button>
+  </div>
+}

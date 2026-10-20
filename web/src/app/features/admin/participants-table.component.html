@@ -1,0 +1,100 @@
+<div class="table-scroll">
+  <table>
+    <caption class="sr-only">
+      Current participants in
+      {{
+        roomName()
+      }}
+    </caption>
+    <thead>
+      <tr>
+        <th
+          [appSortColumn]="'name'"
+          label="Name"
+          [activeSort]="sort()"
+          [direction]="direction()"
+          [disabled]="loading()"
+          (sort)="sortBy.emit('name')"
+        ></th>
+        <th
+          [appSortColumn]="'isObserver'"
+          label="Role"
+          [activeSort]="sort()"
+          [direction]="direction()"
+          [disabled]="loading()"
+          (sort)="sortBy.emit('isObserver')"
+        ></th>
+        <th
+          [appSortColumn]="'isApproved'"
+          label="Approval"
+          [activeSort]="sort()"
+          [direction]="direction()"
+          [disabled]="loading()"
+          (sort)="sortBy.emit('isApproved')"
+        ></th>
+        <th
+          [appSortColumn]="'createdAt'"
+          label="Joined"
+          [activeSort]="sort()"
+          [direction]="direction()"
+          [disabled]="loading()"
+          (sort)="sortBy.emit('createdAt')"
+        ></th>
+        <th
+          [appSortColumn]="'rateLimitCount'"
+          label="Rate-limit hits (30d)"
+          [activeSort]="sort()"
+          [direction]="direction()"
+          [disabled]="loading()"
+          (sort)="sortBy.emit('rateLimitCount')"
+        ></th>
+        <th
+          [appSortColumn]="'lastRateLimitAt'"
+          label="Last rate limit"
+          [activeSort]="sort()"
+          [direction]="direction()"
+          [disabled]="loading()"
+          (sort)="sortBy.emit('lastRateLimitAt')"
+        ></th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (user of members(); track user.id) {
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.isObserver ? 'Observer' : 'Participant' }}</td>
+          <td>
+            <span class="badge" [class.pending]="!user.isApproved">{{
+              user.isApproved ? 'Approved' : 'Pending'
+            }}</span>
+          </td>
+          <td>
+            <time [attr.datetime]="user.createdAt">{{ user.createdAt | date: 'medium' }}</time>
+          </td>
+          <td>{{ user.rateLimitCount }}</td>
+          <td>
+            {{ user.lastRateLimitAt ? (user.lastRateLimitAt | date: 'medium') : 'None recorded' }}
+          </td>
+          <td>
+            <button class="danger" type="button" (click)="deleteMember.emit(user)">
+              Delete user
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="empty">
+            {{
+              loading()
+                ? 'Loading members…'
+                : unavailable()
+                  ? 'Member details unavailable.'
+                  : 'No current participants. Previously approved members can still return.'
+            }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

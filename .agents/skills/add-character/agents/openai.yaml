@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Add Character'
+  short_description: 'Design and polish Agile Deck throwable characters'
+  default_prompt: 'Use $add-character to design and add an animated throwable character for Agile Deck.'
+policy:
+  allow_implicit_invocation: true

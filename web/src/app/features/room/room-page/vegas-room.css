@@ -1,0 +1,78 @@
+[data-theme='vegas'] {
+  --bg-color: #02040a;
+  --primary: #ffd700;
+  --primary-rgb: 255, 215, 0;
+  --secondary: #ff00ff;
+  background: var(--bg-color);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='vegas']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/vegas_bg_v2.png') center/cover no-repeat fixed;
+  filter: blur(4px) brightness(0.75) saturate(0.6);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme='vegas']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 20%, rgba(2, 4, 10, 0.8) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Floating Vegas symbols layer - refined for new BG */
+[data-theme='vegas'] .main-layout::before {
+  content: '🎰 💎 🍒 🎰 💎 🍒';
+  position: absolute;
+  top: -50px;
+  left: 0;
+  width: 200%;
+  font-size: 2rem;
+  opacity: 0.1;
+  white-space: nowrap;
+  animation: vegas-slide 40s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(255, 0, 255, 0.3));
+}
+
+@keyframes vegas-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+[data-theme='vegas'] .room-branding-title {
+  background: linear-gradient(to right, #ffd700, #ff00ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 12px rgba(255, 0, 255, 0.6));
+  animation: vegas-glow 2s ease-in-out infinite;
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+@keyframes vegas-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(255, 0, 255, 0.5));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.8));
+    transform: scale(1.03);
+  }
+}

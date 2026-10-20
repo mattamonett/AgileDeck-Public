@@ -1,0 +1,26 @@
+# Only package manifests, sources and build inputs belong in the build context.
+**/node_modules
+**/dist
+**/coverage
+**/.angular
+**/*.tsbuildinfo
+**/*.log
+.git
+.github
+.claude
+.agents
+.vscode
+.idea
+output
+backups
+docs
+tools
+config
+
+# Secrets and local databases
+**/.env
+**/.env.*
+**/.npmrc
+**/*.pem
+**/*.key
+**/*.db*

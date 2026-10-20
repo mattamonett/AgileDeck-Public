@@ -1,0 +1,46 @@
+{
+  "site": {
+    "name": "Agile Deck",
+    "contactEmail": "admin@example.com",
+    "governingLaw": "the State of Texas, USA",
+    "networkProviders": []
+  },
+  "content": {
+    "moods": ["friendly", "playful", "spicy"],
+    "defaultMood": "playful",
+    "throwables": true,
+    "blockedThrowables": [],
+    "seasonalThrowables": true,
+    "themes": ["default", "space", "retro", "vegas"],
+    "defaultTheme": "default"
+  },
+  "features": {
+    "feedback": true,
+    "issues": true,
+    "usageStats": true
+  },
+  "legal": {
+    "requireAgreement": true,
+    "termsFile": null,
+    "privacyFile": null,
+    "updated": null
+  },
+  "limits": {
+    "maxUsersPerRoom": 25,
+    "maxRooms": 1000,
+    "inactiveRoomDays": 90,
+    "usageRetentionDays": 400,
+    "daily": {
+      "roomsCreated": { "perVisitor": 5, "perNetwork": 20, "perSite": 100 },
+      "newVisitors": { "perNetwork": 100, "perSite": 1000 },
+      "joinRequests": { "perVisitor": 3, "perNetwork": 30 },
+      "issueImports": { "perVisitor": 20, "perNetwork": 40, "perSite": 500 },
+      "feedbackPosts": { "perVisitor": 5, "perNetwork": 20, "perSite": 1000 },
+      "feedbackVotes": { "perVisitor": 100, "perNetwork": 300, "perSite": 10000 },
+      "feedbackReplies": { "perVisitor": 20, "perNetwork": 50, "perSite": 500 }
+    }
+  },
+  "access": {
+    "passwordProtects": "nothing"
+  }
+}

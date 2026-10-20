@@ -1,0 +1,296 @@
+<dialog
+  #dialog
+  class="issues-panel transfer-dialog"
+  aria-labelledby="transfer-heading"
+  (cancel)="busy() ? $event.preventDefault() : null"
+>
+  <header class="panel-header">
+    <div>
+      <span class="eyebrow">TEAM BACKLOG</span>
+      <h2 id="transfer-heading">Import / Export</h2>
+    </div>
+    <button
+      type="button"
+      (click)="close()"
+      [disabled]="busy()"
+      aria-label="Close import and export"
+    >
+      Close
+    </button>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Issue transfer">
+    <button
+      id="import-tab"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="tab() === 'import'"
+      aria-controls="import-content"
+      [attr.tabindex]="tab() === 'import' ? 0 : -1"
+      [disabled]="busy()"
+      #importTab
+      (keydown.arrowright)="changeTab('export'); exportTab.focus(); $event.preventDefault()"
+      (keydown.arrowleft)="changeTab('export'); exportTab.focus(); $event.preventDefault()"
+      (click)="changeTab('import')"
+    >
+      Import
+    </button>
+    <button
+      id="export-tab"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="tab() === 'export'"
+      aria-controls="export-content"
+      [attr.tabindex]="tab() === 'export' ? 0 : -1"
+      [disabled]="busy()"
+      #exportTab
+      (keydown.arrowright)="changeTab('import'); importTab.focus(); $event.preventDefault()"
+      (keydown.arrowleft)="changeTab('import'); importTab.focus(); $event.preventDefault()"
+      (click)="changeTab('export')"
+    >
+      Export
+    </button>
+  </div>
+  <div class="transfer-body">
+    <p class="error" role="alert">{{ requestError() }}</p>
+    <p class="success" role="status">{{ notice() }}</p>
+    @if (tab() === 'import') {
+      <section id="import-content" role="tabpanel" aria-labelledby="import-tab">
+        <details class="format-guide">
+          <summary>View expected JSON format, sample and limitations</summary>
+          <p>
+            Paste an array of issues. Only title is required. Optional fields default to status
+            open, estimate null, an empty link and no children. Nest child issues in subIssues.
+          </p>
+          <pre>{{ sample }}</pre>
+          <ul>
+            <li>Use valid JSON: comments and trailing commas are not supported.</li>
+            <li>
+              Title: 1-200 characters; PBI/Task number: up to 100; URL: up to 2,048 and must start
+              with http:// or https://.
+            </li>
+            <li>Status: open, in_progress or closed. Estimate: a finite number or null.</li>
+            <li>
+              Maximum 20 nesting levels, 500 issues and 2 MB per import, and 5,000 issues per room
+              (including children). Split larger boards into several imports.
+            </li>
+            <li>
+              Imports add new issues. IDs, timestamps, parentId and unknown fields are ignored.
+              Reimporting creates duplicates.
+            </li>
+            <li>
+              Only one active branch is supported. The last in_progress issue and its ancestors
+              remain active; other active branches become open. The preview shows this
+              normalization. Importing an active branch also reopens other active branches on the
+              board.
+            </li>
+            <li>
+              Preview edits update the JSON and the import. Nothing is saved until you press Import
+              issues.
+            </li>
+          </ul>
+        </details>
+        <div class="transfer-grid">
+          <div>
+            <label for="import-json">Paste issue JSON</label>
+            <textarea
+              id="import-json"
+              spellcheck="false"
+              [value]="text()"
+              [disabled]="busy()"
+              (input)="parse($any($event.target).value)"
+              placeholder='[&#123; "title": "My issue" &#125;]'
+              aria-describedby="import-error"
+              [attr.aria-invalid]="!!parseError()"
+            ></textarea>
+            <p id="import-error" class="error" role="alert">{{ parseError() }}</p>
+          </div>
+          <div>
+            <h3>Import preview</h3>
+            <p class="optional">Edit, remove or add children here before importing.</p>
+            <fieldset class="issue-controls" [disabled]="busy()">
+              @if (editor()) {
+                <form class="editor" (ngSubmit)="saveEdit(previewEstimate.validity.badInput)">
+                  <h3>{{ editor()?.id ? 'Edit preview issue' : 'Add preview child' }}</h3>
+                  <label for="preview-title">Title</label
+                  ><input
+                    id="preview-title"
+                    name="title"
+                    [(ngModel)]="draft.title"
+                    required
+                    [maxlength]="limits.title"
+                  />
+                  <label for="preview-number">PBI/Task number</label
+                  ><input
+                    id="preview-number"
+                    name="number"
+                    [(ngModel)]="draft.issueNumber"
+                    [maxlength]="limits.issueNumber"
+                  />
+                  <label for="preview-url">Link</label
+                  ><input
+                    id="preview-url"
+                    name="url"
+                    [(ngModel)]="draft.url"
+                    [maxlength]="limits.url"
+                  />
+                  <label for="preview-status">Status</label
+                  ><select id="preview-status" name="status" [(ngModel)]="draft.status">
+                    @for (status of statuses; track status) {
+                      <option [value]="status">{{ status }}</option>
+                    }
+                  </select>
+                  <label for="preview-estimate">Estimate</label
+                  ><input
+                    #previewEstimate
+                    id="preview-estimate"
+                    name="estimate"
+                    type="number"
+                    step="any"
+                    [(ngModel)]="draft.estimate"
+                  />
+                  <p class="error" role="alert">{{ editorError() }}</p>
+                  <div class="form-actions">
+                    <button type="button" (click)="editor.set(null)">Cancel</button
+                    ><button type="submit" class="primary">Apply to preview</button>
+                  </div>
+                </form>
+              }
+              <div class="preview-list">
+                @for (row of rows(); track row.issue.id) {
+                  <app-issue-card
+                    [row]="row"
+                    [preview]="true"
+                    [collapsed]="collapsed().has(row.issue.id)"
+                    [detailsCollapsed]="details().has(row.issue.id)"
+                    (childrenToggle)="toggle($event)"
+                    (detailsToggle)="toggle($event, true)"
+                    (statusChange)="changeStatus($event.id, $event.status)"
+                    (estimateChange)="changeEstimate($event.id, $event.input)"
+                    (edit)="startEdit($event)"
+                    (add)="startAdd($event)"
+                    (deleteRequest)="removePreview($event)"
+                  />
+                } @empty {
+                  <p class="empty">Paste valid JSON to preview your issues.</p>
+                }
+              </div>
+            </fieldset>
+          </div>
+        </div>
+        <div class="form-actions transfer-actions">
+          <button
+            type="button"
+            class="primary"
+            (click)="submit()"
+            [disabled]="
+              busy() ||
+              store.saving() ||
+              !store.context() ||
+              !!parseError() ||
+              !preview().length ||
+              !!editor()
+            "
+          >
+            {{ busy() ? 'Importing...' : 'Import issues' }}
+          </button>
+        </div>
+      </section>
+    } @else {
+      <section id="export-content" role="tabpanel" aria-labelledby="export-tab">
+        <p class="optional">
+          Select top-level issues from the whole board. All children stay with their parent.
+        </p>
+        @if (loading()) {
+          <p role="status">Loading all issues...</p>
+        }
+        @if (requestError()) {
+          <button type="button" (click)="loadExport()">Retry loading export</button>
+        }
+        <div class="selection-actions">
+          <button type="button" (click)="selectAll(true)" [disabled]="loading()">Select all</button
+          ><button type="button" (click)="selectAll(false)" [disabled]="loading()">
+            Clear selection
+          </button>
+          <label
+            >From <input #rangeStart type="number" min="1" [max]="exportIssues().length" value="1"
+          /></label>
+          <label
+            >To
+            <input
+              #rangeEnd
+              type="number"
+              min="1"
+              [max]="exportIssues().length"
+              [value]="exportIssues().length"
+          /></label>
+          <button
+            type="button"
+            (click)="selectRange(rangeStart.value, rangeEnd.value)"
+            [disabled]="
+              loading() ||
+              !exportIssues().length ||
+              !rangeStart.value ||
+              !rangeEnd.value ||
+              !rangeStart.validity.valid ||
+              !rangeEnd.validity.valid ||
+              +rangeStart.value > +rangeEnd.value
+            "
+          >
+            Select range
+          </button>
+        </div>
+        <div class="selection-list">
+          @for (issue of exportIssues(); track issue.id; let i = $index) {
+            <label
+              ><input
+                type="checkbox"
+                [checked]="selected().has(issue.id)"
+                (change)="select(issue.id, $any($event.target).checked)"
+              />{{ i + 1 }}. {{ issue.issueNumber ? issue.issueNumber + ' - ' : ''
+              }}{{ issue.title }}</label
+            >
+          } @empty {
+            @if (!loading()) {
+              <p>No issues available for export.</p>
+            }
+          }
+        </div>
+        <p role="status">
+          {{ chosen().length }} top-level issues selected, including all their children.
+        </p>
+        <div class="transfer-grid">
+          <div>
+            <label for="export-json">Export JSON</label
+            ><textarea
+              #exportJson
+              id="export-json"
+              readonly
+              spellcheck="false"
+              [value]="exportText()"
+            ></textarea>
+            <button type="button" (click)="exportJson.focus(); exportJson.select()">
+              Select JSON to copy
+            </button>
+          </div>
+          <div>
+            <h3>Export preview</h3>
+            <div class="preview-list">
+              @for (row of rows(); track row.issue.id) {
+                <app-issue-card
+                  [row]="row"
+                  [readonly]="true"
+                  [collapsed]="collapsed().has(row.issue.id)"
+                  [detailsCollapsed]="details().has(row.issue.id)"
+                  (childrenToggle)="toggle($event)"
+                  (detailsToggle)="toggle($event, true)"
+                />
+              } @empty {
+                <p class="empty">Select issues to preview the export.</p>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+</dialog>

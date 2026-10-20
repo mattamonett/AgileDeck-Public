@@ -1,0 +1,107 @@
+<div
+  class="picker-overlay"
+  (click)="closePicker.emit()"
+  (keyup.escape)="closePicker.emit()"
+  tabindex="0"
+>
+  <div
+    class="picker-content glass-panel"
+    (click)="$event.stopPropagation()"
+    (keyup.enter)="$event.stopPropagation()"
+    tabindex="0"
+  >
+    <div class="picker-header">
+      <h3>{{ title() }}</h3>
+      <button class="icon-btn" (click)="closePicker.emit()">✕</button>
+    </div>
+
+    <div class="picker-search">
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search emoji..." />
+    </div>
+
+    @if (!searchQuery()) {
+      @if (christmasEmojis().length) {
+        <div class="picker-section halloween-section">
+          <h4>Christmas · December only (UTC)</h4>
+          <div class="emoji-grid halloween-grid">
+            @for (em of christmasEmojis(); track em.char) {
+              <button
+                (click)="emojiSelect.emit(em.char)"
+                class="emoji-pick-btn"
+                [title]="projectileName(em.char) + ' · Limited time: December'"
+                [attr.aria-label]="projectileName(em.char) + ' · December only'"
+              >
+                {{ em.char }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @if (thanksgivingEmojis().length) {
+        <div class="picker-section halloween-section">
+          <h4>Thanksgiving · November only</h4>
+          <div class="emoji-grid halloween-grid">
+            @for (em of thanksgivingEmojis(); track em.char) {
+              <button
+                (click)="emojiSelect.emit(em.char)"
+                class="emoji-pick-btn"
+                [title]="projectileName(em.char) + ' · Limited time: November'"
+                [attr.aria-label]="projectileName(em.char) + ' · November only'"
+              >
+                {{ em.char }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @if (halloweenEmojis().length) {
+        <div class="picker-section halloween-section">
+          <h4>Halloween · October only</h4>
+          <div class="emoji-grid halloween-grid">
+            @for (em of halloweenEmojis(); track em.char) {
+              <button
+                (click)="emojiSelect.emit(em.char)"
+                class="emoji-pick-btn"
+                [title]="projectileName(em.char) + ' · Limited time: October'"
+                [attr.aria-label]="projectileName(em.char) + ' · October only'"
+              >
+                {{ em.char }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+      <div class="picker-section">
+        <h4>Top Fun</h4>
+        <div class="emoji-grid">
+          @for (em of presets(); track em) {
+            <button
+              (click)="emojiSelect.emit(em)"
+              class="emoji-pick-btn"
+              [title]="projectileName(em)"
+              [attr.aria-label]="projectileName(em)"
+            >
+              {{ em }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="picker-section">
+      <h4>{{ searchQuery() ? 'Search Results' : 'All Emojis' }}</h4>
+      <div class="emoji-grid">
+        @for (em of filteredEmojis(); track em) {
+          <button
+            (click)="emojiSelect.emit(em)"
+            class="emoji-pick-btn"
+            [title]="projectileName(em) + seasonalLabel(em)"
+            [attr.aria-label]="projectileName(em) + seasonalLabel(em)"
+          >
+            {{ em }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

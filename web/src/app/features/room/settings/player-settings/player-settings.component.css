@@ -1,0 +1,190 @@
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-item label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-group input {
+  min-width: 0;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  color: white;
+  outline: none;
+}
+
+.sex-heading {
+  position: relative;
+}
+.sex-heading h4 {
+  margin: 0;
+  line-height: 24px;
+}
+.sex-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid #64748b;
+  border-radius: 8px;
+  background: #162235;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+.sex-options {
+  display: grid;
+  padding: 4px;
+  border: 1px solid #64748b;
+  border-radius: 8px;
+  background: #162235;
+}
+.sex-options button {
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: white;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.sex-options button:hover,
+.sex-options button[aria-selected='true'] {
+  background: #334155;
+}
+.sex-trigger:focus-visible,
+.sex-options button:focus-visible {
+  outline: 2px solid #a5b4fc;
+  outline-offset: 2px;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 3px;
+  border-radius: 10px;
+}
+
+.toggle-group.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.toggle-group button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-group button.active {
+  background: var(--primary);
+  color: white;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-size: 11px;
+  color: #aaa;
+  margin-left: 8px;
+  cursor: help;
+  position: relative;
+  font-weight: normal;
+}
+
+.info-icon:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+}
+
+.info-icon .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #1a1a1a;
+  color: #fff;
+  text-align: center;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 1000;
+  top: 135%; /* Show below */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  text-transform: none;
+}
+
+.info-icon .tooltip-text::after {
+  content: '';
+  position: absolute;
+  bottom: 100%; /* Triangle at top */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #1a1a1a transparent;
+}
+
+.info-icon:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.nudge-test {
+  margin-top: 0.6rem;
+  width: 100%;
+}
+
+.setting-hint {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}

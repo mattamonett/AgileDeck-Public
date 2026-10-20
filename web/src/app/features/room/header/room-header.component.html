@@ -1,0 +1,61 @@
+<div class="header">
+  <div class="room-info">
+    <div class="room-title-wrapper">
+      <h2>{{ roomName() || 'Room #' + roomId() }}</h2>
+      @if (!isConnected()) {
+        <span class="disconnected-dot" title="Disconnected from server"></span>
+      }
+    </div>
+    <button (click)="copyLink.emit()" class="icon-btn" title="Copy Link">🔗</button>
+    <button
+      (click)="openQrCode.emit()"
+      class="icon-btn"
+      title="Show QR Code"
+      aria-label="Show QR Code"
+    >
+      📱
+    </button>
+    @if (showFeedback()) {
+      <button
+        (click)="openFeedback.emit()"
+        class="icon-btn feedback-toggle"
+        [title]="feedbackLabel()"
+        [attr.aria-label]="feedbackLabel()"
+      >
+        💬
+        @if (hasFeedbackUpdates()) {
+          <span class="update-dot" aria-hidden="true"></span>
+        }
+      </button>
+    }
+  </div>
+  <div class="header-actions">
+    <a
+      [routerLink]="['/room', roomId(), 'stats']"
+      class="icon-btn"
+      title="Room stats"
+      aria-label="Room stats"
+      >📊</a
+    >
+    <button
+      (click)="toggleSettings.emit()"
+      class="icon-btn settings-toggle"
+      title="Player Settings"
+    >
+      👤
+    </button>
+    <button
+      (click)="toggleRoomSettings.emit()"
+      class="icon-btn settings-toggle room-settings-toggle"
+      [title]="roomSettingsLabel()"
+      [attr.aria-label]="roomSettingsLabel()"
+    >
+      ⚙️
+      @if (pendingCount() > 0) {
+        <span class="pending-badge" aria-hidden="true">
+          {{ pendingCount() > 99 ? '99+' : pendingCount() }}
+        </span>
+      }
+    </button>
+  </div>
+</div>

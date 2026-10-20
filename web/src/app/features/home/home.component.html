@@ -1,0 +1,89 @@
+<div class="home-container">
+  <div class="glass-panel login-box">
+    <div class="logo-container">
+      <img src="favicon.png" [alt]="siteName() + ' logo'" class="home-logo" />
+    </div>
+    <h1 class="title">{{ siteName() }}</h1>
+
+    <!-- Step 1: Set Name -->
+    @if (!hasName()) {
+      <div class="onboarding-step">
+        <div class="form-group">
+          <p class="label-text">Enter your name to get started</p>
+          <input
+            type="text"
+            [(ngModel)]="name"
+            placeholder="E.g. John Doe"
+            class="glass-input"
+            (keyup.enter)="submitName()"
+          />
+        </div>
+        @if (agreementRequired()) {
+          <div class="site-agreement">
+            <p><strong>Site use agreement</strong></p>
+            <app-site-agreement />
+            <label for="site-agreement-accepted">
+              <input
+                id="site-agreement-accepted"
+                type="checkbox"
+                [ngModel]="agreementAccepted()"
+                (ngModelChange)="agreementAccepted.set($event)"
+              />
+              I am at least 13 and agree to the site use agreement.
+            </label>
+          </div>
+        }
+        <button
+          class="btn-primary full-width"
+          (click)="submitName()"
+          [disabled]="!name.trim() || !canContinue()"
+        >
+          Continue
+        </button>
+      </div>
+    }
+
+    <!-- Step 2: Room Actions -->
+    @if (hasName()) {
+      <div class="onboarding-step">
+        <div class="welcome-header">
+          <p>
+            Welcome back, <strong>{{ name }}</strong
+            >!
+          </p>
+          <button class="link-btn" (click)="editName()">Not you?</button>
+        </div>
+        <div class="actions">
+          <button class="btn-primary full-width" (click)="createRoom()">Create New Room</button>
+          @if (askingPassword()) {
+            <app-site-password-form
+              prompt="Enter the site password to create a room"
+              (unlocked)="passwordAccepted()"
+            />
+          }
+          <div class="divider"><span>OR</span></div>
+          <div class="join-group">
+            <input
+              type="text"
+              [(ngModel)]="roomId"
+              placeholder="Enter Room ID"
+              class="glass-input"
+              (keyup.enter)="joinRoom()"
+            />
+            <button
+              class="btn-secondary full-width"
+              (click)="joinRoom()"
+              [disabled]="!roomId.trim()"
+            >
+              Join Existing Room
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+    <nav class="legal-links" aria-label="Legal">
+      <a routerLink="/terms">Site use agreement</a>
+      <a routerLink="/privacy">Privacy notice</a>
+    </nav>
+  </div>
+</div>

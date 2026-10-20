@@ -1,0 +1,142 @@
+<article
+  class="issue-card"
+  [class.in-progress]="row().issue.status === 'in_progress'"
+  [class.closed]="row().issue.status === 'closed'"
+  [class.compact]="row().issue.status === 'closed' || detailsCollapsed()"
+  [class.subissue]="row().depth > 0"
+  [style.margin-left.px]="row().depth > 0 ? 14 : 0"
+>
+  <div class="issue-meta">
+    <select
+      [disabled]="readonly()"
+      class="status"
+      [attr.data-status]="row().issue.status"
+      [attr.aria-label]="'Status of ' + row().issue.title"
+      [ngModel]="row().issue.status"
+      (ngModelChange)="changeStatus(row().issue.id, $event)"
+    >
+      @for (status of statuses; track status) {
+        <option [value]="status">{{ labels[status] }}</option>
+      }
+    </select>
+
+    <label class="inline-estimate">
+      Estimate
+
+      <input
+        #cardEstimate
+        [disabled]="readonly()"
+        type="number"
+        step="any"
+        placeholder="—"
+        [attr.aria-label]="'Estimate for ' + row().issue.title"
+        [value]="row().issue.estimate ?? ''"
+        (input)="preview() ? changeEstimate(row().issue.id, cardEstimate) : null"
+        (change)="!preview() ? changeEstimate(row().issue.id, cardEstimate) : null"
+      />
+    </label>
+
+    @if (preview() || row().issue.status !== 'closed') {
+      <button
+        type="button"
+        class="details-toggle"
+        (click)="toggleDetails(row().issue.id)"
+        [attr.aria-expanded]="!detailsCollapsed()"
+        [attr.aria-label]="(detailsCollapsed() ? 'Expand ' : 'Collapse ') + row().issue.title"
+      >
+        {{ detailsCollapsed() ? '▸ Show details' : '▾ Hide details' }}
+      </button>
+    }
+
+    @if (row().depth > 0 && row().issue.status !== 'closed') {
+      <span class="sub-label">↳ Subissue · level {{ row().depth }}</span>
+    }
+  </div>
+
+  <h3>
+    @if (row().issue.issueNumber) {
+      <span class="issue-number">{{ row().issue.issueNumber }} · </span>
+    }
+    {{ row().issue.title }}
+  </h3>
+
+  @if (row().issue.status !== 'closed') {
+    @if (row().issue.url) {
+      <a [href]="row().issue.url" target="_blank" rel="noopener noreferrer">Open linked issue ↗</a>
+    }
+
+    <div class="dates" [hidden]="!row().issue.createdAt">
+      Created (UTC) {{ row().issue.createdAt | date: 'MMM d' : 'UTC' }}
+
+      @if (row().issue.lastModifiedAt) {
+        · Updated (UTC) {{ row().issue.lastModifiedAt | date: 'MMM d, h:mm a' : 'UTC' }}
+      }
+    </div>
+  }
+
+  @if (!readonly()) {
+    <div class="issue-actions">
+      @if (!preview() && row().issue.status === 'open') {
+        <button
+          type="button"
+          class="vote-on"
+          (click)="voteRequest.emit(row().issue.id)"
+          [attr.aria-label]="'Vote on ' + row().issue.title"
+        >
+          ▶ Vote on this
+        </button>
+      }
+
+      @if (preview() || row().issue.status !== 'closed') {
+        <button
+          type="button"
+          (click)="startAdd(row().issue.id)"
+          [attr.aria-label]="'Add subissue to ' + row().issue.title"
+        >
+          + Subissue
+        </button>
+
+        <button
+          type="button"
+          (click)="startEdit(row().issue)"
+          [attr.aria-label]="'Edit ' + row().issue.title"
+        >
+          Edit
+        </button>
+      }
+
+      <button
+        type="button"
+        class="delete"
+        (click)="deleteRequest.emit(row().issue.id)"
+        [attr.aria-label]="'Delete ' + row().issue.title"
+      >
+        Delete
+      </button>
+    </div>
+  }
+  @if (deleting()) {
+    <div class="delete-confirm" role="group" aria-label="Confirm deletion">
+      <p>Delete this issue{{ row().issue.subIssues?.length ? ' and all its subissues' : '' }}?</p>
+
+      <button type="button" (click)="cancelDelete.emit()">Keep issue</button
+      ><button type="button" class="danger" (click)="remove(row().issue.id)">Delete</button>
+    </div>
+  }
+
+  @if (row().issue.subIssues?.length) {
+    <button
+      type="button"
+      class="children-toggle subissues-toggle"
+      (click)="toggle(row().issue.id)"
+      [attr.aria-expanded]="!collapsed()"
+      [attr.aria-label]="
+        (collapsed() ? 'Show subissues of ' : 'Hide subissues of ') + row().issue.title
+      "
+    >
+      {{ collapsed() ? '▸ Show' : '▾ Hide' }}
+
+      {{ row().issue.subIssues!.length }} subissues
+    </button>
+  }
+</article>

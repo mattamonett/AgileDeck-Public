@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AbuseQuota {
+  key String
+  day String
+  count Int @default(0)
+  expiresAt DateTime
+
+  @@id([key, day])
+  @@index([expiresAt])
+}
+
+model Room {
+  id        String   @id @default(uuid())
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  reveal          Boolean  @default(false)
+  autoReveal      Boolean  @default(false)
+  useMultiplier   Boolean  @default(false)
+  multiplierValue Float    @default(1.0)
+  theme           String   @default("default")
+  resultSnapshot  String?
+  lobbyEnabled    Boolean  @default(true)
+  issuesEnabled   Boolean  @default(true)
+  mood            String   @default("playful")
+  users           User[]
+  issues          Issue[]
+  observerPreferences ObserverPreference[]
+  approvals       RoomApproval[]
+  statsStartedAt DateTime?
+  roundNumber Int @default(0)
+  roundStartedAt DateTime?
+  roundRevealedAt DateTime?
+  roundsRevealed Int @default(0)
+  unanimousRounds Int @default(0)
+  awardsStartedAt DateTime?
+}
+
+model RoomApproval {
+  statsId String @default(dbgenerated("(lower(hex(randomblob(16))))"))
+  votesCast Int @default(0)
+  lastVotedRound Int @default(-1)
+  throwsSent Int @default(0)
+  throwsReceived Int @default(0)
+  barragesSent Int @default(0)
+  currentVoteStreak Int @default(0)
+  bestVoteStreak Int @default(0)
+  characterVariety Int @default(0)
+  charactersUsed String @default("[]")
+  lastKnownName String?
+  lastIsObserver Boolean?
+  lastJoinedAt DateTime?
+  room      Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId    String
+  visitorId String
+
+  @@id([roomId, visitorId])
+  @@index([visitorId])
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId     String
+  vote       String?
+  isObserver Boolean  @default(false)
+  visitorId  String
+  isApproved Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  agreementVersion String?
+  agreementText String?
+  agreementAcceptedAt DateTime?
+
+  @@unique([roomId, visitorId])
+  @@index([visitorId])
+}
+
+model VisitorAgreement {
+  visitorId String
+  version String
+  text String
+  acceptedAt DateTime
+
+  @@id([visitorId, version])
+  @@index([acceptedAt])
+}
+
+model ObserverPreference {
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId     String
+  visitorId  String
+  isObserver Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+
+  @@id([roomId, visitorId])
+}
+
+model Issue {
+  id             String   @id @default(uuid())
+  roomId         String
+  room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  parentId       String?
+  parent         Issue?   @relation("IssueChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children       Issue[]  @relation("IssueChildren")
+  rootId         String
+  title          String
+  issueNumber    String?
+  url            String?
+  status         String   @default("open")
+  estimate       Float?
+  createdAt      DateTime @default(now())
+  lastModifiedAt DateTime @default(now()) @updatedAt
+  firstVoteMin Float?
+  firstVoteMax Float?
+  latestVoteMin Float?
+  latestVoteMax Float?
+  firstVoteSpread Float @default(0)
+  spreadReduction Float @default(0)
+
+  @@index([roomId, parentId, createdAt, id])
+  @@index([roomId, rootId])
+  @@index([parentId])
+}
+
+
+model FeedbackAccess {
+  visitorId  String   @id
+  approvedAt DateTime @default(now())
+  agreementVersion String?
+  agreementText String?
+  agreementAcceptedAt DateTime?
+  @@index([approvedAt])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  visitorId String
+  category  String
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  status    String   @default("published")
+  rejectionReason String?
+  workflowStatus String @default("new")
+  resolutionReason String?
+  resolutionNote String?
+  duplicateOfId String?
+  authorStatusUnread Boolean @default(false)
+  duplicateOf Feedback? @relation("FeedbackDuplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  duplicates Feedback[] @relation("FeedbackDuplicates")
+  votes     FeedbackVote[]
+  replies   FeedbackReply[]
+
+  @@index([createdAt, id])
+  @@index([category, createdAt, id])
+  @@index([visitorId, createdAt])
+  @@index([visitorId, authorStatusUnread])
+  @@index([status, createdAt, id])
+  @@index([duplicateOfId])
+}
+
+model FeedbackReply {
+  id String @id @default(uuid())
+  feedbackId String
+  feedback Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  author String
+  body String
+  createdAt DateTime @default(now())
+  status String @default("pending")
+  rejectionReason String?
+  authorReadAt DateTime?
+  adminReadAt DateTime?
+  @@index([feedbackId, createdAt, id])
+  @@index([status, createdAt, id])
+  @@index([feedbackId, author, status, authorReadAt, adminReadAt])
+}
+
+model FeedbackVote {
+  feedbackId String
+  visitorId  String
+  reaction   String
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@id([feedbackId, visitorId])
+}
+
+model RateLimitDaily {
+  visitorId String
+  day String
+  count Int
+  lastHitAt DateTime
+
+  @@id([visitorId, day])
+  @@index([day])
+}
+
+// App-wide daily event counts with no room or visitor identity.
+model UsageDaily {
+  day    String
+  metric String
+  count  Int    @default(0)
+
+  @@id([day, metric])
+}

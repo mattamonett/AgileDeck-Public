@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /room/
+Disallow: /feedback
+Disallow: /admin

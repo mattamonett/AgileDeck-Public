@@ -1,0 +1,114 @@
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-modal);
+}
+
+.picker-content {
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  box-shadow: var(--glass-shadow);
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.picker-search input {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.picker-search input:focus {
+  border-color: var(--color-primary);
+}
+
+.picker-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  overflow: hidden;
+}
+
+.picker-section h4 {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-3);
+  overflow-y: auto;
+  padding: var(--spacing-1);
+  max-height: 300px;
+}
+
+.emoji-pick-btn {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-2xl);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-text);
+}
+
+.emoji-pick-btn:hover {
+  background: var(--glass-bg-hover);
+  transform: scale(1.1);
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  transition: color var(--transition-base);
+}
+
+.icon-btn:hover {
+  color: var(--color-text);
+}
+
+.halloween-section {
+  flex-shrink: 0;
+}
+.halloween-section h4 {
+  color: #ffb86b;
+}
+.halloween-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+.halloween-grid .emoji-pick-btn {
+  background: rgba(230, 118, 30, 0.13);
+}
