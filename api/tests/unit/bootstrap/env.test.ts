@@ -1,4 +1,4 @@
-import { readServerEnv } from '../../../src/config/env';
+import { plainHttpWarning, readServerEnv } from '../../../src/config/env';
 
 const SECRET = 'index-test-secret-0123456789abcdef';
 const KEYS = [
@@ -87,13 +87,35 @@ describe('server environment', () => {
     expect(readServerEnv().secureCookies).toBe(false);
   });
 
-  it('turns the admin page on only with a long enough ADMIN_PASSWORD', () => {
+  it('turns the admin page on only with a strong enough ADMIN_PASSWORD', () => {
     process.env.ADMIN_PASSWORD = '';
     expect(readServerEnv().adminEnabled).toBe(false);
-    process.env.ADMIN_PASSWORD = 'a'.repeat(11);
-    expect(() => readServerEnv()).toThrow('ADMIN_PASSWORD must be at least 12 characters');
-    process.env.ADMIN_PASSWORD = 'a'.repeat(12);
+    process.env.ADMIN_PASSWORD = 'Xk4-vR9q-Lm2-pT';
+    expect(() => readServerEnv()).toThrow('ADMIN_PASSWORD must be at least 16 characters');
+    process.env.ADMIN_PASSWORD = 'abababababababab';
+    expect(() => readServerEnv()).toThrow('must use at least 8 different characters');
+    process.env.ADMIN_PASSWORD = 'MyPassword2026!!';
+    expect(() => readServerEnv()).toThrow('common word or sequence such as "password"');
+    process.env.ADMIN_PASSWORD = 'Xk4-vR9q-Lm2-pT8w';
     expect(readServerEnv().adminEnabled).toBe(true);
+  });
+
+  it('warns when a production site is reached over plain HTTP from other machines', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.COOKIE_SIGNING_SECRET = SECRET;
+    process.env.POKER_FRONTEND_URL = 'http://localhost:8080,http://127.0.0.1:8080';
+    expect(plainHttpWarning(readServerEnv())).toBeNull();
+    process.env.POKER_FRONTEND_URL = 'https://poker.example.com';
+    expect(plainHttpWarning(readServerEnv())).toBeNull();
+    process.env.POKER_FRONTEND_URL = 'https://poker.example.com,http://192.168.1.20:8080';
+    expect(plainHttpWarning(readServerEnv())).toMatch(
+      /^http:\/\/192\.168\.1\.20:8080 uses plain HTTP/,
+    );
+  });
+
+  it('does not warn about plain HTTP in development', () => {
+    process.env.POKER_FRONTEND_URL = 'http://192.168.1.20:8080';
+    expect(plainHttpWarning(readServerEnv())).toBeNull();
   });
 
   it('refuses true/false settings it cannot read', () => {

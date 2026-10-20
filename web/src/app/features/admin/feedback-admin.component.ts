@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   OwnFeedbackItemSchema,
@@ -22,6 +22,7 @@ import { RoomAdminComponent } from './room-admin.component';
 import { UsageAdminComponent } from './usage-admin.component';
 import { resolveApiUrl } from '@core/api/api-url';
 import { AdminSessionService } from './admin-session.service';
+import { isPlainHttpBeyondThisComputer } from './plain-http';
 
 function workflowOf(item: FeedbackWorkflow): FeedbackWorkflow {
   return {
@@ -49,6 +50,7 @@ function workflowOf(item: FeedbackWorkflow): FeedbackWorkflow {
 })
 export class FeedbackAdminComponent {
   readonly session = inject(AdminSessionService);
+  readonly plainHttp = isPlainHttpBeyondThisComputer(inject(DOCUMENT).location);
   readonly repliesUrl = `${resolveApiUrl()}/api/admin`;
   readonly checkPassword = (password: string) => this.session.signIn(password);
   readonly activeTab = signal<'pending' | 'feedback' | 'rooms' | 'usage'>('pending');

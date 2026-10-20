@@ -14,6 +14,13 @@
       </div>
     }
   </header>
+  @if (plainHttp) {
+    <p class="notice error" role="alert">
+      This page is served over plain HTTP, so the admin password and your sign-in cookie cross the
+      network unencrypted. Put HTTPS in front of the site before using the admin page from another
+      computer; see the self-hosting guide.
+    </p>
+  }
   @switch (session.access()) {
     @case ('checking') {
       <p class="notice" role="status">Connecting to the admin service…</p>
@@ -28,8 +35,8 @@
         <h2>The admin page is off</h2>
         <p>
           The site operator turns it on by setting the <code>ADMIN_PASSWORD</code> environment
-          variable on the API server to a long random password (at least 12 characters) and
-          restarting it.
+          variable on the API server to a long random password (at least 16 characters, for example
+          the output of <code>openssl rand -base64 24</code>) and restarting it.
         </p>
       </section>
     }

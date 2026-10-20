@@ -16,17 +16,20 @@ services:
       # docker/nginx.conf and the healthcheck below expect 3000; change all three together.
       - PORT=3000
       - DATABASE_URL=file:/app/api/data/poker.db
-      - COOKIE_SIGNING_SECRET=${COOKIE_SIGNING_SECRET:?Set COOKIE_SIGNING_SECRET before starting production containers}
+      # Empty: the API generates a secret on first start and keeps it in the data volume.
+      - COOKIE_SIGNING_SECRET=${COOKIE_SIGNING_SECRET:-}
+      - COOKIE_SIGNING_SECRET_FILE=/app/api/data/cookie-signing-secret
       - COOKIE_SIGNING_SECRET_PREVIOUS=${COOKIE_SIGNING_SECRET_PREVIOUS:-}
       # Used when access.passwordProtects in config/site.json is not "nothing".
       - SITE_PASSWORD=${SITE_PASSWORD:-}
       # Turns on the admin page at /admin; empty leaves it off.
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
       - ALLOW_MISSING_SOCKET_ORIGIN=${ALLOW_MISSING_SOCKET_ORIGIN:-false}
-      # Only the web container (POKER_WEB_IP below) may report client addresses.
-      # Add any reverse proxy in front of it, comma separated; see docs/self-hosting.md.
-      - TRUSTED_PROXY_IPS=${TRUSTED_PROXY_IPS:-${POKER_WEB_IP:-172.30.0.10}}
-      - POKER_FRONTEND_URL=${POKER_FRONTEND_URL:-http://localhost:8080}
+      # Only the web and caddy containers (POKER_WEB_IP, POKER_CADDY_IP) may report client
+      # addresses. Add any reverse proxy in front of them, comma separated; see docs/self-hosting.md.
+      - TRUSTED_PROXY_IPS=${TRUSTED_PROXY_IPS:-${POKER_WEB_IP:-172.30.0.10},${POKER_CADDY_IP:-172.30.0.20}}
+      # https://DOMAIN when DOMAIN is set, otherwise http://localhost:8080.
+      - POKER_FRONTEND_URL=${POKER_FRONTEND_URL:-${DOMAIN:+https://}${DOMAIN:-http://localhost:8080}}
       # Secure cookies follow the address: on for https, off for http.
       - COOKIE_SECURE=${COOKIE_SECURE:-}
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -85,7 +88,7 @@ services:
       - '${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:8080'
     networks:
       poker:
-        # Change POKER_SUBNET and POKER_WEB_IP together if 172.30.0.0/24 is taken.
+        # Change POKER_SUBNET, POKER_WEB_IP and POKER_CADDY_IP together if 172.30.0.0/24 is taken.
         ipv4_address: ${POKER_WEB_IP:-172.30.0.10}
     depends_on:
       api:
@@ -116,6 +119,54 @@ services:
           pids: 64
           cpus: '0.5'
 
+  # Optional HTTPS in front of web, turned on with COMPOSE_PROFILES=https and DOMAIN.
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: ['https']
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - 'test -n "$$DOMAIN" || { echo "Set DOMAIN in .env to the name visitors use, for example poker.example.com" >&2; exit 1; }; exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile'
+    environment:
+      - DOMAIN=${DOMAIN:-}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    networks:
+      poker:
+        ipv4_address: ${POKER_CADDY_IP:-172.30.0.20}
+    depends_on:
+      - web
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777
+    pids_limit: 64
+    security_opt:
+      - no-new-privileges:true
+    # Caddy runs as the image's root user so it can write certificates to its
+    # volumes; binding ports 80 and 443 is the only privilege it keeps.
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          pids: 64
+          cpus: '0.5'
+
 networks:
   poker:
     ipam:
@@ -124,3 +175,5 @@ networks:
 
 volumes:
   poker_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,11 @@
+# Used by the optional caddy service (COMPOSE_PROFILES=https). Caddy gets and
+# renews a certificate for DOMAIN, redirects HTTP to HTTPS, and replaces any
+# X-Forwarded-For a visitor sends with their real address.
+{
+	# No admin endpoint: the configuration only changes with a restart.
+	admin off
+}
+
+{$DOMAIN} {
+	reverse_proxy web:8080
+}

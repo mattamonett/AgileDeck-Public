@@ -25,14 +25,22 @@ You need Docker with the Compose plugin.
 ```sh
 git clone https://github.com/mattamonett/AgileDeck-Public.git
 cd AgileDeck-Public
-cp .env.example .env
-# Edit .env: set COOKIE_SIGNING_SECRET (for example: openssl rand -base64 48)
+cp .env.example .env && chmod 600 .env
 docker compose up -d --build
 ```
 
-Open <http://localhost:8080>. To reach it from other machines, put it behind a reverse proxy with HTTPS, or set `WEB_BIND=0.0.0.0` and `POKER_FRONTEND_URL` in `.env`.
+Open <http://localhost:8080>. The API generates its cookie signing secret on first start, so there is nothing else to set for a copy on your own computer.
 
-Before you put a copy online, read **[docs/self-hosting.md](docs/self-hosting.md)**. It covers reverse proxies and HTTPS, the admin page, and `config/site.json`, where you choose what your copy offers: which moods, themes and throwables are allowed, whether feedback, issues and usage stats are on, room and abuse limits, your own terms and privacy text, and an optional site password.
+To put it online with HTTPS, point DNS for your domain at the server, open ports 80 and 443, and uncomment two lines in `.env`:
+
+```sh
+DOMAIN=poker.example.com
+COMPOSE_PROFILES=https
+```
+
+Then run `docker compose up -d` again. A bundled [Caddy](https://caddyserver.com) container gets and renews the certificate. If startup fails, `docker compose logs api` says why.
+
+Before you put a copy online, read **[docs/self-hosting.md](docs/self-hosting.md)**. It covers HTTPS and reverse proxies, the admin page, and `config/site.json`, where you choose what your copy offers: which moods, themes and throwables are allowed, whether feedback, issues and usage stats are on, room and abuse limits, your own terms and privacy text, and an optional site password.
 
 **If you run a copy, you are its operator.** The terms of use and privacy notice shown on your site are yours, not this project's. The built-in text is a neutral template that fills in your `site.contactEmail` and `site.governingLaw`; set those (the API warns at startup until you do), have the text reviewed for where you operate, or supply your own files. See [terms and privacy notice](docs/site-settings.md#terms-and-privacy-notice-legal). The project's authors do not run your copy, receive none of its data, and provide the software as is under the MIT License.
 
@@ -49,7 +57,7 @@ npm run dev
 
 - Web: <http://localhost:4300>
 - API: <http://localhost:3300>
-- Admin page: <http://localhost:4300/admin> (start with `ADMIN_PASSWORD=<at least 12 characters> npm run dev` to turn it on)
+- Admin page: <http://localhost:4300/admin> (start with `ADMIN_PASSWORD="$(openssl rand -base64 24)" npm run dev` to turn it on)
 
 The API restarts when its source changes and the web app rebuilds on save; refresh the browser to see web changes. Only one local API can run at a time.
 

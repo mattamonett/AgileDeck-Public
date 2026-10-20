@@ -36,11 +36,13 @@ export function assertCookieSigningConfigured(): void {
   if (!isStrictIdentityMode()) return;
   const secret = getCookieSigningSecret();
   if (!secret) {
-    throw new Error('COOKIE_SIGNING_SECRET must be set in production');
+    throw new Error(
+      'COOKIE_SIGNING_SECRET must be set in production, or COOKIE_SIGNING_SECRET_FILE to generate one',
+    );
   }
   if (isWeakSecret(secret)) {
     throw new Error(
-      `COOKIE_SIGNING_SECRET must be a random value of at least ${MIN_SECRET_LENGTH} characters`,
+      `COOKIE_SIGNING_SECRET must be a random value of at least ${MIN_SECRET_LENGTH} characters, or empty under Docker Compose to generate one`,
     );
   }
   const previous = getPreviousCookieSigningSecret();
