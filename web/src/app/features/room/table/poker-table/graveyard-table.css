@@ -1,0 +1,56 @@
+/* Graveyard Shift theme: a freshly turned plot of moonlit earth, with fog on the reveal. */
+:host-context([data-theme='graveyard']) .table {
+  border-color: rgba(120, 132, 148, 0.55);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(141, 230, 160, 0.08), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.5), transparent 70%),
+    linear-gradient(160deg, #2a2620, #15130f 84%);
+  box-shadow:
+    inset 0 0 0 8px rgba(10, 9, 7, 0.6),
+    inset 0 0 0 10px rgba(120, 132, 148, 0.22),
+    inset 0 -28px 60px rgba(0, 0, 0, 0.4),
+    0 22px 46px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(141, 230, 160, 0.08);
+}
+
+:host-context([data-theme='graveyard']) .table::before {
+  border-color: rgba(154, 166, 196, 0.25);
+  border-style: dashed;
+}
+
+:host-context([data-theme='graveyard']) .results {
+  border-color: rgba(120, 132, 148, 0.45);
+  background: linear-gradient(180deg, rgba(64, 71, 80, 0.96), rgba(36, 40, 46, 0.96));
+}
+
+:host-context([data-theme='graveyard']) .avg-group + .avg-group {
+  border-left-color: rgba(154, 166, 196, 0.3);
+}
+
+:host-context([data-theme='graveyard']) .avg-group h3 {
+  color: #b9c2cc;
+}
+
+/* Fog sweeps across the table while the countdown runs. */
+:host-context([data-theme='graveyard']) .revelation-ceremony::after {
+  background:
+    radial-gradient(ellipse 40% 30% at 25% 60%, rgba(200, 212, 228, 0.22), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 70% 45%, rgba(200, 212, 228, 0.18), transparent 70%),
+    radial-gradient(circle at center, rgba(141, 230, 160, 0.1), rgba(4, 6, 10, 0.6));
+  animation: graveyard-table-fog 3s ease-in-out infinite alternate;
+}
+
+@keyframes graveyard-table-fog {
+  to {
+    background-position:
+      12% 0,
+      -12% 0,
+      0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-theme='graveyard']) .revelation-ceremony::after {
+    animation: none;
+  }
+}

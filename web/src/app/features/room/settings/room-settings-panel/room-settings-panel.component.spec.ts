@@ -82,7 +82,7 @@ describe('RoomSettingsPanelComponent', () => {
     }).nativeElement;
     expect(button(element, 'Friendly')).toBeDefined();
     expect(button(element, 'Spicy')).toBeUndefined();
-    expect(element.querySelectorAll('.theme-btn')).toHaveLength(3);
+    expect(element.querySelectorAll('.theme-btn')).toHaveLength(THEMES.length - 1);
     expect(element.textContent).toContain('throwables');
     expect(element.textContent).not.toContain('Spicy');
   });

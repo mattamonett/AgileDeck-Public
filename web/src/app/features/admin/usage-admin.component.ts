@@ -30,6 +30,7 @@ const METRIC_LABELS: Record<UsageMetric, string> = {
   'setting.theme.space': 'Theme changed to Deep Space',
   'setting.theme.retro': 'Theme changed to Retro CRT',
   'setting.theme.vegas': 'Theme changed to Las Vegas',
+  'setting.theme.graveyard': 'Theme changed to Graveyard Shift',
   'setting.mood.friendly': 'Mood changed to Friendly',
   'setting.mood.playful': 'Mood changed to Playful',
   'setting.mood.spicy': 'Mood changed to Spicy',

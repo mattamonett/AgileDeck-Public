@@ -7,6 +7,7 @@ const LABELS: Readonly<Record<Theme, { running: string; stopped: string }>> = {
   [Theme.SPACE]: { running: 'Mission T+', stopped: 'Landed T+' },
   [Theme.RETRO]: { running: '> round', stopped: '> halted' },
   [Theme.VEGAS]: { running: 'On the clock', stopped: 'Final time' },
+  [Theme.GRAVEYARD]: { running: 'Graveyard shift', stopped: 'Time of death' },
 };
 
 export function formatRoundTime(elapsedMs: number): string {

@@ -1,6 +1,8 @@
 <div class="table-area">
   @if (isPerfectMatch() && !isCountdown() && isGardenTheme()) {
     <app-garden-celebration />
+  } @else if (isPerfectMatch() && !isCountdown() && isGraveyardTheme()) {
+    <app-bat-swarm />
   } @else if (isPerfectMatch()) {
     <app-confetti-celebration />
   }
@@ -53,14 +55,14 @@
     }
 
     @if (revealed() && !isCountdown()) {
-      <app-reveal-celebration [vegas]="theme() === 'vegas'" />
+      <app-reveal-celebration [vegas]="theme() === 'vegas'" [graveyard]="isGraveyardTheme()" />
     }
     <div class="table-ornament" aria-hidden="true">✧ ─── ❧ ─── ✧</div>
     <div class="center-content">
       @if (isCountdown()) {
         <div class="countdown reveal-countdown">
           <span class="ceremony-label">
-            {{ theme() === 'vegas' ? 'No more bets' : 'Final reveal' }}
+            {{ ceremonyLabel() }}
           </span>
           <div class="countdown-circle">
             <span class="countdown-number">{{ countdownValue() }}</span>

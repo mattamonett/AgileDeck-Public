@@ -38,6 +38,8 @@ export class NudgeAlertComponent {
 
   readonly currentUserId = input<string | null>(null);
   readonly mood = input<RoomMood>('playful');
+  /** The room theme as stored, which picks the nudge tone. */
+  readonly theme = input<string | undefined>(undefined);
   /** True while this person is a player the room is still waiting on. */
   readonly waitingOnMe = input(false);
 
@@ -57,7 +59,7 @@ export class NudgeAlertComponent {
           this.store.users().find((user) => user.id === nudge.event.sourceUserId)?.name ??
           'Someone';
         this.active.set({ level: nudge.event.level, from, seq: nudge.seq });
-        this.sound.play(nudge.event.level, this.mood());
+        this.sound.play(nudge.event.level, this.mood(), this.theme());
       });
     });
     effect(() => {

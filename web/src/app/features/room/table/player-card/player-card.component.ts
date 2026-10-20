@@ -19,6 +19,7 @@ import type { User } from '../../state/poker.store';
     './player-card.component.css',
     './garden-player.css',
     './vegas-player.css',
+    './graveyard-player.css',
     './observer-player.css',
     './overheated-player.css',
   ],

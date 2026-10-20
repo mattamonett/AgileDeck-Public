@@ -28,7 +28,7 @@ The API reads the file once at startup. If the file is not valid JSON or a value
 | `throwables` | `true` | `false` turns off throwing and barrages completely: the server refuses them, and the throwable picker, throw targets and throw statistics disappear. Nudges still work. |
 | `blockedThrowables` | `[]` | Emoji to remove from the site, for example `["💩", "💊"]`. The server refuses them, pickers hide them, and anyone who had one selected is switched to an allowed one. This is on top of the Friendly mood's own filter. |
 | `seasonalThrowables` | `true` | `false` never offers the limited Halloween (October), Thanksgiving (November) and Christmas (December) throwables. |
-| `themes` | all four: `"default"` (Moonlit Garden), `"space"`, `"retro"` (Retro CRT), `"vegas"` | Board themes people can choose. With one listed, the picker is hidden. |
+| `themes` | all five: `"default"` (Moonlit Garden), `"space"`, `"retro"` (Retro CRT), `"vegas"`, `"graveyard"` (Graveyard Shift) | Board themes people can choose. With one listed, the picker is hidden. |
 | `defaultTheme` | `"default"` | The theme new rooms start with. Must be one of `themes`. Rooms on a removed theme show this one. |
 
 For a workplace copy without the edgier content, a good start is:

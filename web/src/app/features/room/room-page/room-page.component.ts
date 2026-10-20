@@ -71,6 +71,7 @@ import { PokerTableComponent } from '../table/poker-table/poker-table.component'
     './space-room.css',
     './retro-room.css',
     './vegas-room.css',
+    './graveyard-room.css',
     './garden-room.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -244,7 +245,7 @@ export class RoomPageComponent implements OnInit {
   }
 
   protected testNudgeSound(): void {
-    this.nudgeSound.test(this.roomMood());
+    this.nudgeSound.test(this.roomMood(), this.currentRoom()?.theme);
   }
 
   protected toggleObserver(): void {

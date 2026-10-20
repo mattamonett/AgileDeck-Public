@@ -86,6 +86,7 @@
             <app-nudge-alert
               [currentUserId]="user.id"
               [mood]="roomMood()"
+              [theme]="currentRoom()?.theme"
               [waitingOnMe]="waitingOnMe()"
             />
 
