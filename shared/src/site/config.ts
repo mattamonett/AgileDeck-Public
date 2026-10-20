@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { RoomMoodSchema } from '../room/mood';
+import { isSeasonalTheme } from '../seasons/seasonal-themes';
 import { Theme } from '../themes';
 import { RETIRED_THROWABLES, VALID_INTERACTION_CHARACTERS } from '../throwables/catalog';
 
@@ -86,6 +87,10 @@ export const SiteConfigSchema = z
       })
       .refine((content) => content.themes.includes(content.defaultTheme), {
         message: 'defaultTheme must be one of themes',
+        path: ['defaultTheme'],
+      })
+      .refine((content) => !isSeasonalTheme(content.defaultTheme), {
+        message: 'defaultTheme cannot be a seasonal theme',
         path: ['defaultTheme'],
       }),
     features: z

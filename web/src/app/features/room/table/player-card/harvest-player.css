@@ -1,0 +1,118 @@
+/* Harvest Table theme: every card is a lattice-topped pie, and a slice lifts out on reveal. */
+:host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display {
+  border: 3px solid #b8732f;
+  border-radius: 16px;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 9px,
+      rgba(246, 205, 138, 0.95) 9px 14px,
+      transparent 14px 23px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 9px,
+      rgba(234, 186, 112, 0.95) 9px 14px,
+      transparent 14px 23px
+    ),
+    radial-gradient(ellipse at 50% 40%, #b8461f, #7c2412 80%);
+  box-shadow:
+    inset 0 0 0 4px #e3a75a,
+    inset 0 0 0 6px rgba(124, 66, 22, 0.55),
+    0 5px 0 #6b3a14,
+    0 12px 22px rgba(0, 0, 0, 0.42);
+}
+
+/* The steam vent cut into the middle of the crust. */
+:host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border: 2px solid #c98a3f;
+  border-radius: 50%;
+  background: radial-gradient(circle, #8a2a12 0 40%, #f0c27d 45%);
+  box-shadow: 0 0 0 3px rgba(240, 194, 125, 0.9);
+  transform: translate(-50%, -50%);
+}
+
+:host-context([data-theme='harvest']) .user-card.has-voted .card-display:not(.revealed) {
+  border-color: #f2a541;
+  box-shadow:
+    inset 0 0 0 4px #e3a75a,
+    inset 0 0 0 6px rgba(124, 66, 22, 0.55),
+    0 5px 0 #6b3a14,
+    0 0 24px rgba(242, 165, 65, 0.55),
+    0 12px 22px rgba(0, 0, 0, 0.42);
+}
+
+:host-context([data-theme='harvest']) .card-display .vote-check {
+  border-color: rgba(255, 226, 176, 0.85);
+  background: linear-gradient(145deg, #e07a2f, #8a3415);
+}
+
+:host-context([data-theme='harvest']) .card-display .vote-status {
+  border-color: rgba(242, 165, 65, 0.6);
+  background: rgba(58, 26, 14, 0.94);
+  color: #ffe2b0;
+}
+
+/* Pies don't flip: a slice lifts out to show the vote on the pumpkin filling. */
+:host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display.revealed {
+  transform: none;
+  border-color: #c98a3f;
+  background:
+    radial-gradient(circle at 50% 22%, #fff7e8 0 9px, transparent 10px),
+    radial-gradient(ellipse at 40% 30%, rgba(255, 220, 160, 0.35), transparent 60%),
+    linear-gradient(170deg, #e98a35, #c4621f 80%);
+  color: #fff3dc;
+  font-size: 2.1rem;
+  text-shadow:
+    0 2px 0 #8a3415,
+    0 0 10px rgba(122, 40, 10, 0.5);
+  box-shadow:
+    inset 0 0 0 4px #e3a75a,
+    inset 0 -8px 14px rgba(120, 50, 15, 0.35),
+    0 5px 0 #6b3a14,
+    0 12px 22px rgba(0, 0, 0, 0.42);
+  animation: harvest-slice-lift 0.75s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+:host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display.revealed::before {
+  opacity: 0;
+}
+
+:host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display.revealed span {
+  transform: translateY(6px);
+}
+
+@keyframes harvest-slice-lift {
+  0% {
+    transform: none;
+  }
+  45% {
+    transform: translateY(-16px) rotate(-4deg);
+  }
+  75% {
+    transform: translateY(-4px) rotate(1deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  :host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display::before {
+    width: 16px;
+    height: 16px;
+  }
+
+  :host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display.revealed {
+    font-size: 1.55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-theme='harvest']) .user-card:not(.is-observer) .card-display.revealed {
+    animation: none;
+  }
+}

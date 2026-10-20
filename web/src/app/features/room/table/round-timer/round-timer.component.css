@@ -252,6 +252,35 @@
   text-shadow: 0 0 8px rgba(141, 230, 160, 0.6);
 }
 
+/* Harvest Table: a recipe card with handwritten digits. */
+:host([data-look='harvest']) {
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid #c98a3f;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 7px, rgba(180, 46, 36, 0.12) 7px 8px), #fbefd8;
+  box-shadow:
+    0 2px 0 #b8732f,
+    0 0 14px rgba(242, 165, 65, 0.2);
+}
+:host([data-look='harvest']) .label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a3a1a;
+}
+:host([data-look='harvest']) .digits {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 900;
+  color: #5a2a12;
+}
+:host([data-look='harvest'].stopped) .digits {
+  color: #c4621f;
+}
+
 @keyframes cursor-blink {
   50% {
     opacity: 0;

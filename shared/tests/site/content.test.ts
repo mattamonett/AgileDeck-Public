@@ -16,6 +16,7 @@ const content = (input: NonNullable<NonNullable<SiteConfigInput>['content']>): C
 
 const OCTOBER = new Date('2026-10-15T12:00:00Z');
 const MARCH = new Date('2026-03-15T12:00:00Z');
+const NOVEMBER = new Date('2026-11-20T12:00:00Z');
 
 describe('site content rules', () => {
   it('allows only the configured moods', () => {
@@ -49,6 +50,15 @@ describe('site content rules', () => {
     expect(resolveRoomTheme('default', dark)).toBe(Theme.SPACE);
     expect(resolveRoomTheme('neon', defaults)).toBe(Theme.GARDEN);
     expect(resolveRoomTheme(undefined, defaults)).toBe(Theme.GARDEN);
+  });
+
+  it('allows Harvest Table only in November', () => {
+    expect(isThemeAllowed(Theme.HARVEST, defaults, NOVEMBER)).toBe(true);
+    expect(isThemeAllowed(Theme.HARVEST, defaults, OCTOBER)).toBe(false);
+    expect(resolveRoomTheme('harvest', defaults, NOVEMBER)).toBe(Theme.HARVEST);
+    expect(resolveRoomTheme('harvest', defaults, new Date('2026-12-01T00:00:00Z'))).toBe(
+      Theme.GARDEN,
+    );
   });
 
   it('permits every known throwable by default, subject to the room mood', () => {

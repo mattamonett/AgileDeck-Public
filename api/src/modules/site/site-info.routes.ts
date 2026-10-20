@@ -6,6 +6,7 @@ import {
   halloweenAvailability,
   thanksgivingAvailability,
 } from '../interactions/seasonal-throwables.service';
+import { seasonalThemeAvailability } from '../rooms/room-appearance';
 
 /** Public settings, seasonal availability and the running version. */
 export function createSiteInfoRouter(isOriginAllowed: OriginCheck, buildTime: string): Router {
@@ -21,6 +22,7 @@ export function createSiteInfoRouter(isOriginAllowed: OriginCheck, buildTime: st
       ...halloweenAvailability(),
       ...thanksgivingAvailability(),
       ...christmasAvailability(),
+      ...seasonalThemeAvailability(),
     });
   });
 

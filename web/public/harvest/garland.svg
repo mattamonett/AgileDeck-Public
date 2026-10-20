@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" width="320" height="64">
+  <defs>
+    <path id="leaf" d="M0 0C9 6 10 19 0 28C-10 19-9 6 0 0z"/>
+  </defs>
+  <path d="M0 6Q80 30 160 6T320 6" fill="none" stroke="#6b4423" stroke-width="2"/>
+  <g stroke="#5a2e12" stroke-width="0.8">
+    <use href="#leaf" fill="#c8551f" transform="translate(28 13) rotate(-14)"/>
+    <use href="#leaf" fill="#e0a030" transform="translate(62 20) rotate(8)"/>
+    <use href="#leaf" fill="#9e3b1b" transform="translate(96 17) rotate(-6)"/>
+    <use href="#leaf" fill="#d9772b" transform="translate(130 11) rotate(12)"/>
+    <use href="#leaf" fill="#b8862c" transform="translate(190 11) rotate(-10)"/>
+    <use href="#leaf" fill="#c8551f" transform="translate(224 17) rotate(6)"/>
+    <use href="#leaf" fill="#e0a030" transform="translate(258 20) rotate(-8)"/>
+    <use href="#leaf" fill="#9e3b1b" transform="translate(292 13) rotate(14)"/>
+  </g>
+  <g fill="#e8c06a">
+    <circle cx="160" cy="7" r="4"/>
+    <circle cx="0" cy="7" r="4"/>
+    <circle cx="320" cy="7" r="4"/>
+  </g>
+</svg>

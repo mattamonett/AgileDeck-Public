@@ -146,6 +146,99 @@
   }
 }
 
+/* Harvest Table: steam curls up from the table, then a dinner banner. */
+.harvest-steam {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  z-index: 36;
+  display: flex;
+  gap: 18px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.harvest-steam i {
+  width: 14px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 245, 230, 0.55), transparent 70%);
+  filter: blur(2px);
+  opacity: 0;
+  animation: harvest-steam 1.8s ease-out both;
+}
+
+.harvest-steam i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.harvest-steam i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes harvest-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scaleX(0.8);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scaleX(1.4) rotate(8deg);
+  }
+}
+
+.harvest-reveal-banner {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  z-index: 38;
+  width: min(82%, 410px);
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #c98a3f;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #b6461f, #7c2412);
+  box-shadow:
+    inset 0 0 0 3px rgba(246, 205, 138, 0.35),
+    0 4px 0 #4a1a0a,
+    0 0 30px rgba(242, 165, 65, 0.45);
+  color: #ffe9c4;
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-shadow: 0 2px 0 #5a1e0c;
+  text-transform: uppercase;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: harvest-reveal-banner 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.harvest-reveal-banner::before,
+.harvest-reveal-banner::after {
+  content: '🍂';
+  margin: 0 0.6rem;
+}
+
+@keyframes harvest-reveal-banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20%) scale(0.92);
+  }
+  20%,
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+}
+
 .reveal-spark {
   position: absolute;
   top: 50%;
@@ -175,7 +268,8 @@
 
 @media (max-width: 768px) {
   .vegas-reveal-banner,
-  .graveyard-reveal-banner {
+  .graveyard-reveal-banner,
+  .harvest-reveal-banner {
     top: 34%;
     width: min(88%, 330px);
     padding: 0.65rem 0.75rem;
@@ -185,18 +279,22 @@
   .vegas-reveal-banner::before,
   .vegas-reveal-banner::after,
   .graveyard-reveal-banner::before,
-  .graveyard-reveal-banner::after {
+  .graveyard-reveal-banner::after,
+  .harvest-reveal-banner::before,
+  .harvest-reveal-banner::after {
     margin: 0 0.3rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .graveyard-flash {
+  .graveyard-flash,
+  .harvest-steam i {
     animation: none;
   }
 
   .vegas-reveal-banner,
-  .graveyard-reveal-banner {
+  .graveyard-reveal-banner,
+  .harvest-reveal-banner {
     animation: none;
     opacity: 0;
   }

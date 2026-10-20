@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Theme } from '@poker/shared';
 import { SeasonalThrowablesService } from './seasonal-throwables.service';
 import { SocketService } from '@core/socket/socket.service';
 
@@ -86,6 +87,21 @@ describe('SeasonalThrowablesService', () => {
     );
     await vi.advanceTimersByTimeAsync(60_000);
     expect(service.isAvailable('🎅')).toBe(false);
+  });
+
+  it('offers seasonal themes only while the server lists them', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ seasonalThemes: ['harvest'] })));
+    const service = TestBed.inject(SeasonalThrowablesService);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(service.isThemeAvailable(Theme.HARVEST)).toBe(true);
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ seasonalThemes: [] })));
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(service.isThemeAvailable(Theme.HARVEST)).toBe(false);
+    expect(service.isThemeAvailable(Theme.GRAVEYARD)).toBe(true);
+    fetchMock.mockRejectedValue(new Error('offline'));
+    service.seasonalThemes.set([Theme.HARVEST]);
+    await service.refresh();
+    expect(service.isThemeAvailable(Theme.HARVEST)).toBe(false);
   });
 
   it('fails closed on malformed configuration and network failure', async () => {

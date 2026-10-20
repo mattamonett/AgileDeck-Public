@@ -379,6 +379,31 @@ describe('socket setup', () => {
     }
   });
 
+  it('refuses a seasonal theme out of season', async () => {
+    jest.useFakeTimers({ now: new Date('2026-10-20T12:00:00Z'), doNotFake: ['nextTick'] });
+    try {
+      const { io, handlers } = createIo();
+      setupTestSocket(io);
+      const { socket, handlers: socketHandlers } = createSocket();
+      handlers.connection(socket);
+      socket.data = { userId: 'user-1', roomId: 'room-1' };
+      userRepositoryMock.findById.mockResolvedValue({
+        roomId: 'room-1',
+        isApproved: true,
+      });
+      roomServiceMock.updateRoom.mockReset();
+
+      await socketHandlers[SocketEvents.UPDATE_THEME]({ theme: 'harvest' });
+      expect(roomServiceMock.updateRoom).not.toHaveBeenCalled();
+      expect(socket.emit).toHaveBeenCalledWith(
+        GameEvents.ERROR,
+        'That theme is only available in its season',
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('validates and authorizes room mood updates', async () => {
     const { io, handlers } = createIo();
     setupSocket(io as unknown as Parameters<typeof setupSocket>[0]);

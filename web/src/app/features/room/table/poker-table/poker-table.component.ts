@@ -5,6 +5,7 @@ import { ThrowSceneComponent } from '../../throw-scene/throw-scene.component';
 import { ConfettiCelebrationComponent } from '../confetti-celebration/confetti-celebration.component';
 import { GardenCelebrationComponent } from '../garden-celebration/garden-celebration.component';
 import { BatSwarmComponent } from '../bat-swarm/bat-swarm.component';
+import { PieCelebrationComponent } from '../pie-celebration/pie-celebration.component';
 import { RevealCelebrationComponent } from '../reveal-celebration/reveal-celebration.component';
 import { RoundTimerComponent } from '../round-timer/round-timer.component';
 import type { Projectile } from '../../throw-scene/projectile';
@@ -19,6 +20,7 @@ import { isGardenTheme } from '../../room-theme';
     GardenCelebrationComponent,
     ConfettiCelebrationComponent,
     BatSwarmComponent,
+    PieCelebrationComponent,
     RevealCelebrationComponent,
     RoundTimerComponent,
   ],
@@ -28,6 +30,7 @@ import { isGardenTheme } from '../../room-theme';
     './garden-table.css',
     './vegas-table.css',
     './graveyard-table.css',
+    './harvest-table.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -56,12 +59,15 @@ export class PokerTableComponent {
 
   readonly isGardenTheme = computed(() => isGardenTheme(this.theme()));
   readonly isGraveyardTheme = computed(() => this.theme() === Theme.GRAVEYARD);
+  readonly isHarvestTheme = computed(() => this.theme() === Theme.HARVEST);
   readonly ceremonyLabel = computed(() => {
     switch (this.theme()) {
       case Theme.VEGAS:
         return 'No more bets';
       case Theme.GRAVEYARD:
         return 'Final resting estimate';
+      case Theme.HARVEST:
+        return 'Dinner in';
       default:
         return 'Final reveal';
     }

@@ -10,6 +10,7 @@ import {
   UpdateRoomMoodSchema,
   isMoodAllowed,
   isThemeAllowed,
+  isThemeInSeason,
 } from '@poker/shared';
 import { getSiteConfig } from '../../config/site-config';
 import { sanitize } from '../sanitize';
@@ -136,7 +137,12 @@ export function registerRoomSettingsHandlers(socket: PokerSocket): void {
       return;
     }
     if (!isThemeAllowed(validation.data.theme, getSiteConfig().content)) {
-      socket.emit(GameEvents.ERROR, 'That theme is not available on this site');
+      socket.emit(
+        GameEvents.ERROR,
+        isThemeInSeason(validation.data.theme)
+          ? 'That theme is not available on this site'
+          : 'That theme is only available in its season',
+      );
       return;
     }
 
