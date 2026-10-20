@@ -3,7 +3,7 @@ import { createServer, type Server } from 'node:http';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 
-export const ADMIN_TEST_PASSWORD = 'admin test password 0123';
+export const ADMIN_TEST_PASSWORD = 'Kq7-test-operator-Vz29';
 
 export interface AdminTestServer {
   readonly base: string;

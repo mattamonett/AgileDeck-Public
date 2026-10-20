@@ -17,6 +17,7 @@ export interface ServerEnv {
   readonly adminEnabled: boolean;
 }
 
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const DEVELOPMENT_ORIGINS = ['http://localhost:4300', 'http://127.0.0.1:4300'];
 const DEFAULT_PORT = 3000;
 
@@ -50,6 +51,23 @@ function assertTrustedProxiesValid(): void {
     throw new Error(
       `TRUSTED_PROXY_IPS entries must be IP addresses or CIDR ranges; fix ${invalid.join(', ')}`,
     );
+}
+
+function isPlainHttpBeyondThisComputer(origin: string): boolean {
+  if (!URL.canParse(origin)) return false;
+  const url = new URL(origin);
+  return url.protocol === 'http:' && !LOOPBACK_HOSTS.has(url.hostname);
+}
+
+/**
+ * Production sites reached over plain HTTP from other machines send passwords
+ * and cookies in clear text. Allowed, for a trusted network, but worth a warning.
+ */
+export function plainHttpWarning(env: ServerEnv): string | null {
+  if (process.env.NODE_ENV !== 'production') return null;
+  const plain = env.allowedOrigins.filter(isPlainHttpBeyondThisComputer);
+  if (plain.length === 0) return null;
+  return `${plain.join(', ')} uses plain HTTP, so the site and admin passwords and visitor cookies cross the network unencrypted. Put HTTPS in front; see docs/self-hosting.md`;
 }
 
 /**

@@ -147,7 +147,7 @@ describe('public HTTP app', () => {
   });
 
   it('guards the admin routes after the site gate and before every parser', async () => {
-    process.env.ADMIN_PASSWORD = 'admin password for tests';
+    process.env.ADMIN_PASSWORD = 'Unit-operator-key-41Hd';
     try {
       const json = { 'Content-Type': 'application/json', Origin: ALLOWED };
       // No admin cookie: refused before any admin handler or later router runs.

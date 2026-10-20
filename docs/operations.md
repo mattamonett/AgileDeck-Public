@@ -24,17 +24,18 @@ Both containers run read-only with all capabilities dropped,
 
 ## Configuration
 
-Compose reads `.env` (copy it from `.env.example`). The values that matter:
+Compose reads `.env` (copy it from `.env.example`, then `chmod 600 .env`). The values that matter:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `COOKIE_SIGNING_SECRET` | none, required | Signs visitor cookies. Production refuses a value shorter than 32 characters or equal to the example placeholder. |
+| `COOKIE_SIGNING_SECRET` | generated in Compose | Signs visitor cookies. Unset under Compose, the API generates one on first start into `cookie-signing-secret` on the `poker_data` volume (mode 600) and reuses it. Outside Compose, production requires it, or `COOKIE_SIGNING_SECRET_FILE` naming a writable file. Production refuses a value shorter than 32 characters or equal to the old example placeholder. |
 | `COOKIE_SIGNING_SECRET_PREVIOUS` | empty | Accepted only to verify cookies during [rotation](#rotate-the-cookie-signing-secret). |
 | `POKER_FRONTEND_URL` | `http://localhost:8080` in Compose | The address people type, no trailing slash; separate several with commas. The API refuses to start in production when it is empty. Browser and socket requests must come from one of these origins. |
 | `COOKIE_SECURE` | empty | Secure cookies are on when every frontend URL is `https://`. Set `true` or `false` to override; any other value stops the API at startup. |
-| `ADMIN_PASSWORD` | empty | Turns on the [admin page](#admin-page) at `/admin`. At least 12 characters; a shorter value stops the API at startup, and empty leaves it off. |
-| `TRUSTED_PROXY_IPS` | `POKER_WEB_IP` | Proxies allowed to report the client address. An entry that is not an address or CIDR range stops the API at startup. See [client address](#client-address-and-trusted-proxies). |
-| `POKER_SUBNET`, `POKER_WEB_IP` | `172.30.0.0/24`, `172.30.0.10` | The private Docker network and the web container's address on it. Change them together if the subnet clashes with another network. |
+| `ADMIN_PASSWORD` | empty | Turns on the [admin page](#admin-page) at `/admin`. At least 16 characters, at least 8 different ones, and no common word or sequence; a weaker value stops the API at startup, and empty leaves it off. |
+| `TRUSTED_PROXY_IPS` | `POKER_WEB_IP,POKER_CADDY_IP` | Proxies allowed to report the client address. An entry that is not an address or CIDR range stops the API at startup. See [client address](#client-address-and-trusted-proxies). |
+| `POKER_SUBNET`, `POKER_WEB_IP`, `POKER_CADDY_IP` | `172.30.0.0/24`, `172.30.0.10`, `172.30.0.20` | The private Docker network and the web and Caddy containers' addresses on it. Change them together if the subnet clashes with another network. |
+| `DOMAIN`, `COMPOSE_PROFILES` | empty | `DOMAIN=poker.example.com` with `COMPOSE_PROFILES=https` runs the bundled Caddy container for automatic HTTPS; see [self-hosting](self-hosting.md#put-it-online-with-https). |
 | `WEB_BIND`, `WEB_PORT` | `127.0.0.1`, `8080` | Where the web container is published. |
 | `ALLOW_MISSING_SOCKET_ORIGIN` | `false` | In production, requests without an `Origin` header are refused unless this is `true`. Any value other than `true` or `false` stops the API at startup. |
 | `LOG_LEVEL` | `info` | `error`, `warn`, `info` or `debug`. Messages below the level are dropped. |
@@ -92,6 +93,11 @@ startup. Origin rejections are summarised at most once a minute. Set
 collector as one JSON object per line.
 
 ## Backups
+
+The volume also holds `cookie-signing-secret` when the API generated it. The
+volume backup below includes it; keep the file with any database-only backup,
+because restoring the database with a different secret gives every visitor a
+new identity.
 
 SQLite runs in WAL mode, so recent commits may live in `poker.db-wal`. Never
 copy only `poker.db` while the API is running.
@@ -341,8 +347,8 @@ deleted by the admin.
 ## Admin page
 
 The admin page is the `/admin` route of the site. It is off until
-`ADMIN_PASSWORD` is set (at least 12 characters; the API refuses to start with a
-shorter one). While it is off, every `/api/admin` route answers 404 and `/admin`
+`ADMIN_PASSWORD` is set (at least 16 characters with 8 different ones and no
+common word or sequence; the API refuses to start with a weaker one). While it is off, every `/api/admin` route answers 404 and `/admin`
 explains how to turn it on. The page has **Pending Review**, **Feedback
 Review**, **Rooms**, and **Usage** tabs.
 
@@ -354,7 +360,8 @@ for `Path=/api/admin`, Secure under the same rule as other cookies, valid for
 12 hours. It is signed with the cookie signing secret and bound to the browser
 ID and a hash of the password, so it does not work in another browser and
 changing `ADMIN_PASSWORD` (then restarting) signs everyone out. **Sign out**
-clears it. API restarts keep sessions when `COOKIE_SIGNING_SECRET` is set.
+clears it. API restarts keep sessions when the cookie signing secret is set or
+generated into the data volume.
 
 The admin page is reachable wherever the site is, so it is only as strong as
 `ADMIN_PASSWORD`: use a long random value (for example
@@ -372,7 +379,7 @@ sign-ins for the rest of the UTC day; browsers already signed in are
 unaffected. Every other admin route needs the cookie (401 without it), and
 writes also need the site's `Origin`, before any body is parsed (8 KiB at most).
 
-For development, run `ADMIN_PASSWORD=<at least 12 characters> npm run dev` and
+For development, run `ADMIN_PASSWORD="$(openssl rand -base64 24)" npm run dev` and
 open <http://localhost:4300/admin>. Its banner says **development database**;
 production says **production database**.
 

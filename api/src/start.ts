@@ -1,6 +1,7 @@
 // Loads .env before any module reads the environment; nothing else loads it.
 import 'dotenv/config';
-import { readServerEnv } from './config/env';
+import { loadCookieSigningSecretFile } from './config/cookie-secret-file';
+import { plainHttpWarning, readServerEnv } from './config/env';
 import { legalSetupWarnings } from './config/legal-text';
 import { loadSiteConfig } from './config/site-config';
 import { startThrowStats } from './modules/rooms/throw-stats';
@@ -20,6 +21,7 @@ function logUnhandledFailures(): void {
 }
 
 async function start(): Promise<void> {
+  loadCookieSigningSecretFile();
   const siteConfig = loadSiteConfig();
   await initializeDatabase();
   startRateLimitTelemetry();
@@ -34,6 +36,8 @@ async function start(): Promise<void> {
       ? 'Admin page: on at /admin.'
       : 'Admin page: off. Set ADMIN_PASSWORD to turn it on.',
   );
+  const plainHttp = plainHttpWarning(env);
+  if (plainHttp) logger.warn(`Security: ${plainHttp}.`);
   for (const warning of legalSetupWarnings(siteConfig))
     logger.warn(`Terms and privacy: ${warning}.`);
   const server = createServer(env);

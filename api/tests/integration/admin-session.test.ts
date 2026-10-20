@@ -146,7 +146,7 @@ describe('admin password sign-in with SQLite budgets', () => {
     expect((await usage(`${cookie}; ${admin}`)).status).toBe(200);
     expect((await usage(`${await visitorCookie(randomUUID())}; ${admin}`)).status).toBe(401);
     expect((await usage(admin)).status).toBe(401);
-    process.env.ADMIN_PASSWORD = 'the admin password changed';
+    process.env.ADMIN_PASSWORD = 'Rotated-operator-key-84Xw';
     expect((await usage(`${cookie}; ${admin}`)).status).toBe(401);
     expect(await status(`${cookie}; ${admin}`)).toEqual({ signedIn: false });
   });

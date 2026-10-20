@@ -79,8 +79,9 @@ is a navigation aid; the server enforces the gate.
 The admin page (`/admin`, API under `/api/admin` on the public app) is guarded
 by the `ADMIN_PASSWORD` environment variable alone. It is never read from a file
 or sent to the browser. Unset or empty, the admin is off: every `/api/admin`
-route answers 404 before any other work. Set but shorter than 12 characters, the
-API refuses to start. Because the admin is reachable wherever the site is, admin
+route answers 404 before any other work. Set but shorter than 16 characters,
+with fewer than 8 different characters, or containing a common word or sequence
+(`password`, `admin`, `123456` and similar), the API refuses to start. Because the admin is reachable wherever the site is, admin
 access is only as strong as `ADMIN_PASSWORD`; operators should use a long random
 value.
 
