@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an idea or improvement for Agile Deck.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Please search the [open issues](https://github.com/mattamonett/AgileDeck-Public/issues) first, and add a 👍 to an existing request instead of opening a duplicate.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Tell us what you or your team were trying to do, and what got in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Voting and estimation
+        - Lobby, observers and room settings
+        - Issue backlog
+        - Throwables, themes and room mood
+        - Feedback or admin pages
+        - Self-hosting and site settings
+        - Something new
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds
+      description: Anything you've tried, or other tools that do this well.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, sketches or links.

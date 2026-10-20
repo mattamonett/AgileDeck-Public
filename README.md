@@ -80,7 +80,7 @@ API integration tests start their own temporary SQLite databases and loopback se
 
 ## Contributing
 
-Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first. To report a security problem, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
+Bug reports and feature requests are welcome from anyone. Pull requests are by invitation only; see [CONTRIBUTING.md](CONTRIBUTING.md). To report a security problem, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
 
 ## Credits and trademarks
 

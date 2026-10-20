@@ -1,0 +1,82 @@
+name: Bug report
+description: Something in Agile Deck doesn't work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please check the [open issues](https://github.com/mattamonett/AgileDeck-Public/issues) first in case it has already been reported.
+
+        **Security problems don't belong here.** Use the repository's Security tab and choose "Report a vulnerability" (see [SECURITY.md](https://github.com/mattamonett/AgileDeck-Public/blob/main/SECURITY.md)).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem. Screenshots or a short recording help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How many people were in the room, and what each of them did, if it matters.
+      placeholder: |
+        1. Create a room
+        2. Join from a second browser
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the app is affected?
+      options:
+        - Voting, reveal or round timer
+        - Lobby and approving newcomers
+        - Observer mode
+        - Issue backlog (including import and export)
+        - Throwables, barrages and nudges
+        - Themes and room mood
+        - Feedback page
+        - Admin page
+        - Phone or small-screen layout
+        - Self-hosting (Docker, reverse proxy, site settings)
+        - Something else
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where are you running it?
+      options:
+        - Someone else's hosted site
+        - My own copy (Docker)
+        - My own copy (local development)
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: e.g. Firefox 131 on Windows 11, Safari on iPhone 15
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The Web and API versions shown at the bottom of a room page, if you can see them.
+      placeholder: 'e.g. Web: 1.2.3 (abc1234), API: 1.2.3 (abc1234)'
+  - type: textarea
+    id: logs
+    attributes:
+      label: Errors or logs
+      description: Anything from the browser console or the API logs. Remove passwords, cookies and other secrets first.
+      render: text

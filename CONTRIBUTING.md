@@ -1,12 +1,23 @@
 # Contributing to Agile Deck
 
-Thanks for helping. Bug reports, small fixes and new throwable characters are the easiest places to start.
+Thanks for your interest in Agile Deck. Anyone is welcome to report bugs and suggest features. Code changes come from invited collaborators only.
+
+## Bug reports and feature requests
+
+Open an [issue](https://github.com/mattamonett/AgileDeck-Public/issues/new/choose) and pick **Bug report** or **Feature request**. The forms ask for what's needed to reproduce a problem or understand an idea. Please search the open issues first, and add a 👍 to an existing one instead of opening a duplicate.
+
+Security problems go through [SECURITY.md](SECURITY.md), not public issues.
+
+## Pull requests are by invitation
+
+Pull requests are only accepted from collaborators the maintainer has invited. Pull requests from anyone else will be closed without review, however good the change. If you'd like to help with code, open an issue describing what you have in mind, and the maintainer may invite you.
+
+The rest of this guide is for invited collaborators.
 
 ## Before you start
 
 - For anything bigger than a small fix, open an issue first so we can agree on the approach.
 - Read [AGENTS.md](AGENTS.md). It is the source of truth for architecture, strict TypeScript, validation, authorization, rate limiting and testing rules, for people and AI tools alike.
-- Security problems go through [SECURITY.md](SECURITY.md), not public issues.
 
 ## Setting up
 
