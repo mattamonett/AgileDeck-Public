@@ -13,6 +13,7 @@ export class RevealCelebrationComponent {
   readonly vegas = input(false);
   readonly graveyard = input(false);
   readonly harvest = input(false);
+  readonly cabin = input(false);
   protected readonly sparkAngles = Array.from(
     { length: SPARK_COUNT },
     (_, index) => (index * 360) / SPARK_COUNT,

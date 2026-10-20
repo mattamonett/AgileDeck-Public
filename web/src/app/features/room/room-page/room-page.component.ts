@@ -73,6 +73,7 @@ import { PokerTableComponent } from '../table/poker-table/poker-table.component'
     './vegas-room.css',
     './graveyard-room.css',
     './harvest-room.css',
+    './cabin-room.css',
     './garden-room.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

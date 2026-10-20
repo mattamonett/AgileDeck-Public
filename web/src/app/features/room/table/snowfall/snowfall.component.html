@@ -1,0 +1,12 @@
+<div class="snowfall" aria-hidden="true">
+  @for (flake of flakes; track $index) {
+    <span
+      class="flake"
+      [style.left.%]="flake.left"
+      [style.--flake-sway]="flake.sway + 'vw'"
+      [style.animation-delay.s]="flake.delay"
+      [style.animation-duration.s]="flake.duration"
+      >❄</span
+    >
+  }
+</div>

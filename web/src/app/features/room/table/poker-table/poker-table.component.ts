@@ -6,6 +6,7 @@ import { ConfettiCelebrationComponent } from '../confetti-celebration/confetti-c
 import { GardenCelebrationComponent } from '../garden-celebration/garden-celebration.component';
 import { BatSwarmComponent } from '../bat-swarm/bat-swarm.component';
 import { PieCelebrationComponent } from '../pie-celebration/pie-celebration.component';
+import { SnowfallComponent } from '../snowfall/snowfall.component';
 import { RevealCelebrationComponent } from '../reveal-celebration/reveal-celebration.component';
 import { RoundTimerComponent } from '../round-timer/round-timer.component';
 import type { Projectile } from '../../throw-scene/projectile';
@@ -21,6 +22,7 @@ import { isGardenTheme } from '../../room-theme';
     ConfettiCelebrationComponent,
     BatSwarmComponent,
     PieCelebrationComponent,
+    SnowfallComponent,
     RevealCelebrationComponent,
     RoundTimerComponent,
   ],
@@ -31,6 +33,7 @@ import { isGardenTheme } from '../../room-theme';
     './vegas-table.css',
     './graveyard-table.css',
     './harvest-table.css',
+    './cabin-table.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,6 +63,7 @@ export class PokerTableComponent {
   readonly isGardenTheme = computed(() => isGardenTheme(this.theme()));
   readonly isGraveyardTheme = computed(() => this.theme() === Theme.GRAVEYARD);
   readonly isHarvestTheme = computed(() => this.theme() === Theme.HARVEST);
+  readonly isCabinTheme = computed(() => this.theme() === Theme.CABIN);
   readonly ceremonyLabel = computed(() => {
     switch (this.theme()) {
       case Theme.VEGAS:
@@ -68,6 +72,8 @@ export class PokerTableComponent {
         return 'Final resting estimate';
       case Theme.HARVEST:
         return 'Dinner in';
+      case Theme.CABIN:
+        return 'Gather round the fire';
       default:
         return 'Final reveal';
     }

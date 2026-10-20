@@ -28,6 +28,7 @@ export const UsageMetricSchema = z.enum([
   'setting.theme.vegas',
   'setting.theme.graveyard',
   'setting.theme.harvest',
+  'setting.theme.cabin',
   'setting.mood.friendly',
   'setting.mood.playful',
   'setting.mood.spicy',
@@ -76,6 +77,8 @@ export function themeUsageMetric(theme: Theme): UsageMetric {
       return 'setting.theme.graveyard';
     case Theme.HARVEST:
       return 'setting.theme.harvest';
+    case Theme.CABIN:
+      return 'setting.theme.cabin';
   }
 }
 

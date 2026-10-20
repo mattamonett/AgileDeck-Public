@@ -1,0 +1,56 @@
+:host {
+  display: contents;
+}
+
+.snowfall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.flake {
+  position: absolute;
+  top: -2rem;
+  color: #f4f8ff;
+  font-size: 1.3rem;
+  opacity: 0;
+  text-shadow: 0 0 8px rgba(255, 220, 160, 0.6);
+  animation: flake-fall 3.5s linear both;
+}
+
+.flake:nth-child(3n) {
+  font-size: 0.9rem;
+}
+
+.flake:nth-child(3n + 1) {
+  font-size: 1.7rem;
+}
+
+@keyframes flake-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(var(--flake-sway), 45vh) rotate(180deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--flake-sway) * -1), 90vh) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flake {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -11,7 +11,7 @@
     "throwables": true,
     "blockedThrowables": [],
     "seasonalThrowables": true,
-    "themes": ["default", "space", "retro", "vegas", "graveyard", "harvest"],
+    "themes": ["default", "space", "retro", "vegas", "graveyard", "harvest", "cabin"],
     "defaultTheme": "default"
   },
   "features": {

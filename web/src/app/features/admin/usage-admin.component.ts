@@ -32,6 +32,7 @@ const METRIC_LABELS: Record<UsageMetric, string> = {
   'setting.theme.vegas': 'Theme changed to Las Vegas',
   'setting.theme.graveyard': 'Theme changed to Graveyard Shift',
   'setting.theme.harvest': 'Theme changed to Harvest Table',
+  'setting.theme.cabin': 'Theme changed to Fireside Cabin',
   'setting.mood.friendly': 'Mood changed to Friendly',
   'setting.mood.playful': 'Mood changed to Playful',
   'setting.mood.spicy': 'Mood changed to Spicy',

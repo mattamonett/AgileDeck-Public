@@ -5,6 +5,8 @@
     <app-bat-swarm />
   } @else if (isPerfectMatch() && !isCountdown() && isHarvestTheme()) {
     <app-pie-celebration />
+  } @else if (isPerfectMatch() && !isCountdown() && isCabinTheme()) {
+    <app-snowfall />
   } @else if (isPerfectMatch()) {
     <app-confetti-celebration />
   }
@@ -61,6 +63,7 @@
         [vegas]="theme() === 'vegas'"
         [graveyard]="isGraveyardTheme()"
         [harvest]="isHarvestTheme()"
+        [cabin]="isCabinTheme()"
       />
     }
     <div class="table-ornament" aria-hidden="true">✧ ─── ❧ ─── ✧</div>

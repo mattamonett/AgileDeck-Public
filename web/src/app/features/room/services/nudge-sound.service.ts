@@ -10,7 +10,8 @@ export const NUDGE_SOUND_SETTINGS: readonly { value: NudgeSoundSetting; label: s
   { value: 'off', label: 'Off' },
 ];
 
-export type NudgeTone = 'chime' | 'horn' | 'caw' | 'crows' | 'bell' | 'triangle';
+export type NudgeTone =
+  'chime' | 'horn' | 'caw' | 'crows' | 'bell' | 'triangle' | 'crackle' | 'pop';
 
 export interface NudgeSoundPlan {
   readonly tone: NudgeTone;
@@ -34,11 +35,13 @@ const DEFAULT_TONES: ThemeTones = { gentle: 'chime', loud: 'horn' };
 
 /**
  * Themes with their own nudge sounds. Graveyard Shift caws like a crow and then
- * a flock of them; Harvest Table rings a dinner bell and then clangs the triangle.
+ * a flock of them; Harvest Table rings a dinner bell and then clangs the triangle;
+ * Fireside Cabin crackles like a burning log and then pops loudly.
  */
 const THEME_TONES: ReadonlyMap<string, ThemeTones> = new Map([
   [Theme.GRAVEYARD, { gentle: 'caw', loud: 'crows' }],
   [Theme.HARVEST, { gentle: 'bell', loud: 'triangle' }],
+  [Theme.CABIN, { gentle: 'crackle', loud: 'pop' }],
 ]);
 
 /** Friendly rooms only ever play the gentle tone; the other moods escalate to the loud one and then a yell. */
@@ -179,7 +182,65 @@ export class NudgeSoundService {
         return this.bell(context, volume, [0]);
       case 'triangle':
         return this.bell(context, volume, [0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66], 2.3);
+      case 'crackle':
+        return this.crackles(context, volume, [0, 0.09, 0.15, 0.31, 0.38, 0.56]);
+      case 'pop':
+        return this.firePop(context, volume);
     }
+  }
+
+  /**
+   * Plays a short snap of filtered noise at each offset and returns their length in
+   * seconds. Uneven gaps and alternating brightness make it sound like a burning log.
+   */
+  private crackles(context: AudioContext, volume: number, offsets: readonly number[]): number {
+    const start = context.currentTime;
+    const length = 0.05;
+    const noise = this.noise(context, length);
+    offsets.forEach((offset, index) => {
+      const at = start + offset;
+      const source = context.createBufferSource();
+      const filter = context.createBiquadFilter();
+      const gain = context.createGain();
+      source.buffer = noise;
+      filter.type = 'highpass';
+      filter.frequency.value = index % 2 === 0 ? 1800 : 2600;
+      gain.gain.setValueAtTime(Math.max((index % 3 === 0 ? 0.7 : 0.45) * volume, 0.0002), at);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + length);
+      source.connect(filter).connect(gain).connect(context.destination);
+      source.start(at);
+      source.stop(at + length);
+    });
+    return (offsets.at(-1) ?? 0) + length;
+  }
+
+  /** Plays a deep thump from the fire, then a shower of sparks, and returns its length in seconds. */
+  private firePop(context: AudioContext, volume: number): number {
+    const start = context.currentTime;
+    const thump = context.createOscillator();
+    const gain = context.createGain();
+    thump.type = 'sine';
+    thump.frequency.setValueAtTime(140, start);
+    thump.frequency.exponentialRampToValueAtTime(45, start + 0.25);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.8 * volume, 0.0002), start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.3);
+    thump.connect(gain).connect(context.destination);
+    thump.start(start);
+    thump.stop(start + 0.35);
+    this.crackles(context, volume, [0.02, 0.06, 0.13, 0.2, 0.24, 0.35, 0.41, 0.58, 0.66, 0.85]);
+    return 0.9;
+  }
+
+  private noise(context: AudioContext, length: number): AudioBuffer {
+    const buffer = context.createBuffer(
+      1,
+      Math.ceil(context.sampleRate * length),
+      context.sampleRate,
+    );
+    const samples = buffer.getChannelData(0);
+    for (let index = 0; index < samples.length; index++) samples[index] = Math.random() * 2 - 1;
+    return buffer;
   }
 
   /**

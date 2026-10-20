@@ -17,8 +17,17 @@ describe('seasonal themes', () => {
     expect(isThemeInSeason(Theme.SPACE, new Date('2026-03-15T12:00:00Z'))).toBe(true);
   });
 
+  it('limits Fireside Cabin to December', () => {
+    expect(isSeasonalTheme(Theme.CABIN)).toBe(true);
+    expect(isThemeInSeason(Theme.CABIN, new Date('2026-12-01T00:00:00Z'))).toBe(true);
+    expect(isThemeInSeason(Theme.CABIN, new Date('2026-12-31T23:59:59Z'))).toBe(true);
+    expect(isThemeInSeason(Theme.CABIN, new Date('2026-11-30T23:59:59Z'))).toBe(false);
+    expect(isThemeInSeason(Theme.CABIN, new Date('2027-01-01T00:00:00Z'))).toBe(false);
+  });
+
   it('lists the seasonal themes open today', () => {
     expect(seasonalThemesInSeason(new Date('2026-11-20T12:00:00Z'))).toEqual([Theme.HARVEST]);
+    expect(seasonalThemesInSeason(new Date('2026-12-20T12:00:00Z'))).toEqual([Theme.CABIN]);
     expect(seasonalThemesInSeason(new Date('2026-03-15T12:00:00Z'))).toEqual([]);
   });
 

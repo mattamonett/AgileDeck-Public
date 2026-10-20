@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Theme } from '../themes';
+import { isChristmasSeason } from './christmas';
 import { isThanksgivingSeason } from './thanksgiving';
 
 /**
@@ -8,6 +9,7 @@ import { isThanksgivingSeason } from './thanksgiving';
  */
 const THEME_SEASONS: Readonly<Partial<Record<Theme, (now: Date) => boolean>>> = {
   [Theme.HARVEST]: isThanksgivingSeason,
+  [Theme.CABIN]: isChristmasSeason,
 };
 
 export function isSeasonalTheme(theme: Theme): boolean {

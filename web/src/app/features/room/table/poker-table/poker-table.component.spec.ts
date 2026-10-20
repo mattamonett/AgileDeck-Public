@@ -108,6 +108,23 @@ describe('PokerTableComponent', () => {
     expect(countdown.querySelector('.ceremony-label')?.textContent?.trim()).toBe('Dinner in');
   });
 
+  it('lets it snow and hangs a reveal sign in Fireside Cabin', () => {
+    const element: HTMLElement = create({
+      theme: 'cabin',
+      revealed: true,
+      isPerfectMatch: true,
+    }).nativeElement;
+    expect(element.querySelectorAll('.snowfall .flake')).toHaveLength(24);
+    expect(element.querySelector('.confetti-container')).toBeNull();
+    expect(element.querySelector('.cabin-reveal-banner')?.textContent?.trim()).toBe(
+      'Home for the holidays',
+    );
+    const countdown: HTMLElement = create({ theme: 'cabin', isCountdown: true }).nativeElement;
+    expect(countdown.querySelector('.ceremony-label')?.textContent?.trim()).toBe(
+      'Gather round the fire',
+    );
+  });
+
   it('names the reveal ceremony after the theme', () => {
     const element: HTMLElement = create({ theme: 'graveyard', isCountdown: true }).nativeElement;
     expect(element.querySelector('.ceremony-label')?.textContent?.trim()).toBe(

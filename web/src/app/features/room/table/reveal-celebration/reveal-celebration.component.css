@@ -239,6 +239,90 @@
   }
 }
 
+/* Fireside Cabin: the fire flares up, then a hand-painted wooden sign appears. */
+.cabin-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 36;
+  border-radius: 48% / 18%;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 190, 100, 0.7),
+    rgba(255, 140, 60, 0.15) 70%,
+    transparent
+  );
+  pointer-events: none;
+  opacity: 0;
+  animation: cabin-glow 1.2s ease-out both;
+}
+
+@keyframes cabin-glow {
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.cabin-reveal-banner {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  z-index: 38;
+  width: min(82%, 410px);
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #3a2213;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 9px, rgba(0, 0, 0, 0.12) 9px 10px),
+    linear-gradient(180deg, #8a5a32, #5e3a1e);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 0 #2a180c,
+    0 0 30px rgba(255, 170, 80, 0.45);
+  color: #fbe9cf;
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(42, 24, 12, 0.7);
+  text-transform: uppercase;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: cabin-reveal-banner 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.cabin-reveal-banner::before,
+.cabin-reveal-banner::after {
+  content: '❄';
+  margin: 0 0.6rem;
+  color: #f3cf7a;
+  text-shadow: 0 0 8px rgba(255, 210, 130, 0.8);
+}
+
+@keyframes cabin-reveal-banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -80%) rotate(-3deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(2deg);
+  }
+  32%,
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+}
+
 .reveal-spark {
   position: absolute;
   top: 50%;
@@ -269,7 +353,8 @@
 @media (max-width: 768px) {
   .vegas-reveal-banner,
   .graveyard-reveal-banner,
-  .harvest-reveal-banner {
+  .harvest-reveal-banner,
+  .cabin-reveal-banner {
     top: 34%;
     width: min(88%, 330px);
     padding: 0.65rem 0.75rem;
@@ -281,20 +366,24 @@
   .graveyard-reveal-banner::before,
   .graveyard-reveal-banner::after,
   .harvest-reveal-banner::before,
-  .harvest-reveal-banner::after {
+  .harvest-reveal-banner::after,
+  .cabin-reveal-banner::before,
+  .cabin-reveal-banner::after {
     margin: 0 0.3rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .graveyard-flash,
-  .harvest-steam i {
+  .harvest-steam i,
+  .cabin-glow {
     animation: none;
   }
 
   .vegas-reveal-banner,
   .graveyard-reveal-banner,
-  .harvest-reveal-banner {
+  .harvest-reveal-banner,
+  .cabin-reveal-banner {
     animation: none;
     opacity: 0;
   }

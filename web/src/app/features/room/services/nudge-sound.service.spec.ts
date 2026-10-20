@@ -74,6 +74,23 @@ describe('nudgeSoundPlan in Harvest Table', () => {
   });
 });
 
+describe('nudgeSoundPlan in Fireside Cabin', () => {
+  it('crackles instead of chiming and pops the fire instead of the horn', () => {
+    expect(nudgeSoundPlan(1, 'playful', 'cabin')).toEqual({
+      tone: 'crackle',
+      line: null,
+      afterBleep: null,
+    });
+    expect(nudgeSoundPlan(3, 'friendly', 'cabin').tone).toBe('crackle');
+    expect(nudgeSoundPlan(2, 'playful', 'cabin').tone).toBe('pop');
+    expect(nudgeSoundPlan(3, 'playful', 'cabin')).toEqual({
+      tone: 'pop',
+      line: POLITE_NUDGE_LINE,
+      afterBleep: null,
+    });
+  });
+});
+
 describe('NudgeSoundService', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => TestBed.resetTestingModule());

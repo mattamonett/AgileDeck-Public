@@ -1,0 +1,67 @@
+/* Fireside Cabin theme: a plaid blanket on a pine table, warmed by the fire during the reveal. */
+:host-context([data-theme='cabin']) .table {
+  border-color: rgba(231, 176, 74, 0.5);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 190, 110, 0.14), transparent 62%),
+    repeating-linear-gradient(0deg, transparent 0 22px, rgba(20, 50, 28, 0.35) 22px 34px),
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(20, 50, 28, 0.35) 22px 34px),
+    repeating-linear-gradient(0deg, transparent 0 46px, rgba(0, 0, 0, 0.18) 46px 48px),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(0, 0, 0, 0.18) 46px 48px),
+    linear-gradient(160deg, #8e2a2f, #5a161b 84%);
+  box-shadow:
+    inset 0 0 0 8px rgba(74, 44, 24, 0.85),
+    inset 0 0 0 10px rgba(231, 176, 74, 0.3),
+    inset 0 -28px 60px rgba(0, 0, 0, 0.35),
+    0 22px 46px rgba(0, 0, 0, 0.45),
+    0 0 50px rgba(255, 150, 60, 0.15);
+}
+
+:host-context([data-theme='cabin']) .table::before {
+  border-color: rgba(251, 233, 207, 0.35);
+  border-style: dashed;
+}
+
+:host-context([data-theme='cabin']) .results {
+  border-color: rgba(231, 176, 74, 0.45);
+  background: linear-gradient(180deg, rgba(74, 44, 24, 0.96), rgba(42, 24, 13, 0.96));
+}
+
+:host-context([data-theme='cabin']) .avg-group + .avg-group {
+  border-left-color: rgba(231, 176, 74, 0.3);
+}
+
+:host-context([data-theme='cabin']) .avg-group h3 {
+  color: #e8cfa6;
+}
+
+/* Firelight flickers across the table while the countdown runs. */
+:host-context([data-theme='cabin']) .revelation-ceremony::after {
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(255, 160, 60, 0.35),
+    rgba(255, 110, 40, 0.12) 55%,
+    rgba(20, 8, 4, 0.55)
+  );
+  animation: cabin-firelight 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes cabin-firelight {
+  0% {
+    opacity: 0.75;
+  }
+  40% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-theme='cabin']) .revelation-ceremony::after {
+    animation: none;
+  }
+}
