@@ -67,7 +67,7 @@ function idWhere(test: (p: ReindeerPlan) => boolean): string {
   throw new Error('No matching plan');
 }
 
-describe('Rudy the Rooftop Rookie', () => {
+describe('Dasher the Rooftop Rookie', () => {
   it('samples one reproducible plan whose approach, springboard, skid, gesture and exit all vary', () => {
     expect(reindeerPlan('again')).toEqual(reindeerPlan('again'));
     const all = plans(40);

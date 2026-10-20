@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { RoomMoodSchema } from '../room/mood';
 import { Theme } from '../themes';
-import { VALID_INTERACTION_CHARACTERS } from '../throwables/catalog';
+import { RETIRED_THROWABLES, VALID_INTERACTION_CHARACTERS } from '../throwables/catalog';
 
 /**
  * Settings a site operator controls from config/site.json. Every key is
@@ -61,11 +61,15 @@ export const SiteConfigSchema = z
         throwables: z.boolean().default(true),
         blockedThrowables: z
           .array(
-            z.string().refine((value) => VALID_INTERACTION_CHARACTERS.has(value), {
-              message: 'Not a known throwable',
-            }),
+            z
+              .string()
+              .refine(
+                (value) => VALID_INTERACTION_CHARACTERS.has(value) || RETIRED_THROWABLES.has(value),
+                { message: 'Not a known throwable' },
+              ),
           )
           .refine(unique, 'List each throwable once')
+          .transform((chars) => chars.filter((char) => !RETIRED_THROWABLES.has(char)))
           .default([]),
         seasonalThrowables: z.boolean().default(true),
         themes: z

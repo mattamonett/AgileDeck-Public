@@ -34,11 +34,11 @@ export interface ReindeerPlan {
   /** Bounding surges along the route and how strongly the speed swells with each. */
   readonly surges: number;
   readonly surge: number;
-  /** Cautious approach: where along the route Rudy glances round while still walking. */
+  /** Cautious approach: where along the route Dasher glances round while still walking. */
   readonly lookAt: number;
   /** Gathering crouch before the vault, from a stutter-step to a long bull-like wind-up. */
   readonly gather: number;
-  /** Body position along the top edge, measured from the edge nearest Rudy. */
+  /** Body position along the top edge, measured from the edge nearest Dasher. */
   readonly contactU: number;
   readonly bounces: number;
   readonly bounceDepth: number;
@@ -161,7 +161,7 @@ export function reindeerApproachSpeed(p: ReindeerPlan, t: number): number {
     return start * (1 + p.surge * Math.cos(Math.PI * 2 * p.surges * t)) * brake;
   }
   const build = 0.42 + 1.25 * clamp(t) ** 1.6;
-  // The glance round slows Rudy down without stopping him.
+  // The glance round slows Dasher down without stopping him.
   const look = 1 - 0.4 * pulse(t, p.lookAt - 0.08, 0.16);
   return build * look * brake;
 }
@@ -213,7 +213,7 @@ export function arcSample(
 export interface ReindeerStage {
   readonly stand: Point;
   readonly floor: number;
-  /** Raw (unanimated) top-edge point under Rudy's body while he springs on the card. */
+  /** Raw (unanimated) top-edge point under Dasher's body while he springs on the card. */
   readonly contact: Point;
   /** Whether the springboard sends him over the card (or the far side lacks room, so it flings him back). */
   readonly over: boolean;
@@ -304,7 +304,7 @@ export const reindeerLandAt = (p: ReindeerPlan, k: number) => p.perch + k * p.pe
 export const reindeerPushAt = (p: ReindeerPlan, k: number) =>
   k < p.bounces ? reindeerLandAt(p, k) + p.period * 0.5 : p.spring;
 
-/** Which springboard contact or hop Rudy is in: hop t runs 0..1 between push-off and the next landing. */
+/** Which springboard contact or hop Dasher is in: hop t runs 0..1 between push-off and the next landing. */
 export function reindeerBounce(
   p: ReindeerPlan,
   ms: number,
@@ -358,7 +358,7 @@ export function reindeerPress(p: ReindeerPlan, ms: number): number {
 
 /**
  * Springboard response: the card squashes about its bottom edge under the hooves, tilts toward the
- * side they press, and whips back toward Rudy's start side as he launches, then settles.
+ * side they press, and whips back toward Dasher's start side as he launches, then settles.
  */
 export function reindeerCardPose(
   p: ReindeerPlan,

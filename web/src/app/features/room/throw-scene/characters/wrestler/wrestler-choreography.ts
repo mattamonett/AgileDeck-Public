@@ -19,7 +19,7 @@ export interface WrestlerPlan {
   readonly spot: Point;
 }
 export function wrestlerPlan(id: string): WrestlerPlan {
-  const r = seededRandom(id + ':schlee-na-shoulder');
+  const r = seededRandom(id + ':heel-shoulder');
   const hit = 900 + r() * 100 - 50;
   return {
     pace: 0.92 + r() * 0.16,

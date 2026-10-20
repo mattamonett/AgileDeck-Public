@@ -28,7 +28,7 @@ describe('ProjectileSchema', () => {
 
 describe('interaction emoji rules', () => {
   it('accept valid throwables and an empty default', () => {
-    for (const emoji of ['🍅', '🇺🇸', '']) {
+    for (const emoji of ['🍅', '🏎️', '']) {
       expect(ProjectileSchema.safeParse({ targetUserId: 'u2', emoji }).success).toBe(true);
     }
     for (const emoji of ['<b>', 'invalid!']) {

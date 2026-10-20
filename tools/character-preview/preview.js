@@ -57,18 +57,10 @@ import {
   sharkLandingPoint,
 } from '../../web/src/app/features/room/throw-scene/characters/shark/shark-choreography';
 import {
-  nillPlan,
-  nillLandingPoint,
-} from '../../web/src/app/features/room/throw-scene/characters/nill/nill-choreography';
-import {
   carPlan,
   carLandingPoint,
   carClimb,
 } from '../../web/src/app/features/room/throw-scene/characters/car/car-choreography';
-import {
-  trumpPlan,
-  trumpLandingPoint,
-} from '../../web/src/app/features/room/throw-scene/characters/trump/trump-choreography';
 import {
   architectPlan,
   architectLandingPoint,
@@ -238,9 +230,9 @@ const studies = {
   },
   '🥋': {
     name: 'bullettime',
-    title: '🥋 Bullet Time',
+    title: '🥋 Slow-Mo Showdown',
     description:
-      "Two plain white stick men stage a Matrix fight beside the card. The hero flips in (over the card when thrown from its far side) or knee-slides into place, and an agent in a black necktie strides in or materialises out of falling green code. The hero beckons and they brawl like the subway fight: a mid-air clash, punch flurries, a leg sweep (the agent kips back up when he is the one swept), spinning or side kicks and sometimes a shot to the hero's chin. Then the hero bends right back under a slow-motion punch that lands on the card instead: it ripples green with code and tilts away before springing back. A spinning kick or palm strike sends the agent tumbling away as he dissolves into code, and the hero dusts off his hands and flies up out of view or strolls off.",
+      "Two plain white stick men stage a slow-motion kung fu fight beside the card. The hero flips in (over the card when thrown from its far side) or knee-slides into place, and an agent in a black necktie strides in or materialises out of falling green code. The hero beckons and they brawl: a mid-air clash, punch flurries, a leg sweep (the agent kips back up when he is the one swept), spinning or side kicks and sometimes a shot to the hero's chin. Then the hero bends right back under a slow-motion punch that lands on the card instead: it ripples green with code and tilts away before springing back. A spinning kick or palm strike sends the agent tumbling away as he dissolves into code, and the hero dusts off his hands and flies up out of view or strolls off.",
     beats: [],
   },
   '☮️': {
@@ -273,7 +265,7 @@ const studies = {
   },
   '🦌': {
     name: 'reindeer',
-    title: '\ud83e\udd8c Rudy the Rooftop Rookie',
+    title: '\ud83e\udd8c Dasher the Rooftop Rookie',
     description:
       'An overconfident rookie bounds in (or cautiously builds up), vaults onto the card and bounces on it as a springboard, then launches over it or gets flung backwards. He lands in a snowy skid, wobbles upright, checks his hoof or rubs his nose with a blush, and bucks or slinks off into a gallop.',
     beats: [],
@@ -557,7 +549,7 @@ const studies = {
     name: 'wrestler',
     title: '🤼 The card never stood a chance',
     description:
-      'John Schlee-na arrives in orange, loads up and drives the actual shoulder into the card. Paper creases and a forceful recoil accompany the tackle. Planted recovery steps lead into a double biceps flex and a face wave or cap-tip flourish, then an athletic victory jog.',
+      'The Heel arrives in orange, loads up and drives the actual shoulder into the card. Paper creases and a forceful recoil accompany the tackle. Planted recovery steps lead into a double biceps flex and a face wave or cap-tip flourish, then an athletic victory jog.',
     beats: [
       [0, 'Arrival'],
       [450, 'Wind up'],
@@ -608,42 +600,6 @@ const studies = {
       [7100, 'Turn'],
       [7800, 'Walk away'],
       [9000, 'Restored'],
-    ],
-  },
-  '🇺🇸': {
-    name: 'trump',
-    title: '🇺🇸 A very important inspection',
-    description:
-      'A red cap, swept blond hair, navy suit and long red tie. Our visitor sizes up the card, delivers a patronizing pat and an opinion, then strides confidently onward. The existing quips have their own pinch, pointing or dismissive hand gestures.',
-    beats: [
-      [0, 'Arrival'],
-      [550, 'Inspect'],
-      [1200, 'Opinion'],
-      [2000, 'Reach'],
-      [2300, 'Pat'],
-      [2380, 'Nudge'],
-      [3100, 'Verdict'],
-      [3700, 'Turn'],
-      [4400, 'Stride away'],
-      [5600, 'Restored'],
-    ],
-  },
-  '✋': {
-    name: 'nill',
-    title: '✋ Keep my name out yo mouth',
-    description:
-      'A very familiar dark suit strides in, plants its dress shoes, delivers a palm slap and a returning backhand, then voices its objection. A tie adjustment or cuff brush precedes a purposeful walk away and one last offended glance.',
-    beats: [
-      [0, 'Arrival'],
-      [350, 'Wind up'],
-      [650, 'Slap'],
-      [720, 'Follow through'],
-      [1320, 'Backhand'],
-      [2200, 'Retort'],
-      [3250, 'Turn'],
-      [3900, 'Last glance'],
-      [4800, 'Walk away'],
-      [6000, 'Restored'],
     ],
   },
   '🏎️': {
@@ -748,9 +704,9 @@ const studies = {
   },
   '🪚': {
     name: 'chainsaw',
-    title: '🪚 Texas Chainsaw Massacre',
+    title: '🪚 Chainsaw Maniac',
     description:
-      'A stitched mask, work shirt, bloody apron and yellow chainsaw. The saw bites into the card, tears through flesh, and leaves hanging intestines before an overhead flourish on the way out.',
+      'A plain white hockey mask, work shirt, bloody apron and yellow chainsaw. The saw bites into the card, tears through flesh, and leaves hanging intestines before an overhead flourish on the way out.',
     beats: [
       [0, 'Arrival'],
       [500, 'Rev'],
@@ -990,7 +946,7 @@ const planned = {
     ],
   },
 };
-/** Still beats for each exchange of the Bullet Time fight. */
+/** Still beats for each exchange of the Slow-Mo Showdown fight. */
 function bulletExchangeBeats(e) {
   const who = e.by === 'hero' ? 'Hero' : 'Agent';
   const last = 160 + (e.count - 1) * e.beat + 0.62 * e.beat;
@@ -1547,17 +1503,9 @@ function info() {
     const p = architectPlan(seed());
     return `${seed()} · ${p.pace.toFixed(2)} pace · ${p.pressure.toFixed(2)} pressure · ${p.glasses ? 'adjusts glasses' : 'proud nod'}`;
   }
-  if (character === '🇺🇸') {
-    const p = trumpPlan(seed());
-    return `${seed()} · ${p.phrase} · ${p.pace.toFixed(2)} pace · ${p.force.toFixed(2)} pat`;
-  }
   if (character === '🏎️') {
     const p = carPlan(seed());
     return `${seed()} · ${p.turns} tumble${p.turns > 1 ? 's' : ''} · ${p.force.toFixed(2)} force · ${p.pace.toFixed(2)} pace · ${p.helmet ? 'checks helmet' : 'sheepish wave'}`;
-  }
-  if (character === '✋') {
-    const p = nillPlan(seed());
-    return `${seed()} · ${p.force.toFixed(2)} force · ${p.pace.toFixed(2)} pace · ${p.tie ? 'straightens tie' : 'brushes cuff'}`;
   }
   if (character === '🦈') {
     const p = sharkPlan(seed());
@@ -1766,14 +1714,6 @@ function inspect(ms) {
     else if (ms === 7100) ms = p.departure + 100;
     else if (ms === 7800) ms = p.departure + 180 + 1300 * p.exit * 0.65;
   }
-  if (character === '🇺🇸') {
-    const p = trumpPlan(seed());
-    if (ms === 2000) ms = p.pat - 200;
-    else if (ms === 2300) ms = p.pat;
-    else if (ms === 2380) ms = p.pat + 80;
-    else if (ms === 3700) ms = p.departure + 80;
-    else if (ms === 4400) ms = p.departure + 1450 * p.exit * 0.6;
-  }
   if (character === '🏎️') {
     const p = carPlan(seed());
     if (ms === 350) ms = 100 + (p.hit - 100) * 0.5;
@@ -1783,17 +1723,6 @@ function inspect(ms) {
     else if (ms === 2900) ms = carClimb(p) + 1025;
     else if (ms === 3400) ms = p.departure - 620;
     else if (ms === 4200) ms = p.departure + 850;
-  }
-  if (character === '✋') {
-    const p = nillPlan(seed());
-    if (ms === 350) ms = p.slap - 170;
-    else if (ms === 650) ms = p.slap;
-    else if (ms === 720) ms = p.slap + 90;
-    else if (ms === 1320) ms = p.backhand + 90;
-    else if (ms === 2200) ms = p.backhand + 880;
-    else if (ms === 3250) ms = p.departure + 150;
-    else if (ms === 3900) ms = p.departure + 220 + 1500 * p.exit * (0.32 + p.glance / 2);
-    else if (ms === 4800) ms = p.departure + 220 + 1500 * p.exit * 0.75;
   }
   if (character === '🦈') {
     const p = sharkPlan(seed());
@@ -2119,46 +2048,36 @@ function inspect(ms) {
                     ? pigeonLandingPoint(trick.pigeonPlan, b, view)
                     : character === '🦈'
                       ? sharkLandingPoint(trick.sharkPlan, b, view)
-                      : character === '✋'
-                        ? nillLandingPoint(trick.nillPlan, b, view, {
-                            x: source.left + source.width / 2,
-                            y: source.top + source.height / 2,
-                          })
-                        : character === '🕶️'
-                          ? sunglassesLandingPoint(b)
-                          : character === '🛸'
-                            ? ufoLandingPoint(trick.ufoPlan, b, view)
-                            : character === '🐐'
-                              ? goatLandingPoint(trick.goatPlan, b, view, {
+                      : character === '🕶️'
+                        ? sunglassesLandingPoint(b)
+                        : character === '🛸'
+                          ? ufoLandingPoint(trick.ufoPlan, b, view)
+                          : character === '🐐'
+                            ? goatLandingPoint(trick.goatPlan, b, view, {
+                                x: source.left + source.width / 2,
+                                y: source.top + source.height / 2,
+                              })
+                            : character === '🤼'
+                              ? wrestlerLandingPoint(trick.wrestlerPlan, b, view, {
                                   x: source.left + source.width / 2,
                                   y: source.top + source.height / 2,
                                 })
-                              : character === '🤼'
-                                ? wrestlerLandingPoint(trick.wrestlerPlan, b, view, {
+                              : character === '👶'
+                                ? babyLandingPoint(trick.babyPlan, b, view, {
                                     x: source.left + source.width / 2,
                                     y: source.top + source.height / 2,
                                   })
-                                : character === '👶'
-                                  ? babyLandingPoint(trick.babyPlan, b, view, {
+                                : character === '📐'
+                                  ? architectLandingPoint(trick.architectPlan, b, view, {
                                       x: source.left + source.width / 2,
                                       y: source.top + source.height / 2,
                                     })
-                                  : character === '📐'
-                                    ? architectLandingPoint(trick.architectPlan, b, view, {
+                                  : character === '🏎️'
+                                    ? carLandingPoint(trick.carPlan, b, view, {
                                         x: source.left + source.width / 2,
                                         y: source.top + source.height / 2,
                                       })
-                                    : character === '🇺🇸'
-                                      ? trumpLandingPoint(trick.trumpPlan, b, view, {
-                                          x: source.left + source.width / 2,
-                                          y: source.top + source.height / 2,
-                                        })
-                                      : character === '🏎️'
-                                        ? carLandingPoint(trick.carPlan, b, view, {
-                                            x: source.left + source.width / 2,
-                                            y: source.top + source.height / 2,
-                                          })
-                                        : zombieLandingPoint(b, landingVariation(seed()), view);
+                                    : zombieLandingPoint(b, landingVariation(seed()), view);
     const facing = end.x < b.left + b.width / 2 ? 1 : -1;
     const pace =
       character === '👽'
@@ -2177,25 +2096,21 @@ function inspect(ms) {
                     ? trick.pigeonPlan.pace
                     : character === '🦈'
                       ? trick.sharkPlan.pace
-                      : character === '✋'
-                        ? trick.nillPlan.pace
-                        : character === '🕶️'
-                          ? trick.sunglassesPlan.pace
-                          : character === '🛸'
-                            ? trick.ufoPlan.pace
-                            : character === '🐐'
-                              ? trick.goatPlan.pace
-                              : character === '🤼'
-                                ? trick.wrestlerPlan.pace
-                                : character === '👶'
-                                  ? trick.babyPlan.pace
-                                  : character === '📐'
-                                    ? trick.architectPlan.pace
-                                    : character === '🇺🇸'
-                                      ? trick.trumpPlan.pace
-                                      : character === '🏎️'
-                                        ? trick.carPlan.pace
-                                        : trick.zombiePlan.pace;
+                      : character === '🕶️'
+                        ? trick.sunglassesPlan.pace
+                        : character === '🛸'
+                          ? trick.ufoPlan.pace
+                          : character === '🐐'
+                            ? trick.goatPlan.pace
+                            : character === '🤼'
+                              ? trick.wrestlerPlan.pace
+                              : character === '👶'
+                                ? trick.babyPlan.pace
+                                : character === '📐'
+                                  ? trick.architectPlan.pace
+                                  : character === '🏎️'
+                                    ? trick.carPlan.pace
+                                    : trick.zombiePlan.pace;
     const frames = trick.cardAnimation(facing, b);
     animation = card.animate(frames.frames, frames.options);
     animation.pause();

@@ -108,6 +108,7 @@ describe('@poker/shared export surface', () => {
       'PublicSiteConfigSchema',
       'PublicUserSchema',
       'PublicUsersSchema',
+      'RETIRED_THROWABLES',
       'REVELATION_DELAY_MS',
       'ROUGH_THROWABLES',
       'ReadFeedbackRepliesSchema',

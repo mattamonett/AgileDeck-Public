@@ -20,9 +20,7 @@ export type LandingKind =
   | '🕶️'
   | '🦈'
   | '🦄'
-  | '✋'
   | '🏎️'
-  | '🇺🇸'
   | '📐'
   | '☮️'
   | '👻'
@@ -60,9 +58,7 @@ export function landingKind(emoji: string): LandingKind | null {
     case '🕶️':
     case '🦈':
     case '🦄':
-    case '✋':
     case '🏎️':
-    case '🇺🇸':
     case '📐':
     case '☮️':
     case '👻':
@@ -138,8 +134,6 @@ export function landingPoint(kind: LandingKind | null, b: TargetBounds, variatio
     case '🪆':
     case '🧟':
     case '🦈':
-    case '✋':
-    case '🇺🇸':
     case '📐':
     case '👶':
     case '🤼':

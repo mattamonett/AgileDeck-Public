@@ -6,4 +6,5 @@ export * from './routine';
 export * from './scene-queries';
 export * from './staging';
 export * from './strips';
+export * from './text-sprite';
 export * from './timing';

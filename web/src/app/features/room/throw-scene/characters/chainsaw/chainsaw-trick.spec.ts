@@ -17,10 +17,10 @@ import { chainsawCharacter } from './chainsaw-character';
 
 const bounds = { left: 150, top: 100, width: 105, height: 154 };
 
-describe('Texas Chainsaw Massacre', () => {
+describe('Chainsaw Maniac', () => {
   it('registers the saw emoji and samples either side independently per throw', () => {
     expect(VALID_INTERACTION_CHARACTERS.has('🪚')).toBe(true);
-    expect(projectileName('🪚')).toBe('Texas Chainsaw Massacre');
+    expect(projectileName('🪚')).toBe('Chainsaw Maniac');
     const sides = new Set(
       Array.from(
         { length: 30 },
