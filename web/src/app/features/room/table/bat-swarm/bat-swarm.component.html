@@ -1,0 +1,11 @@
+<div class="bat-swarm" aria-hidden="true">
+  @for (bat of bats; track $index) {
+    <span
+      class="bat"
+      [style.left.%]="bat.left"
+      [style.--bat-drift]="bat.drift + 'vw'"
+      [style.animation-delay.s]="bat.delay"
+      >🦇</span
+    >
+  }
+</div>

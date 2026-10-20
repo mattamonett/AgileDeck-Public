@@ -35,6 +35,28 @@ describe('nudgeSoundPlan', () => {
   });
 });
 
+describe('nudgeSoundPlan in Graveyard Shift', () => {
+  it('caws instead of chiming and sends a flock of crows instead of the horn', () => {
+    expect(nudgeSoundPlan(1, 'playful', 'graveyard')).toEqual({
+      tone: 'caw',
+      line: null,
+      afterBleep: null,
+    });
+    expect(nudgeSoundPlan(3, 'friendly', 'graveyard').tone).toBe('caw');
+    expect(nudgeSoundPlan(2, 'playful', 'graveyard').tone).toBe('crows');
+    expect(nudgeSoundPlan(3, 'spicy', 'graveyard')).toEqual({
+      tone: 'crows',
+      line: SPICY_NUDGE_LINE,
+      afterBleep: SPICY_NUDGE_ENDING,
+    });
+  });
+
+  it('keeps the usual tones on every other theme', () => {
+    expect(nudgeSoundPlan(1, 'playful', 'vegas').tone).toBe('chime');
+    expect(nudgeSoundPlan(2, 'playful', 'vegas').tone).toBe('horn');
+  });
+});
+
 describe('NudgeSoundService', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => TestBed.resetTestingModule());

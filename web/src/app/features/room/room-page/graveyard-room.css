@@ -1,0 +1,71 @@
+[data-theme='graveyard'] {
+  --bg-color: #0b0f16;
+  --primary: #8de6a0;
+  --primary-rgb: 141, 230, 160;
+  --secondary: #9aa6c4;
+  --color-primary: #8de6a0;
+  --color-primary-rgb: 141, 230, 160;
+  --color-secondary: #9aa6c4;
+  background:
+    radial-gradient(
+      circle at 88% 90%,
+      #f4f1dc 0 34px,
+      rgba(244, 241, 220, 0.18) 36px,
+      transparent 120px
+    ),
+    radial-gradient(ellipse at 50% 120%, #2b3546 0%, transparent 60%),
+    linear-gradient(180deg, #121a2a 0%, #0b0f16 70%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* A row of headstones and crosses along the horizon. */
+[data-theme='graveyard']::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 120px;
+  background: url('/graveyard/horizon.svg') 0 100% / 320px 100px repeat-x;
+  opacity: 0.95;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Fog rolling slowly across the bottom of the screen. */
+[data-theme='graveyard']::after {
+  content: '';
+  position: absolute;
+  inset: auto -50% 0 -50%;
+  height: 45%;
+  background:
+    radial-gradient(ellipse 260px 70px at 20% 70%, rgba(190, 205, 225, 0.16), transparent 70%),
+    radial-gradient(ellipse 320px 90px at 55% 80%, rgba(190, 205, 225, 0.12), transparent 70%),
+    radial-gradient(ellipse 240px 60px at 85% 65%, rgba(190, 205, 225, 0.14), transparent 70%);
+  background-size: 50% 100%;
+  animation: graveyard-fog 48s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes graveyard-fog {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+[data-theme='graveyard'] .room-branding-title {
+  color: #d9dfe8;
+  text-shadow:
+    0 0 10px rgba(141, 230, 160, 0.45),
+    0 2px 0 #1a1e24;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='graveyard']::after {
+    animation: none;
+  }
+}

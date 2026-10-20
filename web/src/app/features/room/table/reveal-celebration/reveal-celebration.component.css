@@ -65,6 +65,87 @@
   }
 }
 
+/* Graveyard Shift: a flash of lightning, then a carved stone banner. */
+.graveyard-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 36;
+  border-radius: 48% / 18%;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(236, 244, 255, 0.85),
+    rgba(180, 200, 230, 0.2) 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  animation: graveyard-flash 0.7s ease-out both;
+}
+
+@keyframes graveyard-flash {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  8%,
+  38% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.graveyard-reveal-banner {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  z-index: 38;
+  width: min(82%, 410px);
+  padding: 0.8rem 1.5rem;
+  border: 1px solid #7b8592;
+  border-radius: 14px 14px 4px 4px;
+  background: linear-gradient(180deg, #5d6570, #353b44);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 4px 0 #1d2128,
+    0 0 30px rgba(141, 230, 160, 0.35);
+  color: #1d2128;
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: graveyard-reveal-banner 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.graveyard-reveal-banner::before,
+.graveyard-reveal-banner::after {
+  content: '✝';
+  margin: 0 0.6rem;
+  color: #9be8ae;
+  text-shadow: 0 0 8px rgba(141, 230, 160, 0.8);
+}
+
+@keyframes graveyard-reveal-banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -10%);
+  }
+  20%,
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+}
+
 .reveal-spark {
   position: absolute;
   top: 50%;
@@ -93,7 +174,8 @@
 }
 
 @media (max-width: 768px) {
-  .vegas-reveal-banner {
+  .vegas-reveal-banner,
+  .graveyard-reveal-banner {
     top: 34%;
     width: min(88%, 330px);
     padding: 0.65rem 0.75rem;
@@ -101,13 +183,20 @@
   }
 
   .vegas-reveal-banner::before,
-  .vegas-reveal-banner::after {
+  .vegas-reveal-banner::after,
+  .graveyard-reveal-banner::before,
+  .graveyard-reveal-banner::after {
     margin: 0 0.3rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vegas-reveal-banner {
+  .graveyard-flash {
+    animation: none;
+  }
+
+  .vegas-reveal-banner,
+  .graveyard-reveal-banner {
     animation: none;
     opacity: 0;
   }

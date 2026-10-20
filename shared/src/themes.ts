@@ -5,6 +5,7 @@ export enum Theme {
   SPACE = 'space',
   RETRO = 'retro',
   VEGAS = 'vegas',
+  GRAVEYARD = 'graveyard',
 }
 
 export interface ThemeDefinition {
@@ -18,6 +19,7 @@ export const THEMES = [
   { id: Theme.SPACE, name: 'Deep Space', icon: '🌌' },
   { id: Theme.RETRO, name: 'Retro CRT', icon: '📟' },
   { id: Theme.VEGAS, name: 'Las Vegas', icon: '🎰' },
+  { id: Theme.GRAVEYARD, name: 'Graveyard Shift', icon: '🪦' },
 ] as const satisfies readonly ThemeDefinition[];
 
 export const UpdateThemeSchema = z.object({

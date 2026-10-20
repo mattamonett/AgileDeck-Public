@@ -79,6 +79,26 @@ describe('PokerTableComponent', () => {
     expect(element.querySelector('.vegas-reveal-banner')).not.toBeNull();
   });
 
+  it('releases bats and carves a reveal banner in Graveyard Shift', () => {
+    const element: HTMLElement = create({
+      theme: 'graveyard',
+      revealed: true,
+      isPerfectMatch: true,
+    }).nativeElement;
+    expect(element.querySelectorAll('.bat-swarm .bat')).toHaveLength(14);
+    expect(element.querySelector('.confetti-container')).toBeNull();
+    expect(element.querySelector('.graveyard-reveal-banner')?.textContent?.trim()).toBe(
+      'The votes have risen',
+    );
+  });
+
+  it('names the reveal ceremony after the theme', () => {
+    const element: HTMLElement = create({ theme: 'graveyard', isCountdown: true }).nativeElement;
+    expect(element.querySelector('.ceremony-label')?.textContent?.trim()).toBe(
+      'Final resting estimate',
+    );
+  });
+
   it('shows the countdown and hides the controls during the reveal ceremony', () => {
     const element: HTMLElement = create({ isCountdown: true, countdownValue: 2 }).nativeElement;
     expect(element.querySelector('.countdown-number')?.textContent).toBe('2');

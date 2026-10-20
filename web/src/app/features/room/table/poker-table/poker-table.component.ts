@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { Theme } from '@poker/shared';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { ThrowSceneComponent } from '../../throw-scene/throw-scene.component';
 import { ConfettiCelebrationComponent } from '../confetti-celebration/confetti-celebration.component';
 import { GardenCelebrationComponent } from '../garden-celebration/garden-celebration.component';
+import { BatSwarmComponent } from '../bat-swarm/bat-swarm.component';
 import { RevealCelebrationComponent } from '../reveal-celebration/reveal-celebration.component';
 import { RoundTimerComponent } from '../round-timer/round-timer.component';
 import type { Projectile } from '../../throw-scene/projectile';
@@ -16,11 +18,17 @@ import { isGardenTheme } from '../../room-theme';
     ThrowSceneComponent,
     GardenCelebrationComponent,
     ConfettiCelebrationComponent,
+    BatSwarmComponent,
     RevealCelebrationComponent,
     RoundTimerComponent,
   ],
   templateUrl: './poker-table.component.html',
-  styleUrls: ['./poker-table.component.css', './garden-table.css', './vegas-table.css'],
+  styleUrls: [
+    './poker-table.component.css',
+    './garden-table.css',
+    './vegas-table.css',
+    './graveyard-table.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PokerTableComponent {
@@ -47,6 +55,17 @@ export class PokerTableComponent {
   nudgeCooldowns = input<ReadonlyMap<string, number>>(new Map());
 
   readonly isGardenTheme = computed(() => isGardenTheme(this.theme()));
+  readonly isGraveyardTheme = computed(() => this.theme() === Theme.GRAVEYARD);
+  readonly ceremonyLabel = computed(() => {
+    switch (this.theme()) {
+      case Theme.VEGAS:
+        return 'No more bets';
+      case Theme.GRAVEYARD:
+        return 'Final resting estimate';
+      default:
+        return 'Final reveal';
+    }
+  });
   /**
    * Players the room is waiting on, other than the person looking. Nobody is a
    * straggler until someone has voted, so a fresh round isn't covered in megaphones.

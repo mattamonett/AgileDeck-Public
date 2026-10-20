@@ -1,0 +1,51 @@
+:host {
+  display: contents;
+}
+
+.bat-swarm {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.bat {
+  position: absolute;
+  bottom: 30%;
+  font-size: 1.6rem;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(141, 230, 160, 0.45));
+  animation: bat-flight 2.6s ease-in both;
+}
+
+.bat:nth-child(odd) {
+  font-size: 1.15rem;
+}
+
+@keyframes bat-flight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  12% {
+    opacity: 1;
+  }
+  35% {
+    transform: translate(calc(var(--bat-drift) * 0.3), -18vh) scale(1) rotate(-12deg);
+  }
+  65% {
+    transform: translate(calc(var(--bat-drift) * 0.7), -36vh) scale(0.9) rotate(10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--bat-drift), -70vh) scale(0.6) rotate(-6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bat {
+    animation: none;
+    opacity: 0;
+  }
+}

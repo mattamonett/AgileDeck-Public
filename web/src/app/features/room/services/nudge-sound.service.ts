@@ -1,5 +1,5 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
-import type { NudgeLevel, RoomMood } from '@poker/shared';
+import { Theme, type NudgeLevel, type RoomMood } from '@poker/shared';
 import { readLocalPreference, writeLocalPreference } from '@core/storage/local-preference';
 import { NUDGE_SOUND_STORAGE_KEY } from '@core/storage/storage-keys';
 
@@ -11,7 +11,7 @@ export const NUDGE_SOUND_SETTINGS: readonly { value: NudgeSoundSetting; label: s
 ];
 
 export interface NudgeSoundPlan {
-  readonly tone: 'chime' | 'horn';
+  readonly tone: 'chime' | 'horn' | 'caw' | 'crows';
   /** Spoken after the tone, or null for no voice. */
   readonly line: string | null;
   /** When set, a censor bleep follows the line and then this is spoken, like a radio edit. */
@@ -23,13 +23,23 @@ export const POLITE_NUDGE_LINE = "We're all waiting on your vote!";
 export const SPICY_NUDGE_LINE = 'Vote, mother fuh';
 export const SPICY_NUDGE_ENDING = 'er';
 
-/** Friendly rooms only ever chime; the other moods escalate to a horn and then a yell. */
-export function nudgeSoundPlan(level: NudgeLevel, mood: RoomMood): NudgeSoundPlan {
-  if (mood === 'friendly' || level === 1) return { tone: 'chime', line: null, afterBleep: null };
-  if (level === 2) return { tone: 'horn', line: null, afterBleep: null };
+/**
+ * Friendly rooms only ever chime; the other moods escalate to a horn and then a yell.
+ * Graveyard Shift swaps the chime for a crow's caw and the horn for a flock of them.
+ */
+export function nudgeSoundPlan(
+  level: NudgeLevel,
+  mood: RoomMood,
+  theme: string = Theme.GARDEN,
+): NudgeSoundPlan {
+  const graveyard = theme === Theme.GRAVEYARD;
+  const gentle = graveyard ? 'caw' : 'chime';
+  const loud = graveyard ? 'crows' : 'horn';
+  if (mood === 'friendly' || level === 1) return { tone: gentle, line: null, afterBleep: null };
+  if (level === 2) return { tone: loud, line: null, afterBleep: null };
   return mood === 'spicy'
-    ? { tone: 'horn', line: SPICY_NUDGE_LINE, afterBleep: SPICY_NUDGE_ENDING }
-    : { tone: 'horn', line: POLITE_NUDGE_LINE, afterBleep: null };
+    ? { tone: loud, line: SPICY_NUDGE_LINE, afterBleep: SPICY_NUDGE_ENDING }
+    : { tone: loud, line: POLITE_NUDGE_LINE, afterBleep: null };
 }
 
 const RADIO_BLEEP_SECONDS = 0.35;
@@ -93,27 +103,31 @@ export class NudgeSoundService {
     writeLocalPreference(NUDGE_SOUND_STORAGE_KEY, value);
   }
 
-  play(level: NudgeLevel, mood: RoomMood): void {
+  play(level: NudgeLevel, mood: RoomMood, theme?: string): void {
     const setting = this.setting();
     if (setting === 'off') return;
-    this.playAt(level, mood, VOLUME[setting]);
+    this.playAt(level, mood, theme, VOLUME[setting]);
   }
 
-  /** Plays the loudest nudge for this mood so the person can check what they will hear. */
-  test(mood: RoomMood): void {
+  /** Plays the loudest nudge for this room so the person can check what they will hear. */
+  test(mood: RoomMood, theme?: string): void {
     const setting = this.setting();
-    this.playAt(3, mood, VOLUME[setting === 'off' ? 'quiet' : setting]);
+    this.playAt(3, mood, theme, VOLUME[setting === 'off' ? 'quiet' : setting]);
   }
 
-  private playAt(level: NudgeLevel, mood: RoomMood, volume: number): void {
-    const plan = nudgeSoundPlan(level, mood);
+  private playAt(
+    level: NudgeLevel,
+    mood: RoomMood,
+    theme: string | undefined,
+    volume: number,
+  ): void {
+    const plan = nudgeSoundPlan(level, mood, theme);
     const context = this.audioContext();
     // Browsers keep audio suspended until the person has interacted with the page;
     // in that case the visual nudge and tab title still reach them.
     if (context) {
       void context.resume().catch(() => undefined);
-      const toneEnd =
-        plan.tone === 'chime' ? this.chime(context, volume) : this.horn(context, volume);
+      const toneEnd = this.tone(context, plan.tone, volume);
       if (plan.line) this.speak(plan.line, volume, plan.afterBleep, toneEnd);
     } else if (plan.line) {
       this.speak(plan.line, volume, plan.afterBleep, 0);
@@ -135,6 +149,56 @@ export class NudgeSoundService {
     if (typeof AudioContext === 'undefined') return null;
     this.context = new AudioContext();
     return this.context;
+  }
+
+  /** Plays a nudge tone and returns its length in seconds. */
+  private tone(context: AudioContext, tone: NudgeSoundPlan['tone'], volume: number): number {
+    switch (tone) {
+      case 'chime':
+        return this.chime(context, volume);
+      case 'horn':
+        return this.horn(context, volume);
+      case 'caw':
+        return this.caws(context, volume, [0]);
+      case 'crows':
+        return this.caws(context, volume, [0, 0.32, 0.7, 0.95]);
+    }
+  }
+
+  /**
+   * Plays a harsh caw at each offset and returns their length in seconds. A falling
+   * sawtooth, roughened by a fast wobble and narrowed by a band-pass, reads as a crow.
+   */
+  private caws(context: AudioContext, volume: number, offsets: readonly number[]): number {
+    const start = context.currentTime;
+    const length = 0.28;
+    offsets.forEach((offset, index) => {
+      const at = start + offset;
+      const pitch = index % 2 === 0 ? 1 : 0.88;
+      const oscillator = context.createOscillator();
+      const wobble = context.createOscillator();
+      const wobbleDepth = context.createGain();
+      const filter = context.createBiquadFilter();
+      const gain = context.createGain();
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(820 * pitch, at);
+      oscillator.frequency.exponentialRampToValueAtTime(520 * pitch, at + length);
+      wobble.frequency.value = 55;
+      wobbleDepth.gain.value = 90;
+      wobble.connect(wobbleDepth).connect(oscillator.frequency);
+      filter.type = 'bandpass';
+      filter.frequency.value = 1500;
+      filter.Q.value = 2.5;
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.5 * volume, 0.0002), at + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + length);
+      oscillator.connect(filter).connect(gain).connect(context.destination);
+      for (const node of [oscillator, wobble]) {
+        node.start(at);
+        node.stop(at + length + 0.05);
+      }
+    });
+    return (offsets.at(-1) ?? 0) + length;
   }
 
   /** Plays a rising two-note chime and returns its length in seconds. */

@@ -34,6 +34,7 @@ describe('NudgeAlertComponent', () => {
     const fixture = TestBed.createComponent(NudgeAlertComponent);
     fixture.componentRef.setInput('currentUserId', 'me');
     fixture.componentRef.setInput('mood', 'spicy');
+    fixture.componentRef.setInput('theme', 'graveyard');
     fixture.componentRef.setInput('waitingOnMe', waitingOnMe);
     fixture.detectChanges();
     const root: HTMLElement = fixture.nativeElement;
@@ -46,7 +47,7 @@ describe('NudgeAlertComponent', () => {
     document.title = '';
   });
 
-  it('alerts only the nudged player, naming who nudged them, in the room mood', async () => {
+  it('alerts only the nudged player, naming who nudged them, in the room mood and theme', async () => {
     const { fixture, root } = await setup();
     nudge('someone-else');
     fixture.detectChanges();
@@ -57,7 +58,7 @@ describe('NudgeAlertComponent', () => {
     fixture.detectChanges();
     expect(root.querySelector('.nudge-alert.level-3')?.textContent).toContain('Pat nudged you');
     expect(root.querySelector('strong')?.textContent).toBe('VOTE!');
-    expect(sound.play).toHaveBeenCalledWith(3, 'spicy');
+    expect(sound.play).toHaveBeenCalledWith(3, 'spicy', 'graveyard');
   });
 
   it('ignores a nudge that arrives after the player has voted', async () => {
