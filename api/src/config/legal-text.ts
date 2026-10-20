@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   DEFAULT_LEGAL_UPDATED,
+  DEFAULT_SITE_CONFIG,
   defaultPrivacyNotice,
   defaultSiteAgreement,
   LEGAL_FILE_MAX_BYTES,
@@ -78,4 +79,22 @@ export function buildLegalText(config: SiteConfig, directory: string | null): Le
     privacyUpdated: updated ?? DEFAULT_LEGAL_UPDATED,
     privacy,
   };
+}
+
+/**
+ * Settings the operator still needs to fill in before the legal text names
+ * them correctly. The defaults are placeholders, never a real owner.
+ */
+export function legalSetupWarnings(config: SiteConfig): string[] {
+  const defaults = DEFAULT_SITE_CONFIG.site;
+  const warnings: string[] = [];
+  if (config.site.contactEmail === defaults.contactEmail)
+    warnings.push(
+      `site.contactEmail is still ${defaults.contactEmail}; set your own address in config/site.json`,
+    );
+  if (config.legal.termsFile === null && config.site.governingLaw === defaults.governingLaw)
+    warnings.push(
+      'site.governingLaw is still the placeholder; set your jurisdiction in config/site.json',
+    );
+  return warnings;
 }

@@ -27,6 +27,7 @@ export function defaultSiteAgreement(config: SiteConfig): LegalSection[] {
             : 'By using the site you accept these terms.'
         } If you do not accept them, do not use the site.`,
         'You must be at least 13 years old to use the site.',
+        'The site runs on open-source software. The people who wrote that software do not run this copy, are not a party to these terms, and are not responsible for it.',
       ],
     },
     {

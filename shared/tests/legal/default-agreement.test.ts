@@ -14,14 +14,14 @@ describe('site use agreement', () => {
           site: {
             name: 'Team Poker',
             contactEmail: 'legal@team.example',
-            governingLaw: 'the State of Texas, USA',
+            governingLaw: 'England and Wales',
           },
         }),
       ),
     );
     expect(agreement).toContain('Team Poker (the "site")');
     expect(agreement).toContain('email legal@team.example.');
-    expect(agreement).toContain('governed by the laws of the State of Texas, USA');
+    expect(agreement).toContain('governed by the laws of England and Wales');
     expect(agreement).not.toContain('Agile Deck');
   });
 

@@ -2,7 +2,7 @@
   "site": {
     "name": "Agile Deck",
     "contactEmail": "admin@example.com",
-    "governingLaw": "the State of Texas, USA",
+    "governingLaw": "the state or country where the site owner lives",
     "networkProviders": []
   },
   "content": {

@@ -34,6 +34,8 @@ Open <http://localhost:8080>. To reach it from other machines, put it behind a r
 
 Before you put a copy online, read **[docs/self-hosting.md](docs/self-hosting.md)**. It covers reverse proxies and HTTPS, the admin page, and `config/site.json`, where you choose what your copy offers: which moods, themes and throwables are allowed, whether feedback, issues and usage stats are on, room and abuse limits, your own terms and privacy text, and an optional site password.
 
+**If you run a copy, you are its operator.** The terms of use and privacy notice shown on your site are yours, not this project's. The built-in text is a neutral template that fills in your `site.contactEmail` and `site.governingLaw`; set those (the API warns at startup until you do), have the text reviewed for where you operate, or supply your own files. See [terms and privacy notice](docs/site-settings.md#terms-and-privacy-notice-legal). The project's authors do not run your copy, receive none of its data, and provide the software as is under the MIT License.
+
 ## Develop locally
 
 You need Node.js 22.18 or newer (24 recommended).
