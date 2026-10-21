@@ -49,7 +49,7 @@
 
 :host-context([data-theme='cabin']) .card-display .vote-status {
   border-color: rgba(255, 217, 138, 0.7);
-  background: rgba(36, 20, 12, 0.94);
+  background: rgba(10, 40, 26, 0.94);
   color: #fbe9cf;
 }
 

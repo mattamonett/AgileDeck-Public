@@ -1,15 +1,15 @@
 [data-theme='cabin'] {
-  --bg-color: #1a110b;
-  --primary: #f2a74b;
-  --primary-rgb: 242, 167, 75;
-  --secondary: #d9c3a0;
-  --color-primary: #f2a74b;
-  --color-primary-rgb: 242, 167, 75;
-  --color-secondary: #d9c3a0;
+  --bg-color: #0c1a1f;
+  --primary: #f3cf7a;
+  --primary-rgb: 243, 207, 122;
+  --secondary: #e05a5f;
+  --color-primary: #f3cf7a;
+  --color-primary-rgb: 243, 207, 122;
+  --color-secondary: #e05a5f;
   background:
-    radial-gradient(ellipse at 50% 115%, rgba(255, 140, 50, 0.4) 0%, transparent 55%),
-    repeating-linear-gradient(180deg, transparent 0 58px, rgba(0, 0, 0, 0.28) 58px 62px),
-    linear-gradient(180deg, #2b1a10 0%, #1a110b 75%);
+    radial-gradient(ellipse at 50% 115%, rgba(255, 170, 80, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% -10%, rgba(120, 170, 200, 0.18) 0%, transparent 60%),
+    linear-gradient(180deg, #13303a 0%, #0c1a1f 75%);
   position: relative;
   overflow: hidden;
 }
@@ -37,7 +37,7 @@
     radial-gradient(circle at 60% 35%, rgba(255, 255, 255, 0.5) 0 2px, transparent 3px),
     radial-gradient(circle at 85% 75%, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 2.5px);
   background-size: 220px 220px;
-  opacity: 0.45;
+  opacity: 0.6;
   animation: cabin-snow 30s linear infinite;
   pointer-events: none;
   z-index: 1;
@@ -52,8 +52,8 @@
 [data-theme='cabin'] .room-branding-title {
   color: #fbe9cf;
   text-shadow:
-    0 0 12px rgba(242, 167, 75, 0.55),
-    0 2px 0 #3a2213;
+    0 0 12px rgba(243, 207, 122, 0.5),
+    0 2px 0 #0a2a1c;
   letter-spacing: 0.06em;
 }
 

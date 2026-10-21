@@ -281,33 +281,31 @@
   color: #c4621f;
 }
 
-/* Fireside Cabin: a little wooden plank with cream lettering. */
+/* Fireside Cabin: a velvet ribbon tag with gold lettering. */
 :host([data-look='cabin']) {
   gap: 7px;
   padding: 6px 12px;
-  border: 1px solid #3a2213;
+  border: 1px solid #f3cf7a;
   border-radius: 6px;
-  background:
-    repeating-linear-gradient(180deg, transparent 0 7px, rgba(0, 0, 0, 0.12) 7px 8px),
-    linear-gradient(180deg, #8a5a32, #5e3a1e);
+  background: linear-gradient(180deg, #1f5a3c, #0e3323);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 3px 0 #2a180c,
-    0 0 16px rgba(255, 170, 80, 0.18);
+    0 3px 0 #06180f,
+    0 0 16px rgba(243, 207, 122, 0.2);
 }
 :host([data-look='cabin']) .label {
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #e8cfa6;
+  color: #f6e3b0;
 }
 :host([data-look='cabin']) .digits {
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 900;
-  color: #fbe9cf;
-  text-shadow: 0 1px 0 rgba(42, 24, 12, 0.7);
+  color: #fff4dc;
+  text-shadow: 0 1px 0 rgba(6, 24, 15, 0.8);
 }
 :host([data-look='cabin'].stopped) .digits {
   color: #ffd98a;

@@ -1,37 +1,38 @@
-/* Fireside Cabin theme: a plaid blanket on a pine table, warmed by the fire during the reveal. */
+/* Fireside Cabin theme: an evergreen velvet table with a snowy rim and gold sparkles. */
 :host-context([data-theme='cabin']) .table {
-  border-color: rgba(231, 176, 74, 0.5);
+  border-color: rgba(240, 246, 250, 0.85);
   background:
-    radial-gradient(ellipse at 50% 30%, rgba(255, 190, 110, 0.14), transparent 62%),
-    repeating-linear-gradient(0deg, transparent 0 22px, rgba(20, 50, 28, 0.35) 22px 34px),
-    repeating-linear-gradient(90deg, transparent 0 22px, rgba(20, 50, 28, 0.35) 22px 34px),
-    repeating-linear-gradient(0deg, transparent 0 46px, rgba(0, 0, 0, 0.18) 46px 48px),
-    repeating-linear-gradient(90deg, transparent 0 46px, rgba(0, 0, 0, 0.18) 46px 48px),
-    linear-gradient(160deg, #8e2a2f, #5a161b 84%);
+    radial-gradient(circle at 18% 30%, rgba(243, 207, 122, 0.7) 0 1.5px, transparent 2.5px) 0 0 /
+      90px 70px,
+    radial-gradient(circle at 62% 74%, rgba(255, 255, 255, 0.55) 0 1px, transparent 2px) 0 0 / 70px
+      90px,
+    radial-gradient(ellipse at 50% 30%, rgba(255, 220, 150, 0.16), transparent 62%),
+    linear-gradient(160deg, #1f5a3c, #0e3323 84%);
   box-shadow:
-    inset 0 0 0 8px rgba(74, 44, 24, 0.85),
-    inset 0 0 0 10px rgba(231, 176, 74, 0.3),
+    inset 0 0 0 6px rgba(240, 246, 250, 0.9),
+    inset 0 0 0 10px rgba(200, 222, 236, 0.45),
+    inset 0 0 22px 12px rgba(255, 255, 255, 0.18),
     inset 0 -28px 60px rgba(0, 0, 0, 0.35),
     0 22px 46px rgba(0, 0, 0, 0.45),
-    0 0 50px rgba(255, 150, 60, 0.15);
+    0 0 50px rgba(160, 210, 240, 0.12);
 }
 
 :host-context([data-theme='cabin']) .table::before {
-  border-color: rgba(251, 233, 207, 0.35);
-  border-style: dashed;
+  border-color: rgba(243, 207, 122, 0.45);
+  border-style: dotted;
 }
 
 :host-context([data-theme='cabin']) .results {
-  border-color: rgba(231, 176, 74, 0.45);
-  background: linear-gradient(180deg, rgba(74, 44, 24, 0.96), rgba(42, 24, 13, 0.96));
+  border-color: rgba(243, 207, 122, 0.55);
+  background: linear-gradient(180deg, rgba(22, 70, 46, 0.97), rgba(10, 40, 26, 0.97));
 }
 
 :host-context([data-theme='cabin']) .avg-group + .avg-group {
-  border-left-color: rgba(231, 176, 74, 0.3);
+  border-left-color: rgba(243, 207, 122, 0.3);
 }
 
 :host-context([data-theme='cabin']) .avg-group h3 {
-  color: #e8cfa6;
+  color: #f6e3b0;
 }
 
 /* Firelight flickers across the table while the countdown runs. */
