@@ -4,8 +4,11 @@ import {
   isChristmasProjectile,
   HalloweenAvailabilitySchema,
   isHalloweenProjectile,
+  isSeasonalTheme,
+  SeasonalThemeAvailabilitySchema,
   ThanksgivingAvailabilitySchema,
   isThanksgivingProjectile,
+  type Theme,
 } from '@poker/shared';
 import { SocketService } from '@core/socket/socket.service';
 
@@ -16,6 +19,8 @@ export class SeasonalThrowablesService {
   readonly christmasAvailable = signal(false);
   readonly available = signal(false);
   readonly thanksgivingAvailable = signal(false);
+  /** Seasonal themes the server says are in season; every other theme is always offered. */
+  readonly seasonalThemes = signal<readonly Theme[]>([]);
 
   constructor() {
     void this.refresh();
@@ -30,6 +35,10 @@ export class SeasonalThrowablesService {
     if (isChristmasProjectile(char)) return this.christmasAvailable();
     if (isThanksgivingProjectile(char)) return this.thanksgivingAvailable();
     return !isHalloweenProjectile(char) || this.available();
+  }
+
+  isThemeAvailable(theme: Theme): boolean {
+    return !isSeasonalTheme(theme) || this.seasonalThemes().includes(theme);
   }
 
   async refresh(): Promise<void> {
@@ -49,10 +58,13 @@ export class SeasonalThrowablesService {
         thanksgiving.success && thanksgiving.data.thanksgivingAvailable,
       );
       this.available.set(parsed.success && parsed.data.halloweenAvailable);
+      const themes = SeasonalThemeAvailabilitySchema.safeParse(payload);
+      this.seasonalThemes.set(themes.success ? themes.data.seasonalThemes : []);
     } catch {
       this.christmasAvailable.set(false);
       this.thanksgivingAvailable.set(false);
       this.available.set(false);
+      this.seasonalThemes.set([]);
     }
   }
 }

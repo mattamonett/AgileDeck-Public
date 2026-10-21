@@ -104,6 +104,12 @@ describe('mood and theme', () => {
     );
   });
 
+  it('shows Harvest Table through November and the default theme once it ends', () => {
+    const harvest = room({ theme: 'harvest' });
+    expect(toPublicRoom(harvest, Date.parse('2026-11-30T23:59:59Z')).theme).toBe('harvest');
+    expect(toPublicRoom(harvest, Date.parse('2026-12-01T00:00:00Z')).theme).toBe('default');
+  });
+
   it('reads unrecognised stored values as the defaults', () => {
     const publicRoom = toPublicRoom(room({ mood: 'feral', theme: 'neon' }), now);
     expect(publicRoom.mood).toBe('playful');

@@ -55,6 +55,7 @@ describe('RoundTimerComponent', () => {
       ['retro', '> round 0:30', '> halted 0:30'],
       ['vegas', 'On the clock 0:30', 'Final time 0:30'],
       ['graveyard', 'Graveyard shift 0:30', 'Time of death 0:30'],
+      ['harvest', 'Roasting 0:30', 'Served in 0:30'],
       ['unknown', 'Round 0:30', 'Round took 0:30'],
     ] as const;
     for (const [theme, running, stopped] of cases) {

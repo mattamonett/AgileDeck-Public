@@ -1,0 +1,15 @@
+<div class="pie-celebration" aria-hidden="true">
+  @for (leaf of leaves; track $index) {
+    <span
+      class="leaf"
+      [style.left.%]="leaf.left"
+      [style.--leaf-drift]="leaf.drift + 'vw'"
+      [style.animation-delay.s]="leaf.delay"
+      >{{ leaf.char }}</span
+    >
+  }
+  <div class="pie-served">
+    <span class="pie">🥧</span>
+    <span class="pie-banner">Seconds for everyone!</span>
+  </div>
+</div>

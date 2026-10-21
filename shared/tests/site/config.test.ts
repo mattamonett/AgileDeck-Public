@@ -39,6 +39,7 @@ describe('site config', () => {
     [{ unknown: true }, 'Unrecognized key'],
     [{ content: { moods: ['friendly'] } }, 'defaultMood must be one of moods'],
     [{ content: { themes: ['space'] } }, 'defaultTheme must be one of themes'],
+    [{ content: { defaultTheme: 'harvest' } }, 'defaultTheme cannot be a seasonal theme'],
     [
       { content: { moods: ['friendly', 'friendly'], defaultMood: 'friendly' } },
       'List each mood once',

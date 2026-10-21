@@ -10,7 +10,7 @@ It is released under the [MIT License](LICENSE).
 - An approval lobby: the room creator is approved straight away, and any approved participant can let newcomers in.
 - Observer mode for people who watch but don't vote.
 - A persistent issue backlog per room, with nested issues, estimates, pagination and JSON import and export.
-- Themes (Moonlit Garden, Deep Space, Retro CRT, Las Vegas, Graveyard Shift) and a room mood that controls which throwables are allowed.
+- Themes (Moonlit Garden, Deep Space, Retro CRT, Las Vegas, Graveyard Shift, and the November-only Harvest Table) and a room mood that controls which throwables are allowed.
 - Throwable characters, barrages and nudges, animated with Three.js.
 - A feedback page where visitors can post ideas and bug reports. New posts stay private until the operator approves them.
 - An admin page at `/admin` for feedback, rooms and usage counts, turned on by the `ADMIN_PASSWORD` environment variable.

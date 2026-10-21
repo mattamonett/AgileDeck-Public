@@ -1,0 +1,71 @@
+[data-theme='harvest'] {
+  --bg-color: #2a140c;
+  --primary: #f2a541;
+  --primary-rgb: 242, 165, 65;
+  --secondary: #e0604a;
+  --color-primary: #f2a541;
+  --color-primary-rgb: 242, 165, 65;
+  --color-secondary: #e0604a;
+  background:
+    radial-gradient(circle at 12% 88%, rgba(255, 196, 102, 0.22), transparent 220px),
+    radial-gradient(circle at 88% 88%, rgba(255, 196, 102, 0.18), transparent 220px),
+    repeating-linear-gradient(0deg, rgba(255, 236, 205, 0.035) 0 22px, transparent 22px 44px),
+    repeating-linear-gradient(90deg, rgba(255, 236, 205, 0.035) 0 22px, transparent 22px 44px),
+    linear-gradient(180deg, #4a1f14 0%, #2a140c 75%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* A garland of autumn leaves strung along the top of the room. */
+[data-theme='harvest']::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 64px;
+  background: url('/harvest/garland.svg') 0 0 / 320px 64px repeat-x;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Candlelight flickering in the corners of the room. */
+[data-theme='harvest']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 88%, rgba(255, 170, 70, 0.14), transparent 160px),
+    radial-gradient(circle at 88% 88%, rgba(255, 170, 70, 0.12), transparent 160px);
+  animation: harvest-candle 3.2s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes harvest-candle {
+  0%,
+  40% {
+    opacity: 0.6;
+  }
+  55% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+[data-theme='harvest'] .room-branding-title {
+  color: #ffe2b0;
+  text-shadow:
+    0 0 10px rgba(242, 165, 65, 0.45),
+    0 2px 0 #3a1a0e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='harvest']::after {
+    animation: none;
+  }
+}

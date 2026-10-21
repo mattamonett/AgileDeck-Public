@@ -72,6 +72,7 @@ import { PokerTableComponent } from '../table/poker-table/poker-table.component'
     './retro-room.css',
     './vegas-room.css',
     './graveyard-room.css',
+    './harvest-room.css',
     './garden-room.css',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -134,7 +135,9 @@ export class RoomPageComponent implements OnInit {
   );
   readonly themes = computed(() => {
     const allowed = this.content().themes;
-    return THEMES.filter((theme) => allowed.includes(theme.id));
+    return THEMES.filter(
+      (theme) => allowed.includes(theme.id) && this.seasonal.isThemeAvailable(theme.id),
+    );
   });
 
   private readonly projectilePreference = signal(loadProjectilePreference());

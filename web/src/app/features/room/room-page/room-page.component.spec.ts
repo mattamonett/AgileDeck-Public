@@ -309,4 +309,13 @@ describe('RoomPageComponent', () => {
     expect(room.themes().map((theme) => theme.id)).toEqual([Theme.SPACE, Theme.VEGAS]);
     expect(room.roomMood()).toBe('friendly');
   });
+
+  it('offers Harvest Table only while the server says it is in season', () => {
+    const seasonal = TestBed.inject(SeasonalThrowablesService);
+    const room = TestBed.createComponent(RoomPageComponent).componentInstance;
+    seasonal.seasonalThemes.set([]);
+    expect(room.themes().map((theme) => theme.id)).not.toContain(Theme.HARVEST);
+    seasonal.seasonalThemes.set([Theme.HARVEST]);
+    expect(room.themes().map((theme) => theme.id)).toContain(Theme.HARVEST);
+  });
 });

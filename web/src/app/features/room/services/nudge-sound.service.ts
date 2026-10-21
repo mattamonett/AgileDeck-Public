@@ -10,8 +10,10 @@ export const NUDGE_SOUND_SETTINGS: readonly { value: NudgeSoundSetting; label: s
   { value: 'off', label: 'Off' },
 ];
 
+export type NudgeTone = 'chime' | 'horn' | 'caw' | 'crows' | 'bell' | 'triangle';
+
 export interface NudgeSoundPlan {
-  readonly tone: 'chime' | 'horn' | 'caw' | 'crows';
+  readonly tone: NudgeTone;
   /** Spoken after the tone, or null for no voice. */
   readonly line: string | null;
   /** When set, a censor bleep follows the line and then this is spoken, like a radio edit. */
@@ -23,18 +25,29 @@ export const POLITE_NUDGE_LINE = "We're all waiting on your vote!";
 export const SPICY_NUDGE_LINE = 'Vote, mother fuh';
 export const SPICY_NUDGE_ENDING = 'er';
 
+interface ThemeTones {
+  readonly gentle: NudgeTone;
+  readonly loud: NudgeTone;
+}
+
+const DEFAULT_TONES: ThemeTones = { gentle: 'chime', loud: 'horn' };
+
 /**
- * Friendly rooms only ever chime; the other moods escalate to a horn and then a yell.
- * Graveyard Shift swaps the chime for a crow's caw and the horn for a flock of them.
+ * Themes with their own nudge sounds. Graveyard Shift caws like a crow and then
+ * a flock of them; Harvest Table rings a dinner bell and then clangs the triangle.
  */
+const THEME_TONES: ReadonlyMap<string, ThemeTones> = new Map([
+  [Theme.GRAVEYARD, { gentle: 'caw', loud: 'crows' }],
+  [Theme.HARVEST, { gentle: 'bell', loud: 'triangle' }],
+]);
+
+/** Friendly rooms only ever play the gentle tone; the other moods escalate to the loud one and then a yell. */
 export function nudgeSoundPlan(
   level: NudgeLevel,
   mood: RoomMood,
   theme: string = Theme.GARDEN,
 ): NudgeSoundPlan {
-  const graveyard = theme === Theme.GRAVEYARD;
-  const gentle = graveyard ? 'caw' : 'chime';
-  const loud = graveyard ? 'crows' : 'horn';
+  const { gentle, loud } = THEME_TONES.get(theme) ?? DEFAULT_TONES;
   if (mood === 'friendly' || level === 1) return { tone: gentle, line: null, afterBleep: null };
   if (level === 2) return { tone: loud, line: null, afterBleep: null };
   return mood === 'spicy'
@@ -162,7 +175,34 @@ export class NudgeSoundService {
         return this.caws(context, volume, [0]);
       case 'crows':
         return this.caws(context, volume, [0, 0.32, 0.7, 0.95]);
+      case 'bell':
+        return this.bell(context, volume, [0]);
+      case 'triangle':
+        return this.bell(context, volume, [0, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66], 2.3);
     }
+  }
+
+  /**
+   * Strikes a small brass bell at each offset and returns their length in seconds.
+   * Inharmonic overtones over the fundamental give it the ring of struck metal, and a
+   * higher pitch with quick repeats turns it into a dinner triangle being rung.
+   */
+  private bell(
+    context: AudioContext,
+    volume: number,
+    offsets: readonly number[],
+    pitch = 1,
+  ): number {
+    const start = context.currentTime;
+    const ring = offsets.length > 1 ? 0.5 : 1.2;
+    for (const offset of offsets) {
+      [1, 2.76, 5.4].forEach((overtone, index) => {
+        const length = ring / (index + 1);
+        const peak = (0.3 / (index + 1)) * volume;
+        this.note(context, 'sine', 740 * pitch * overtone, start + offset, length, peak);
+      });
+    }
+    return (offsets.at(-1) ?? 0) + ring;
   }
 
   /**

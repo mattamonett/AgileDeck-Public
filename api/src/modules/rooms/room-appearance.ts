@@ -1,4 +1,10 @@
-import { resolveRoomMood, resolveRoomTheme, type RoomMood, type Theme } from '@poker/shared';
+import {
+  resolveRoomMood,
+  resolveRoomTheme,
+  seasonalThemesInSeason,
+  type RoomMood,
+  type Theme,
+} from '@poker/shared';
 import { getSiteConfig } from '../../config/site-config';
 
 /**
@@ -9,7 +15,15 @@ export function parseRoomMood(value: string): RoomMood {
   return resolveRoomMood(value, getSiteConfig().content);
 }
 
-/** Themes follow the same rule as moods. */
-export function parseRoomTheme(value: string): Theme {
-  return resolveRoomTheme(value, getSiteConfig().content);
+/** Themes follow the same rule as moods, and a seasonal theme also ends with its season. */
+export function parseRoomTheme(value: string, now = new Date()): Theme {
+  return resolveRoomTheme(value, getSiteConfig().content, now);
+}
+
+/** The seasonal themes this site offers that are in season today. */
+export function seasonalThemeAvailability(now = new Date()) {
+  const { themes } = getSiteConfig().content;
+  return {
+    seasonalThemes: seasonalThemesInSeason(now).filter((theme) => themes.includes(theme)),
+  };
 }

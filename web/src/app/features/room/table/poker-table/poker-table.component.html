@@ -3,6 +3,8 @@
     <app-garden-celebration />
   } @else if (isPerfectMatch() && !isCountdown() && isGraveyardTheme()) {
     <app-bat-swarm />
+  } @else if (isPerfectMatch() && !isCountdown() && isHarvestTheme()) {
+    <app-pie-celebration />
   } @else if (isPerfectMatch()) {
     <app-confetti-celebration />
   }
@@ -55,7 +57,11 @@
     }
 
     @if (revealed() && !isCountdown()) {
-      <app-reveal-celebration [vegas]="theme() === 'vegas'" [graveyard]="isGraveyardTheme()" />
+      <app-reveal-celebration
+        [vegas]="theme() === 'vegas'"
+        [graveyard]="isGraveyardTheme()"
+        [harvest]="isHarvestTheme()"
+      />
     }
     <div class="table-ornament" aria-hidden="true">✧ ─── ❧ ─── ✧</div>
     <div class="center-content">

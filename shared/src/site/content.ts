@@ -1,5 +1,6 @@
 import { RoomMoodSchema, type RoomMood } from '../room/mood';
 import { isSeasonalThrowable } from '../seasons/seasonal';
+import { isThemeInSeason } from '../seasons/seasonal-themes';
 import { Theme } from '../themes';
 import { VALID_INTERACTION_CHARACTERS } from '../throwables/catalog';
 import {
@@ -42,13 +43,21 @@ export function resolveRoomMood(value: unknown, content: ContentSettings): RoomM
   return parsed.success && isMoodAllowed(parsed.data, content) ? parsed.data : content.defaultMood;
 }
 
-export function isThemeAllowed(theme: Theme, content: ContentSettings): boolean {
-  return content.themes.includes(theme);
+/** The operator lists the theme and, for a seasonal theme, it is in season today. */
+export function isThemeAllowed(theme: Theme, content: ContentSettings, now = new Date()): boolean {
+  return content.themes.includes(theme) && isThemeInSeason(theme, now);
 }
 
-/** Same rule as moods: an unknown or no longer allowed theme reads as the default. */
-export function resolveRoomTheme(value: unknown, content: ContentSettings): Theme {
-  return isTheme(value) && isThemeAllowed(value, content) ? value : content.defaultTheme;
+/**
+ * Same rule as moods: an unknown or no longer allowed theme reads as the
+ * default, so a seasonal theme quietly ends with its season.
+ */
+export function resolveRoomTheme(
+  value: unknown,
+  content: ContentSettings,
+  now = new Date(),
+): Theme {
+  return isTheme(value) && isThemeAllowed(value, content, now) ? value : content.defaultTheme;
 }
 
 /**

@@ -57,6 +57,23 @@ describe('nudgeSoundPlan in Graveyard Shift', () => {
   });
 });
 
+describe('nudgeSoundPlan in Harvest Table', () => {
+  it('rings a dinner bell and then clangs the dinner triangle', () => {
+    expect(nudgeSoundPlan(1, 'spicy', 'harvest')).toEqual({
+      tone: 'bell',
+      line: null,
+      afterBleep: null,
+    });
+    expect(nudgeSoundPlan(3, 'friendly', 'harvest').tone).toBe('bell');
+    expect(nudgeSoundPlan(2, 'playful', 'harvest').tone).toBe('triangle');
+    expect(nudgeSoundPlan(3, 'playful', 'harvest')).toEqual({
+      tone: 'triangle',
+      line: POLITE_NUDGE_LINE,
+      afterBleep: null,
+    });
+  });
+});
+
 describe('NudgeSoundService', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => TestBed.resetTestingModule());

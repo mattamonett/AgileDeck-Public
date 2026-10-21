@@ -1,0 +1,56 @@
+/* Harvest Table theme: a wooden farmhouse table with a gingham runner down the middle. */
+:host-context([data-theme='harvest']) .table {
+  border-color: rgba(201, 138, 63, 0.6);
+  background:
+    linear-gradient(90deg, transparent 30%, rgba(180, 46, 36, 0.5) 30% 70%, transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 14px, rgba(255, 236, 205, 0.12) 14px 28px),
+    repeating-linear-gradient(0deg, transparent 0 14px, rgba(255, 236, 205, 0.08) 14px 28px),
+    repeating-linear-gradient(172deg, rgba(0, 0, 0, 0.06) 0 3px, transparent 3px 19px),
+    linear-gradient(160deg, #7a4a26, #4a2a14 84%);
+  box-shadow:
+    inset 0 0 0 8px rgba(58, 30, 12, 0.6),
+    inset 0 0 0 10px rgba(201, 138, 63, 0.3),
+    inset 0 -28px 60px rgba(0, 0, 0, 0.35),
+    0 22px 46px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(242, 165, 65, 0.12);
+}
+
+:host-context([data-theme='harvest']) .table::before {
+  border-color: rgba(242, 196, 120, 0.3);
+}
+
+:host-context([data-theme='harvest']) .results {
+  border-color: rgba(201, 138, 63, 0.5);
+  background: linear-gradient(180deg, rgba(110, 52, 22, 0.97), rgba(70, 32, 14, 0.97));
+}
+
+:host-context([data-theme='harvest']) .avg-group + .avg-group {
+  border-left-color: rgba(242, 196, 120, 0.3);
+}
+
+:host-context([data-theme='harvest']) .avg-group h3 {
+  color: #f6d7a4;
+}
+
+/* Candlelight glows and flickers over the table while dinner is coming. */
+:host-context([data-theme='harvest']) .revelation-ceremony::after {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 190, 90, 0.32), transparent 45%),
+    radial-gradient(circle at center, rgba(255, 150, 60, 0.12), rgba(30, 12, 4, 0.6));
+  animation: harvest-table-candle 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes harvest-table-candle {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-theme='harvest']) .revelation-ceremony::after {
+    animation: none;
+  }
+}

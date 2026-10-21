@@ -92,6 +92,22 @@ describe('PokerTableComponent', () => {
     );
   });
 
+  it('serves a pie and announces dinner in Harvest Table', () => {
+    const element: HTMLElement = create({
+      theme: 'harvest',
+      revealed: true,
+      isPerfectMatch: true,
+    }).nativeElement;
+    expect(element.querySelectorAll('.pie-celebration .leaf')).toHaveLength(16);
+    expect(element.querySelector('.pie-banner')?.textContent?.trim()).toBe('Seconds for everyone!');
+    expect(element.querySelector('.confetti-container')).toBeNull();
+    expect(element.querySelector('.harvest-reveal-banner')?.textContent?.trim()).toBe(
+      'Dinner is served',
+    );
+    const countdown: HTMLElement = create({ theme: 'harvest', isCountdown: true }).nativeElement;
+    expect(countdown.querySelector('.ceremony-label')?.textContent?.trim()).toBe('Dinner in');
+  });
+
   it('names the reveal ceremony after the theme', () => {
     const element: HTMLElement = create({ theme: 'graveyard', isCountdown: true }).nativeElement;
     expect(element.querySelector('.ceremony-label')?.textContent?.trim()).toBe(

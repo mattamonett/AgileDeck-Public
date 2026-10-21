@@ -36,7 +36,7 @@ export function toPublicRoom(room: Room, now = Date.now()): PublicRoom {
     autoReveal: room.autoReveal,
     useMultiplier: room.useMultiplier,
     multiplierValue: room.multiplierValue,
-    theme: parseRoomTheme(room.theme),
+    theme: parseRoomTheme(room.theme, new Date(now)),
     lobbyEnabled: room.lobbyEnabled,
     issuesEnabled: room.issuesEnabled && getSiteConfig().features.issues,
     mood: parseRoomMood(room.mood),
