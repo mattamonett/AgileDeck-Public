@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { DINO_SCALE, dinoPlan, type DinoPlan } from './dinosaur-choreography';
+import { stretchBetweenVectors } from '../../kit';
 
 const plans = new WeakMap<THREE.Group, DinoPlan>();
 function oval(
@@ -175,13 +176,6 @@ export function nativeDinoPlan(root: THREE.Group): DinoPlan {
   if (!p) throw Error('Missing native dinosaur plan');
   return p;
 }
-const up = new THREE.Vector3(0, 1, 0);
-function segment(o: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const v = b.clone().sub(a);
-  o.position.copy(a).add(b).multiplyScalar(0.5);
-  o.scale.y = v.length();
-  o.quaternion.setFromUnitVectors(up, v.normalize());
-}
 function limb(
   root: THREE.Object3D,
   target: THREE.Vector3,
@@ -204,8 +198,8 @@ function limb(
         .normalize()
         .multiplyScalar(bend * Math.sqrt(Math.max(0, length * length - (d * d) / 4))),
     );
-  segment(requireSceneObject(root, upper), new THREE.Vector3(), knee);
-  segment(requireSceneObject(root, lower), knee, local);
+  stretchBetweenVectors(requireSceneObject(root, upper), new THREE.Vector3(), knee);
+  stretchBetweenVectors(requireSceneObject(root, lower), knee, local);
   requireSceneObject(root, joint).position.copy(knee);
   requireSceneObject(root, end).position.copy(local);
 }

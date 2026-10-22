@@ -1,4 +1,4 @@
-import { clamp } from '../../kit';
+import { clamp, stretchBetweenVectors } from '../../kit';
 import { requireSceneObject } from '../../engine/scene-object';
 import * as THREE from 'three';
 import type { Point } from '../../flight/flight-math';
@@ -251,17 +251,10 @@ export function sawPose(ms: number, plan = chainsawPlan('landing')) {
   };
 }
 
-const up = new THREE.Vector3(0, 1, 0);
 const handPoint = new THREE.Vector3();
 const shoulder = new THREE.Vector3();
 const direction = new THREE.Vector3();
 const elbowPoint = new THREE.Vector3();
-function bone(mesh: THREE.Object3D, from: THREE.Vector3, to: THREE.Vector3) {
-  direction.subVectors(to, from);
-  mesh.position.copy(from).addScaledVector(direction, 0.5);
-  mesh.scale.y = direction.length();
-  mesh.quaternion.setFromUnitVectors(up, direction.normalize());
-}
 function poseSaw(man: THREE.Group, pose: ReturnType<typeof sawPose>, ms: number) {
   const rig = requireSceneObject(man, 'saw-rig');
   rig.position.set(pose.x, pose.y, 19);
@@ -285,8 +278,8 @@ function poseSaw(man: THREE.Group, pose: ReturnType<typeof sawPose>, ms: number)
     } else elbowPoint.x += bend;
     const prefix = name.startsWith('left') ? 'left' : 'right';
     requireSceneObject(man, `${prefix}-elbow`).position.copy(elbowPoint);
-    bone(requireSceneObject(man, `${prefix}-upperarm`), shoulder, elbowPoint);
-    bone(requireSceneObject(man, name), elbowPoint, handPoint);
+    stretchBetweenVectors(requireSceneObject(man, `${prefix}-upperarm`), shoulder, elbowPoint);
+    stretchBetweenVectors(requireSceneObject(man, name), elbowPoint, handPoint);
   }
   let index = 0;
   for (const tooth of rig.children) {

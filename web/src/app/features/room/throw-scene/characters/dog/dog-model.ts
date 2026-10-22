@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
+import { stretchBetween } from '../../kit';
 
 function oval(
   parent: THREE.Object3D,
@@ -29,14 +30,6 @@ function limb(parent: THREE.Object3D, name: string, radius: number, color: numbe
   mesh.name = name;
   parent.add(mesh);
   return mesh;
-}
-const up = new THREE.Vector3(0, 1, 0);
-const direction = new THREE.Vector3();
-function bone(object: THREE.Object3D, ax: number, ay: number, bx: number, by: number) {
-  direction.set(bx - ax, by - ay, 0);
-  object.position.set((ax + bx) / 2, (ay + by) / 2, 0);
-  object.scale.y = direction.length();
-  object.quaternion.setFromUnitVectors(up, direction.normalize());
 }
 export function makeDog(): THREE.Group {
   const dog = new THREE.Group();
@@ -153,8 +146,8 @@ export function dogPose(
     const bend = Math.sqrt(Math.max(0, 100 - (length * length) / 4));
     const ex = px / 2 - (py / length) * bend;
     const ey = py / 2 + (px / length) * bend;
-    bone(requireSceneObject(leg, 'upper-leg'), 0, 0, ex, ey);
-    bone(requireSceneObject(leg, 'lower-leg'), ex, ey, px, py);
+    stretchBetween(requireSceneObject(leg, 'upper-leg'), 0, 0, ex, ey);
+    stretchBetween(requireSceneObject(leg, 'lower-leg'), ex, ey, px, py);
     requireSceneObject(leg, 'knee').position.set(ex, ey, 0);
     const paw = requireSceneObject(leg, 'paw');
     paw.position.set(px + 1, py, 0);

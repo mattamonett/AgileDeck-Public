@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { monkeyThrowPose, type MonkeyPlan } from './monkey-choreography';
+import { stretchBetween } from '../../kit';
 
 function oval(
   parent: THREE.Object3D,
@@ -115,14 +116,6 @@ export function makeMonkey(): THREE.Group {
   body.add(tail);
   return monkey;
 }
-const up = new THREE.Vector3(0, 1, 0);
-const vector = new THREE.Vector3();
-function segment(part: THREE.Object3D, ax: number, ay: number, bx: number, by: number) {
-  vector.set(bx - ax, by - ay, 0);
-  part.position.set((ax + bx) / 2, (ay + by) / 2, 0);
-  part.scale.y = vector.length();
-  part.quaternion.setFromUnitVectors(up, vector.normalize());
-}
 function limb(
   root: THREE.Object3D,
   x: number,
@@ -135,8 +128,8 @@ function limb(
   const bend = Math.sqrt(Math.max(0, length * length - (distance * distance) / 4));
   const ex = x / 2 - ((bendSide * y) / Math.max(0.001, distance)) * bend;
   const ey = y / 2 + ((bendSide * x) / Math.max(0.001, distance)) * bend;
-  segment(requireSceneObject(root, arm ? 'upper-arm' : 'upper-leg'), 0, 0, ex, ey);
-  segment(requireSceneObject(root, arm ? 'forearm' : 'lower-leg'), ex, ey, x, y);
+  stretchBetween(requireSceneObject(root, arm ? 'upper-arm' : 'upper-leg'), 0, 0, ex, ey);
+  stretchBetween(requireSceneObject(root, arm ? 'forearm' : 'lower-leg'), ex, ey, x, y);
   requireSceneObject(root, arm ? 'elbow' : 'knee').position.set(ex, ey, 0);
   requireSceneObject(root, arm ? 'hand' : 'foot').position.set(x, y, 0);
 }

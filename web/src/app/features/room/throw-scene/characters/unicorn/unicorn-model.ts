@@ -6,6 +6,7 @@ import {
   unicornPlan,
   type UnicornPlan,
 } from './unicorn-choreography';
+import { stretchBetweenVectors } from '../../kit';
 const plans = new WeakMap<THREE.Group, UnicornPlan>();
 function oval(
   parent: THREE.Object3D,
@@ -180,13 +181,6 @@ export function makeUnicorn(id = 'unicorn'): THREE.Group {
   root.scale.set(UNICORN_SCALE * p.side, UNICORN_SCALE, UNICORN_SCALE);
   return root;
 }
-const up = new THREE.Vector3(0, 1, 0);
-function segment(o: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const direction = b.clone().sub(a);
-  o.position.copy(a).add(b).multiplyScalar(0.5);
-  o.scale.y = direction.length();
-  o.quaternion.setFromUnitVectors(up, direction.normalize());
-}
 export function unicornFoot(root: THREE.Group, index: number, target: THREE.Vector3, angle = 0) {
   const leg = requireSceneObject(root, `leg-${index}`),
     local = leg.worldToLocal(target.clone()),
@@ -203,8 +197,8 @@ export function unicornFoot(root: THREE.Group, index: number, target: THREE.Vect
           (index < 2 ? -1 : 1) * Math.sqrt(Math.max(0, 144 - (distance * distance) / 4)),
         ),
     );
-  segment(requireSceneObject(leg, 'upper-leg'), new THREE.Vector3(), knee);
-  segment(requireSceneObject(leg, 'lower-leg'), knee, local);
+  stretchBetweenVectors(requireSceneObject(leg, 'upper-leg'), new THREE.Vector3(), knee);
+  stretchBetweenVectors(requireSceneObject(leg, 'lower-leg'), knee, local);
   requireSceneObject(leg, 'knee').position.copy(knee);
   const hoof = requireSceneObject(leg, 'hoof');
   hoof.position.copy(local);

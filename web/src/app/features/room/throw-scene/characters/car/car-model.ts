@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { CAR_SCALE, carClamp, carClimb, type CarPlan } from './car-choreography';
+import { stretchBetweenVectors } from '../../kit';
 function oval(
   parent: THREE.Object3D,
   name: string,
@@ -234,13 +235,6 @@ export function makeRaceCar(): THREE.Group {
   raceCarDrive(car, 0, 0);
   return car;
 }
-const up = new THREE.Vector3(0, 1, 0);
-function segment(part: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const line = b.clone().sub(a);
-  part.position.copy(a).add(b).multiplyScalar(0.5);
-  part.scale.y = line.length();
-  part.quaternion.setFromUnitVectors(up, line.normalize());
-}
 export function carLimb(root: THREE.Object3D, target: THREE.Vector3, arm: boolean) {
   const length = arm ? 8 : 7;
   const distance = target.length();
@@ -257,8 +251,12 @@ export function carLimb(root: THREE.Object3D, target: THREE.Vector3, arm: boolea
         .normalize()
         .multiplyScalar(Math.sqrt(Math.max(0, length * length - (distance * distance) / 4))),
     );
-  segment(requireSceneObject(root, arm ? 'upper-arm' : 'thigh'), new THREE.Vector3(), joint);
-  segment(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
+  stretchBetweenVectors(
+    requireSceneObject(root, arm ? 'upper-arm' : 'thigh'),
+    new THREE.Vector3(),
+    joint,
+  );
+  stretchBetweenVectors(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
   requireSceneObject(root, arm ? 'elbow' : 'knee').position.copy(joint);
   requireSceneObject(root, arm ? 'glove' : 'boot').position.copy(target);
 }

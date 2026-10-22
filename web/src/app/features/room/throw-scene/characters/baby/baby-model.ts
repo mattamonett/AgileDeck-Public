@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { BABY_SCALE } from './baby-choreography';
+import { stretchBetweenVectors } from '../../kit';
 const SKIN = 0xe1aa88;
 export function babyOval(
   parent: THREE.Object3D,
@@ -159,13 +160,6 @@ export function makeBabyBrent(): THREE.Group {
   babyCrawl(baby, 0, 1, 0, 1);
   return baby;
 }
-const up = new THREE.Vector3(0, 1, 0);
-function segment(part: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const line = b.clone().sub(a);
-  part.position.copy(a).add(b).multiplyScalar(0.5);
-  part.scale.y = line.length();
-  part.quaternion.setFromUnitVectors(up, line.normalize());
-}
 export function babyLimb(
   root: THREE.Object3D,
   target: THREE.Vector3,
@@ -193,8 +187,8 @@ export function babyLimb(
     );
   const joint = target.clone().multiplyScalar(0.5).add(bend),
     origin = new THREE.Vector3();
-  segment(requireSceneObject(root, arm ? 'upper-arm' : 'thigh'), origin, joint);
-  segment(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
+  stretchBetweenVectors(requireSceneObject(root, arm ? 'upper-arm' : 'thigh'), origin, joint);
+  stretchBetweenVectors(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
   requireSceneObject(root, arm ? 'elbow' : 'knee').position.copy(joint);
   requireSceneObject(root, arm ? 'hand' : 'foot').position.copy(target);
 }

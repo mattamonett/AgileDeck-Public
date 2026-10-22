@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { HAT_SCALE, hatEase, type HatPlan } from './hat-choreography';
+import { stretchBetween } from '../../kit';
 
 function material(color: number, roughness = 0.8) {
   return new THREE.MeshStandardMaterial({ color, roughness });
@@ -123,14 +124,6 @@ export function makeRabbit(): THREE.Group {
   rabbit.add(head);
   return rabbit;
 }
-const up = new THREE.Vector3(0, 1, 0);
-const direction = new THREE.Vector3();
-function bone(part: THREE.Object3D, ax: number, ay: number, bx: number, by: number) {
-  direction.set(bx - ax, by - ay, 0);
-  part.position.set((ax + bx) / 2, (ay + by) / 2, 0);
-  part.scale.y = direction.length();
-  part.quaternion.setFromUnitVectors(up, direction.normalize());
-}
 export function rabbitPose(rabbit: THREE.Group, ms: number, plan: HatPlan, rise: number) {
   const pop = 950 + plan.peekPause;
   const side = plan.spot.x < 0.5 ? -1 : 1;
@@ -147,8 +140,8 @@ export function rabbitPose(rabbit: THREE.Group, ms: number, plan: HatPlan, rise:
     const bend = Math.sqrt(Math.max(0, 100 - (distance * distance) / 4));
     const ex = px / 2 - ((armSide * py) / Math.max(0.001, distance)) * bend;
     const ey = py / 2 + ((armSide * px) / Math.max(0.001, distance)) * bend;
-    bone(requireSceneObject(arm, 'upper-arm'), 0, 0, ex, ey);
-    bone(requireSceneObject(arm, 'forearm'), ex, ey, px, py);
+    stretchBetween(requireSceneObject(arm, 'upper-arm'), 0, 0, ex, ey);
+    stretchBetween(requireSceneObject(arm, 'forearm'), ex, ey, px, py);
     requireSceneObject(arm, 'elbow').position.set(ex, ey, 0);
     requireSceneObject(arm, 'rabbit-paw').position.set(px, py, 0);
   }

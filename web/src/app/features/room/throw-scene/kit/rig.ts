@@ -4,8 +4,8 @@ import { part } from './meshes';
 
 const up = new THREE.Vector3(0, 1, 0);
 const along = new THREE.Vector3();
-/** Places a unit-height cylinder so it spans exactly from a to b. */
-export function bone(
+/** Places a unit-height part so it spans exactly from (ax, ay) to (bx, by) at depth z. */
+export function stretchBetween(
   object: THREE.Object3D,
   ax: number,
   ay: number,
@@ -17,6 +17,15 @@ export function bone(
   object.position.set((ax + bx) / 2, (ay + by) / 2, z);
   object.scale.y = Math.max(0.0001, along.length());
   object.quaternion.setFromUnitVectors(up, along.normalize());
+}
+
+const span = new THREE.Vector3();
+/** Places a unit-height part so it spans exactly from a to b. */
+export function stretchBetweenVectors(object: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
+  span.subVectors(b, a);
+  object.position.copy(a).add(b).multiplyScalar(0.5);
+  object.scale.y = span.length();
+  object.quaternion.setFromUnitVectors(up, span.normalize());
 }
 
 /** A two-segment limb whose segments keep fixed lengths; the end group carries hands, feet or props. */
@@ -97,8 +106,8 @@ export function reach(limb: Limb, tx: number, ty: number, bend: number, endAngle
     ey = Math.sin(elbowAngle) * l1;
   const hx = Math.cos(a) * d,
     hy = Math.sin(a) * d;
-  bone(limb.upper, 0, 0, ex, ey);
-  bone(limb.lower, ex, ey, hx, hy);
+  stretchBetween(limb.upper, 0, 0, ex, ey);
+  stretchBetween(limb.lower, ex, ey, hx, hy);
   limb.joint.position.set(ex, ey, 0);
   limb.elbow.set(ex, ey);
   limb.end.position.set(hx, hy, 0);
