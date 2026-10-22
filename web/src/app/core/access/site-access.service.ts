@@ -1,8 +1,9 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { SiteAccessStatusSchema } from '@poker/shared';
+import { ApiPath, SiteAccessStatusSchema } from '@poker/shared';
 import { resolveApiUrl } from '../api/api-url';
 import { SiteConfigService } from '../config/site-config.service';
 import { apiErrorMessage } from '../api/api-request';
+import { requestVisitorSession } from '../session/visitor-session';
 
 export type UnlockResult = { readonly ok: true } | { readonly ok: false; readonly message: string };
 
@@ -23,7 +24,7 @@ export class SiteAccessService {
   async refresh(): Promise<void> {
     if (this.protects() === 'nothing') return;
     try {
-      const response = await fetch(`${resolveApiUrl()}/api/access`, {
+      const response = await fetch(resolveApiUrl() + ApiPath.ACCESS, {
         cache: 'no-store',
         credentials: 'include',
         signal: AbortSignal.timeout(10_000),
@@ -40,8 +41,8 @@ export class SiteAccessService {
     const apiUrl = resolveApiUrl();
     try {
       // The access cookie is bound to the browser ID, so make sure there is one.
-      await fetch(`${apiUrl}/api/init`, { cache: 'no-store', credentials: 'include' });
-      const response = await fetch(`${apiUrl}/api/access`, {
+      await requestVisitorSession(apiUrl);
+      const response = await fetch(apiUrl + ApiPath.ACCESS, {
         method: 'POST',
         cache: 'no-store',
         credentials: 'include',

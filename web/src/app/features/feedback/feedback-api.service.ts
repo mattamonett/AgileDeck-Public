@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
+  ApiPath,
   CreateFeedbackSchema,
   FeedbackPageSchema,
   FeedbackVoteStateSchema,
@@ -50,21 +51,21 @@ export class FeedbackApiService {
     });
     if (query.cursor) params.set('cursor', query.cursor);
     return FeedbackPageSchema.parse(
-      await this.request('/api/feedback?' + params.toString(), { cache: 'no-store' }),
+      await this.request(`${ApiPath.FEEDBACK}?${params.toString()}`, { cache: 'no-store' }),
     );
   }
 
   async listOwn(cursor: string | null): Promise<OwnFeedbackPage> {
     const suffix = cursor ? '?cursor=' + encodeURIComponent(cursor) : '';
     return OwnFeedbackPageSchema.parse(
-      await this.request('/api/feedback/mine' + suffix, { cache: 'no-store' }),
+      await this.request(`${ApiPath.FEEDBACK}/mine${suffix}`, { cache: 'no-store' }),
     );
   }
 
   /** A null reaction removes the visitor's current vote. */
   async vote(id: string, reaction: FeedbackReaction | null): Promise<FeedbackVoteState> {
     return FeedbackVoteStateSchema.parse(
-      await this.request('/api/feedback/' + id + '/vote', {
+      await this.request(`${ApiPath.FEEDBACK}/${encodeURIComponent(id)}/vote`, {
         method: reaction === null ? 'DELETE' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         ...(reaction === null ? {} : { body: JSON.stringify({ reaction }) }),
@@ -74,7 +75,7 @@ export class FeedbackApiService {
 
   async submit(feedback: CreateFeedback): Promise<OwnFeedbackItem> {
     return OwnFeedbackItemSchema.parse(
-      await this.request('/api/feedback', {
+      await this.request(ApiPath.FEEDBACK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(feedback),
@@ -84,7 +85,7 @@ export class FeedbackApiService {
 
   /** Best effort: the response is ignored and unseen items are simply flagged again later. */
   async markOwnSeen(ids: readonly string[]): Promise<void> {
-    await fetch(this.apiUrl + '/api/feedback/mine/seen', {
+    await fetch(`${this.apiUrl}${ApiPath.FEEDBACK}/mine/seen`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

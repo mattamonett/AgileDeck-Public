@@ -1,4 +1,6 @@
 import cookie from 'cookie';
+import { ApiPath } from '@poker/shared';
+import { DAY_MS } from '../../platform/time';
 import { getSiteConfig } from '../../config/site-config';
 import {
   encodeAccessToken,
@@ -13,15 +15,15 @@ import {
  * of the password, so changing the password locks every browser out again.
  */
 export const SITE_ACCESS_COOKIE_NAME = 'agiledeck_site_access_v1';
-export const SITE_ACCESS_MAX_AGE_MS = 30 * 24 * 60 * 60_000;
+export const SITE_ACCESS_MAX_AGE_MS = 30 * DAY_MS;
 
 /** Paths a visitor can reach before entering the password when it protects everything. */
 export const OPEN_API_PATHS: ReadonlySet<string> = new Set([
   '/',
-  '/api/init',
-  '/api/version',
-  '/api/site-config',
-  '/api/access',
+  ApiPath.INIT,
+  ApiPath.VERSION,
+  ApiPath.SITE_CONFIG,
+  ApiPath.ACCESS,
 ]);
 
 export type SiteAccessScope = 'room-creation' | 'everything';

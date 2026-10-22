@@ -1,13 +1,14 @@
 import type { ThrowOverheat } from '@poker/shared';
+import { MINUTE_MS } from '../../platform/time';
 
 /** Rejected throws within this window count toward overheating. */
 const REJECTION_WINDOW_MS = 5000;
 const REJECTIONS_BEFORE_OVERHEAT = 20;
 /** Overheat lasts longer on each strike: 5 s, then 15 s, then a minute. */
-const MAX_OVERHEAT_MS = 60_000;
+const MAX_OVERHEAT_MS = MINUTE_MS;
 const OVERHEAT_MS = [5000, 15_000, MAX_OVERHEAT_MS] as const;
 const MAX_STRIKES = 3;
-const SWEEP_INTERVAL_MS = 60_000;
+const SWEEP_INTERVAL_MS = MINUTE_MS;
 
 interface ThrowHistory {
   rejectedAt: number[];

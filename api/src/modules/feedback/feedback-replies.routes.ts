@@ -1,6 +1,8 @@
-import { Router, json, type Request, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { CreateFeedbackReplySchema, ReadFeedbackRepliesSchema } from '@poker/shared';
+import { MINUTE_MS } from '../../platform/time';
+import { jsonBody, JsonBodyLimit } from '../../platform/http/json-body';
 import { AbuseLimitError } from '../../platform/db/abuse-quota';
 import { FeedbackReplyError } from './feedback-errors';
 import type { ReplyActor } from './reply-access';
@@ -40,7 +42,7 @@ export function createFeedbackRepliesRouter(
     }
   });
   const posting = limiter({
-    windowMs: 60_000,
+    windowMs: MINUTE_MS,
     limit: 3,
     keyGenerator: (req) => {
       const actor = actors.get(req)?.actor;
@@ -64,7 +66,7 @@ export function createFeedbackRepliesRouter(
       next(error);
     }
   });
-  router.post('/', posting, json({ limit: '8kb', inflate: false }), async (req, res, next) => {
+  router.post('/', posting, jsonBody(JsonBodyLimit.MESSAGE), async (req, res, next) => {
     const context = actors.get(req);
     if (!context) {
       next(new Error('Reply access was not initialized.'));
@@ -83,7 +85,7 @@ export function createFeedbackRepliesRouter(
       next(error);
     }
   });
-  router.post('/read', json({ limit: '2kb', inflate: false }), async (req, res, next) => {
+  router.post('/read', jsonBody(JsonBodyLimit.RECEIPTS), async (req, res, next) => {
     const context = actors.get(req);
     if (!context) {
       next(new Error('Reply access was not initialized.'));

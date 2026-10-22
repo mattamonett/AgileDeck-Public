@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { RoomStatsQuerySchema } from '@poker/shared';
+import { MINUTE_MS } from '../../platform/time';
 import { httpClientKey } from '../../platform/http/client-ip';
 import { readRoomStats } from './room-stats.service';
 import { limiter, requireVisitor } from '../../platform/http/helpers';
@@ -8,7 +9,7 @@ export function createRoomStatsRouter() {
   const router = Router();
   router.get(
     '/:roomId/stats',
-    limiter({ windowMs: 60_000, limit: 30, keyGenerator: httpClientKey }),
+    limiter({ windowMs: MINUTE_MS, limit: 30, keyGenerator: httpClientKey }),
     async (req, res) => {
       res.setHeader('Cache-Control', 'no-store');
       const query = RoomStatsQuerySchema.safeParse({

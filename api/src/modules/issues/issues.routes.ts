@@ -1,4 +1,6 @@
-import { Router, json, type Response } from 'express';
+import { Router, type Response } from 'express';
+import { MINUTE_MS } from '../../platform/time';
+import { jsonBody, JsonBodyLimit } from '../../platform/http/json-body';
 import { httpClientKey } from '../../platform/http/client-ip';
 import {
   CreateIssueSchema,
@@ -58,7 +60,7 @@ export function createIssuesRouter(io: PokerServer, isOriginAllowed: (origin: st
     res.setHeader('Cache-Control', 'no-store');
     next();
   });
-  router.use(limiter({ windowMs: 60_000, limit: 120, keyGenerator: httpClientKey }));
+  router.use(limiter({ windowMs: MINUTE_MS, limit: 120, keyGenerator: httpClientKey }));
   router.use('/:roomId/issues', (_req, res, next) => {
     if (getSiteConfig().features.issues) {
       next();
@@ -88,14 +90,14 @@ export function createIssuesRouter(io: PokerServer, isOriginAllowed: (origin: st
     next();
   });
   const userLimiter = limiter({
-    windowMs: 60_000,
+    windowMs: MINUTE_MS,
     limit: 90,
     keyGenerator: (_req, res) => getIssueAccess(res).visitorId,
   });
   router.use('/:roomId/issues', userLimiter);
-  router.use('/:roomId/issues/import', json({ limit: ISSUE_IMPORT_MAX_BYTES, inflate: false }));
+  router.use('/:roomId/issues/import', jsonBody(ISSUE_IMPORT_MAX_BYTES));
   // Parse bodies only on issue routes, after the visitor and membership checks.
-  router.use('/:roomId/issues', json({ limit: '100kb', inflate: false }));
+  router.use('/:roomId/issues', jsonBody(JsonBodyLimit.DOCUMENT));
   router.get('/:roomId/issues', async (req, res) => {
     try {
       let cursor;

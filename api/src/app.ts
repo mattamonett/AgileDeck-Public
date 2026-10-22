@@ -1,6 +1,9 @@
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
 import rateLimit from 'express-rate-limit';
+import { ApiPath } from '@poker/shared';
+import { MINUTE_MS } from './platform/time';
+import { jsonBody } from './platform/http/json-body';
 import { createAdminRouter } from './modules/admin/admin.routes';
 import { createFeedbackRouter } from './modules/feedback/feedback.routes';
 import { createIssuesRouter } from './modules/issues/issues.routes';
@@ -15,7 +18,7 @@ import { memberContext } from './platform/http/member-context.middleware';
 import { originCors, type OriginCheck } from './platform/http/origin-policy';
 import type { PokerServer } from './socket/types';
 
-const GLOBAL_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const GLOBAL_LIMIT_WINDOW_MS = 15 * MINUTE_MS;
 const GLOBAL_REQUESTS_PER_WINDOW = 1000;
 
 export interface AppDependencies {
@@ -68,14 +71,14 @@ export function createApp({
   // Admin work is not member work: like the former separate admin listener, it
   // runs outside member deletion leases, so it never conflicts with the
   // deletions it performs.
-  app.use('/api/admin', createAdminRouter(isOriginAllowed, secureCookies));
+  app.use(ApiPath.ADMIN, createAdminRouter(isOriginAllowed, secureCookies));
   app.use(memberContext);
 
-  app.use('/api/rooms', createRoomStatsRouter());
-  app.use('/api/rooms', createIssuesRouter(io, isOriginAllowed));
-  app.use('/api/feedback', createFeedbackRouter(isOriginAllowed));
-  app.use('/api/access', createSiteAccessRouter(isOriginAllowed, secureCookies));
-  app.use(express.json({ inflate: false }));
+  app.use(ApiPath.ROOMS, createRoomStatsRouter());
+  app.use(ApiPath.ROOMS, createIssuesRouter(io, isOriginAllowed));
+  app.use(ApiPath.FEEDBACK, createFeedbackRouter(isOriginAllowed));
+  app.use(ApiPath.ACCESS, createSiteAccessRouter(isOriginAllowed, secureCookies));
+  app.use(jsonBody());
 
   app.use(createSessionRouter(isOriginAllowed, secureCookies));
   app.use(createSiteInfoRouter(isOriginAllowed, buildTime));

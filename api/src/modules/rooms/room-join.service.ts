@@ -2,6 +2,7 @@ import { GameEvents, NAME_TAKEN_JOIN_MESSAGE, type SiteAgreementAcceptance } fro
 import { Prisma } from '@prisma/client';
 import type { Room, User } from '@prisma/client';
 import { ipKeyGenerator } from 'express-rate-limit';
+import { MINUTE_MS } from '../../platform/time';
 import { getSiteConfig, type SiteAgreement } from '../../config/site-config';
 import { AbuseLimitError, type DailyQuota } from '../../platform/db/abuse-quota';
 import {
@@ -28,7 +29,7 @@ import * as roomRepository from './room.repository';
 import * as userRepository from './user.repository';
 import { logger } from '../../platform/logger';
 
-export const PENDING_REQUEST_TTL_MS = 5 * 60_000;
+export const PENDING_REQUEST_TTL_MS = 5 * MINUTE_MS;
 /** Requests that may wait in one room's lobby at once. */
 export const MAX_PENDING_REQUESTS = 10;
 

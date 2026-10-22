@@ -1,3 +1,5 @@
+import { ApiPath } from '@poker/shared';
+import { HOUR_MS } from '../../platform/time';
 import { adminPassword } from '../../config/admin-password';
 import {
   encodeAccessToken,
@@ -11,8 +13,8 @@ import {
  * browser ID and changing the password signs every admin out.
  */
 export const ADMIN_COOKIE_NAME = 'agiledeck_admin_v1';
-export const ADMIN_COOKIE_PATH = '/api/admin';
-export const ADMIN_SESSION_MAX_AGE_MS = 12 * 60 * 60_000;
+export const ADMIN_COOKIE_PATH = ApiPath.ADMIN;
+export const ADMIN_SESSION_MAX_AGE_MS = 12 * HOUR_MS;
 
 /** The admin page answers only while ADMIN_PASSWORD is set. */
 export function isAdminEnabled(): boolean {

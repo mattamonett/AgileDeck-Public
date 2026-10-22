@@ -1,5 +1,7 @@
-import { json, Router, type Request, type RequestHandler, type Response } from 'express';
+import { Router, type Request, type RequestHandler, type Response } from 'express';
 import { AdminSignInRequestSchema, type AdminSessionStatus } from '@poker/shared';
+import { MINUTE_MS } from '../../platform/time';
+import { jsonBody, JsonBodyLimit } from '../../platform/http/json-body';
 import { AbuseLimitError, claimDailyQuotas } from '../../platform/db/abuse-quota';
 import { httpClientKey } from '../../platform/http/client-ip';
 import { limiter, requireAllowedOrigin, requireVisitor } from '../../platform/http/helpers';
@@ -23,7 +25,7 @@ import { createUsageRouter } from './routes/usage.routes';
 export const ADMIN_REQUESTS_PER_MINUTE = 120;
 /** Password attempts per network: a short window, then durable daily budgets. */
 export const ADMIN_SIGN_IN_ATTEMPTS_PER_WINDOW = 5;
-const ADMIN_SIGN_IN_WINDOW_MS = 15 * 60_000;
+const ADMIN_SIGN_IN_WINDOW_MS = 15 * MINUTE_MS;
 export const ADMIN_SIGN_IN_ATTEMPTS_PER_NETWORK_DAY = 20;
 export const ADMIN_SIGN_IN_ATTEMPTS_PER_DAY = 200;
 
@@ -98,7 +100,7 @@ function createAdminSessionRouter(
       if (!requireVisitor(req, res)) return;
       next();
     },
-    json({ limit: '1kb', inflate: false }),
+    jsonBody(JsonBodyLimit.PASSWORD),
     async (req, res, next) => {
       try {
         const visitorId = requireVisitor(req, res);
@@ -181,7 +183,7 @@ export function createAdminRouter(isOriginAllowed: OriginCheck, secureCookies: b
   router.use(requireAdminEnabled);
   router.use(
     limiter({
-      windowMs: 60_000,
+      windowMs: MINUTE_MS,
       limit: ADMIN_REQUESTS_PER_MINUTE,
       keyGenerator: httpClientKey,
       message: { message: 'Too many admin requests. Please wait a moment.' },

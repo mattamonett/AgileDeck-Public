@@ -1,3 +1,4 @@
+import { DAY_MS } from '../../platform/time';
 import { getSiteConfig } from '../../config/site-config';
 import {
   DeletionConflictError,
@@ -10,8 +11,6 @@ import * as cleanupRepository from './cleanup.repository';
 
 /** True while any socket is still subscribed to the room. */
 export type RoomActivityCheck = (roomId: string) => boolean;
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Deletes each stale room under its room lock and deletion fence, like an

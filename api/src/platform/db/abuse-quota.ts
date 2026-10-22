@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import type { Prisma } from '@prisma/client';
+import { DAY_MS } from '../time';
 import prisma from './prisma';
 
 /** Each daily counter outlives the UTC day it counts. */
-const QUOTA_RETENTION_MS = 2 * 24 * 60 * 60_000;
+const QUOTA_RETENTION_MS = 2 * DAY_MS;
 
 export class AbuseLimitError extends Error {
   constructor(message = 'Daily abuse-prevention limit reached. Please try again tomorrow.') {

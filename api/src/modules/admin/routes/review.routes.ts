@@ -1,6 +1,7 @@
 import express, { Router, type RequestHandler } from 'express';
 import { z } from 'zod';
 import { RejectFeedbackSubmissionSchema } from '@poker/shared';
+import { jsonBody, JsonBodyLimit } from '../../../platform/http/json-body';
 import {
   listPendingReview,
   reviewFeedback,
@@ -63,7 +64,7 @@ export function createReviewRouter(): Router {
       next(error);
     }
   });
-  const reviewBody = express.json({ limit: '4kb', inflate: false });
+  const reviewBody = jsonBody(JsonBodyLimit.COMMAND);
   router.post('/feedback/:id/approve', reviewRoute('feedback', approve));
   router.post('/feedback/:id/reject', reviewBody, reviewRoute('feedback', reject));
   router.post('/replies/:id/approve', reviewRoute('replies', approve));

@@ -1,8 +1,10 @@
+import { MINUTE_MS } from '../time';
+
 /** Last accepted action per key, such as `${userId}:${action}`, in epoch milliseconds. */
 export const ACTION_COOLDOWNS: Map<string, number> = new Map();
 
-const COOLDOWN_SWEEP_INTERVAL_MS = 60_000;
-const COOLDOWN_MAX_AGE_MS = 60_000;
+const COOLDOWN_SWEEP_INTERVAL_MS = MINUTE_MS;
+const COOLDOWN_MAX_AGE_MS = MINUTE_MS;
 
 // Stale entries are swept so distinct keys cannot grow the map without bound.
 setInterval(() => {

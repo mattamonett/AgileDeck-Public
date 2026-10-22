@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
+  ApiPath,
   OwnFeedbackItemSchema,
   OwnFeedbackPageSchema,
   FeedbackWorkflowSchema,
@@ -51,7 +52,7 @@ function workflowOf(item: FeedbackWorkflow): FeedbackWorkflow {
 export class FeedbackAdminComponent {
   readonly session = inject(AdminSessionService);
   readonly plainHttp = isPlainHttpBeyondThisComputer(inject(DOCUMENT).location);
-  readonly repliesUrl = `${resolveApiUrl()}/api/admin`;
+  readonly repliesUrl = resolveApiUrl() + ApiPath.ADMIN;
   readonly checkPassword = (password: string) => this.session.signIn(password);
   readonly activeTab = signal<'pending' | 'feedback' | 'rooms' | 'usage'>('pending');
   readonly pendingCount = signal<number | null>(null);

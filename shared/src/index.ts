@@ -9,3 +9,4 @@ export * from './legal';
 export * from './site';
 export * from './feedback';
 export * from './admin';
+export * from './http';

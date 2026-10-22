@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import cors from 'cors';
 import type { Request, RequestHandler, Response } from 'express';
+import { MINUTE_MS } from '../time';
 import { ClientError } from '../errors';
 import { isStrictIdentityMode } from './visitor-session';
 import { logger } from '../logger';
@@ -31,7 +32,7 @@ export function originAllowList(allowedOrigins: readonly string[]): OriginCheck 
 }
 
 // Rejected origins are attacker-controlled; summarize them instead of logging each.
-const REJECTION_LOG_INTERVAL_MS = 60_000;
+const REJECTION_LOG_INTERVAL_MS = MINUTE_MS;
 const rejectionCounts = new Map<string, number>();
 let rejectionLogDue = 0;
 
