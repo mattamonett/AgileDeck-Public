@@ -116,7 +116,8 @@ Engine.IO intercepts its own requests before Express. Authenticate and budget
 the transport in `allowRequest`, before allocation, even if the client never
 sends a Socket.IO namespace CONNECT. Namespace guards must remain in place too.
 Transport reservations must expire after failed handshakes and remain counted
-until close after successful admission. Enforce visitor, network, and global
+until close after successful admission. Sockets that stay outside a room are closed after
+a timeout, so capacity is held only by participation; a join in flight defers it. Enforce visitor, network, and global
 concurrency caps, a namespace timeout, and an inbound message-size limit.
 
 For HTTP, the global network limiter precedes cookie parsing and JSON parsing.

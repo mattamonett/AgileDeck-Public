@@ -29,6 +29,7 @@ export class SocketService {
   private lastJoinedKey: string | null = null;
   private connectionNonce: string | null = null;
   private clientSeq = 0;
+  private sessionReady = false;
 
   constructor() {
     this.socket = io(this.apiUrl, {
@@ -97,7 +98,10 @@ export class SocketService {
     });
     void initializeSecureSession(
       this.apiUrl,
-      () => this.socket.connect(),
+      () => {
+        this.sessionReady = true;
+        this.socket.connect();
+      },
       this.sessionAbort.signal,
     );
   }
@@ -125,6 +129,10 @@ export class SocketService {
       const joinKey = this.getJoinKey(roomId, userName, createRoomIntent);
       if (this.lastJoinedKey === joinKey) return;
       this.emitJoinRoom(roomId, userName, createRoomIntent);
+    } else if (this.sessionReady && !this.socket.active) {
+      // The server closes sockets that stay outside a room, and Socket.IO does
+      // not reconnect after a server-side close, so reopen it for this join.
+      this.socket.connect();
     }
   }
 

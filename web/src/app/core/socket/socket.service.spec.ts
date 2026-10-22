@@ -87,6 +87,15 @@ describe('room navigation membership', () => {
     expect(service.isInRoom('another-room')).toBe(true);
   });
 
+  it('reopens a socket the server closed for idling outside a room before joining', async () => {
+    await vi.waitFor(() => expect(socket.connect).toHaveBeenCalledTimes(1));
+    navigate('/');
+    socket.connected = false;
+    expect(socket.active).toBe(false);
+    service.joinRoom('another-room', 'Tester');
+    expect(socket.connect).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps a new name only after the server accepts it', () => {
     localStorage.setItem(USER_NAME_STORAGE_KEY, 'Tester');
     const reconnect = () => {

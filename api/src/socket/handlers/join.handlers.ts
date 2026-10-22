@@ -16,6 +16,11 @@ import type { PokerSocket } from '../types';
 import { logger } from '../../platform/logger';
 
 const GENERIC_JOIN_ERROR = 'Could not join the room. Please try again.';
+/**
+ * A socket outside any room is closed after this long, so idle connections
+ * cannot hold the transport capacity that admission shares across the site.
+ */
+export const UNJOINED_SOCKET_TIMEOUT_MS = 60_000;
 
 function joinErrorMessage(error: unknown): string {
   return error instanceof RoomService.JoinRejectedError || error instanceof AbuseLimitError
@@ -38,11 +43,23 @@ export function registerJoinHandlers(socket: PokerSocket): MembershipSession {
   let membershipVersion = 0;
   let pendingExpiry: ReturnType<typeof setTimeout> | undefined;
   let expiryVersion = 0;
+  let unjoinedTimeout: ReturnType<typeof setTimeout> | undefined;
   const clearPendingExpiry = () => {
     expiryVersion++;
     clearTimeout(pendingExpiry);
     pendingExpiry = undefined;
   };
+  const scheduleUnjoinedTimeout = () => {
+    clearTimeout(unjoinedTimeout);
+    unjoinedTimeout = setTimeout(() => {
+      if (socket.disconnected || socket.data.roomId) return;
+      // A join still running may yet commit; check again once it settles.
+      if (joining) scheduleUnjoinedTimeout();
+      else socket.disconnect(true);
+    }, UNJOINED_SOCKET_TIMEOUT_MS);
+    unjoinedTimeout.unref();
+  };
+  scheduleUnjoinedTimeout();
 
   onMemberEvent(socket, SocketEvents.JOIN_ROOM, async (payload: unknown) => {
     if (joining || socket.disconnected) {
@@ -219,6 +236,7 @@ export function registerJoinHandlers(socket: PokerSocket): MembershipSession {
       for (const channel of memberChannels(roomId)) socket.leave(channel);
       socket.data.roomId = null;
       socket.data.userId = null;
+      scheduleUnjoinedTimeout();
       await RoomService.cleanupUser(userId, roomId, socket.id, true);
     }
   });
@@ -227,6 +245,7 @@ export function registerJoinHandlers(socket: PokerSocket): MembershipSession {
     invalidate() {
       membershipVersion++;
       clearPendingExpiry();
+      clearTimeout(unjoinedTimeout);
     },
   };
 }
