@@ -111,6 +111,7 @@ describe('@poker/shared export surface', () => {
       'PublicUsersSchema',
       'RETIRED_THROWABLES',
       'REVELATION_DELAY_MS',
+      'ROOM_TEXT_REGEX',
       'ROUGH_THROWABLES',
       'ReadFeedbackRepliesSchema',
       'RejectFeedbackSubmissionSchema',

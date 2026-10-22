@@ -277,7 +277,9 @@ only after network, visitor, and capacity checks pass, so rejected traffic from
 one network cannot exhaust admission for unrelated networks. Concurrent
 transports are capped at 5 per visitor, 100 per network, and 2,000 globally.
 Reservations for failed handshakes expire after 10 seconds; admitted transports
-keep their slots until close. The namespace connection timeout is 10 seconds,
+keep their slots until close. A socket that is not in a room 60 seconds after
+connecting or leaving one is closed, so idle connections cannot hold capacity;
+the browser reopens it when the visitor next joins a room. The namespace connection timeout is 10 seconds,
 inbound messages are limited to 16 KiB, and a visitor's sockets share a
 300-message budget per 10 seconds.
 

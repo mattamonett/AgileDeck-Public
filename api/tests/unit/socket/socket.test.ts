@@ -80,6 +80,7 @@ jest.mock('../../../src/modules/rooms/member.service', () => userServiceMock);
 
 import { VISITOR_COOKIE_NAME } from '../../../src/platform/http/visitor-session';
 import { setupSocket } from '../../../src/socket';
+import { UNJOINED_SOCKET_TIMEOUT_MS } from '../../../src/socket/handlers/join.handlers';
 import type { RoomBroadcaster } from '../../../src/modules/rooms/room-broadcaster';
 import { clearThrowPenalties } from '../../../src/modules/interactions/throw-penalty.service';
 import { HEALTH_BUDGET, JOIN_BUDGET, JOIN_NETWORK_BUDGET } from '../../../src/socket/rate-limits';
@@ -266,6 +267,57 @@ describe('socket setup', () => {
       }
     },
   );
+
+  it('closes a socket that stays outside any room, but not one in a room', async () => {
+    jest.useFakeTimers();
+    try {
+      const { io, handlers } = createIo();
+      setupTestSocket(io);
+      const idle = createSocket();
+      handlers.connection(idle.socket);
+      const member = createSocket();
+      handlers.connection(member.socket);
+      roomServiceMock.joinRoom.mockResolvedValueOnce({
+        user: { id: 'user-1', isApproved: true },
+        room: { id: 'room-1' },
+      });
+      await member.handlers[SocketEvents.JOIN_ROOM]({ roomId: 'room-1', userName: 'Alice' });
+
+      await jest.advanceTimersByTimeAsync(UNJOINED_SOCKET_TIMEOUT_MS - 1);
+      expect(idle.socket.disconnect).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(idle.socket.disconnect).toHaveBeenCalledWith(true);
+      expect(member.socket.disconnect).not.toHaveBeenCalled();
+
+      // Leaving starts the clock again.
+      await member.handlers[SocketEvents.LEAVE_ROOM]();
+      await jest.advanceTimersByTimeAsync(UNJOINED_SOCKET_TIMEOUT_MS);
+      expect(member.socket.disconnect).toHaveBeenCalledWith(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('waits for a join in flight before closing an unjoined socket', async () => {
+    jest.useFakeTimers();
+    try {
+      const { io, handlers } = createIo();
+      setupTestSocket(io);
+      const { socket, handlers: events } = createSocket();
+      handlers.connection(socket);
+      const deferred = Promise.withResolvers<unknown>();
+      roomServiceMock.joinRoom.mockReturnValueOnce(deferred.promise);
+      const joining = events[SocketEvents.JOIN_ROOM]({ roomId: 'room-1', userName: 'Alice' });
+      await jest.advanceTimersByTimeAsync(UNJOINED_SOCKET_TIMEOUT_MS);
+      expect(socket.disconnect).not.toHaveBeenCalled();
+      deferred.resolve({ user: { id: 'user-1', isApproved: true }, room: { id: 'room-1' } });
+      await joining;
+      await jest.advanceTimersByTimeAsync(UNJOINED_SOCKET_TIMEOUT_MS);
+      expect(socket.disconnect).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 
   it('does not register the retired room reaction event', () => {
     const { io, handlers } = createIo();

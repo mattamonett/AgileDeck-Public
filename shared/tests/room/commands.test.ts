@@ -61,6 +61,16 @@ describe('room command schemas', () => {
         ).toBe(false);
       }
     });
+
+    it('allows spaces but no other whitespace, so names cannot forge log lines', () => {
+      expect(JoinRoomSchema.safeParse({ roomId: 'my room', userName: 'Ada L' }).success).toBe(true);
+      for (const text of ['a\nb', 'a\rb', 'a\tb', 'a b', 'a b']) {
+        expect(JoinRoomSchema.safeParse({ roomId: text, userName: 'user1' }).success).toBe(false);
+        expect(JoinRoomSchema.safeParse({ roomId: 'room1', userName: text }).success).toBe(false);
+        expect(UpdateUserSchema.safeParse({ name: text }).success).toBe(false);
+        expect(UpdateRoomNameSchema.safeParse({ name: text }).success).toBe(false);
+      }
+    });
   });
 
   describe('UpdateRoomNameSchema', () => {

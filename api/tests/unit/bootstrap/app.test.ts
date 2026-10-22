@@ -139,6 +139,11 @@ describe('public HTTP app', () => {
     expect(malformed.status).toBe(400);
   });
 
+  it('treats a malformed room path escape as no room instead of a server error', async () => {
+    const reply = await send('GET', '/api/rooms/%E0%A4%A/issues', { Origin: ALLOWED });
+    expect(reply.status).toBeLessThan(500);
+  });
+
   it('answers every admin route with 404 while ADMIN_PASSWORD is unset', async () => {
     delete process.env.ADMIN_PASSWORD;
     const reply = await send('GET', '/api/admin/usage', { Origin: ALLOWED });

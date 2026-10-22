@@ -1,20 +1,24 @@
 import { z } from 'zod';
 import { SiteAgreementAcceptanceSchema } from '../legal/agreement';
 
-const ALPHANUMERIC_REGEX = /^[a-zA-Z0-9\s\-_]+$/;
+/**
+ * Names and room IDs. Only a plain space: other whitespace, such as a line
+ * break, would let a name forge API log lines.
+ */
+export const ROOM_TEXT_REGEX = /^[a-zA-Z0-9 \-_]+$/;
 const ALPHANUMERIC_ERROR =
   'Only alphanumeric characters, spaces, hyphens, and underscores are allowed';
 
 export const JoinRoomSchema = z.object({
-  roomId: z.string().trim().min(1).max(50).regex(ALPHANUMERIC_REGEX, ALPHANUMERIC_ERROR),
-  userName: z.string().trim().min(1).max(20).regex(ALPHANUMERIC_REGEX, ALPHANUMERIC_ERROR),
+  roomId: z.string().trim().min(1).max(50).regex(ROOM_TEXT_REGEX, ALPHANUMERIC_ERROR),
+  userName: z.string().trim().min(1).max(20).regex(ROOM_TEXT_REGEX, ALPHANUMERIC_ERROR),
   createRoomIntent: z.boolean().optional(),
   siteAgreement: SiteAgreementAcceptanceSchema.optional(),
 });
 export type JoinRoomPayload = z.input<typeof JoinRoomSchema>;
 
 export const UpdateRoomNameSchema = z.object({
-  name: z.string().trim().min(1).max(50).regex(ALPHANUMERIC_REGEX, ALPHANUMERIC_ERROR),
+  name: z.string().trim().min(1).max(50).regex(ROOM_TEXT_REGEX, ALPHANUMERIC_ERROR),
 });
 export type UpdateRoomNamePayload = z.input<typeof UpdateRoomNameSchema>;
 
@@ -37,7 +41,7 @@ export const UpdateMultiplierSchema = z.object({
 export type UpdateMultiplierPayload = z.input<typeof UpdateMultiplierSchema>;
 
 export const UpdateUserSchema = z.object({
-  name: z.string().trim().min(1).max(20).regex(ALPHANUMERIC_REGEX, ALPHANUMERIC_ERROR),
+  name: z.string().trim().min(1).max(20).regex(ROOM_TEXT_REGEX, ALPHANUMERIC_ERROR),
 });
 export type UpdateUserPayload = z.input<typeof UpdateUserSchema>;
 
