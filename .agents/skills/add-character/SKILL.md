@@ -65,7 +65,7 @@ A non-seasonal character lives in its own folder, `web/src/app/features/room/thr
 1. One import and one entry in the registry, `throw-scene/characters.ts`. The model factory, landing effects, renderer and motion all look characters up there.
 2. A row in `PROJECTILE_STYLES` in `throw-scene/flight/projectile-motion.ts`. The compiler requires one for every emoji in the shared catalog.
 3. If it has a landing act: `LandingKind` and `landingKind()` in `throw-scene/landing/landing-geometry.ts`.
-4. The shared emoji catalog in `shared/src/constants.ts` and the picker names in `features/room/projectile-names.ts`.
+4. The shared emoji catalog in `shared/src/throwables/catalog.ts` (append to the end of `ALL_EMOJIS_WITH_TAGS`, or of the season's list, with `addedOn` set to the release date so the picker marks it new) and the picker names in `features/room/projectile-names.ts`.
 
 Seasonal characters go through `throw-scene/seasonal/seasonal-models.ts` and `throw-scene/seasonal/seasonal-routines.ts` instead. Import only through relative paths inside the character folder, without path aliases or wide barrels, so that `scripts/web-test.mts` can still select the specs a change affects.
 

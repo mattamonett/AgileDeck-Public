@@ -1,9 +1,14 @@
+import { CHRISTMAS_PROJECTILES } from '../../src/seasons/christmas';
+import { HALLOWEEN_PROJECTILES } from '../../src/seasons/halloween';
+import { isSeasonalThrowable } from '../../src/seasons/seasonal';
+import { THANKSGIVING_PROJECTILES } from '../../src/seasons/thanksgiving';
 import {
   ALL_EMOJIS_WITH_TAGS,
   BASIC_THROWABLE_EMOJIS,
   TOP_PROJECTILES,
   VEGAS_PROJECTILES,
 } from '../../src/throwables/catalog';
+import { throwableAddedAt, type EmojiDefinition } from '../../src/throwables/emoji';
 
 describe('throwable catalog', () => {
   it('defines available emojis and top projectiles', () => {
@@ -27,5 +32,21 @@ describe('throwable catalog', () => {
       expect(typeof entry.tags).toBe('string');
       expect(entry.tags.trim().split(/\s+/).length).toBeGreaterThan(1);
     }
+  });
+
+  it.each<[string, readonly EmojiDefinition[]]>([
+    ['year-round', ALL_EMOJIS_WITH_TAGS.filter(({ char }) => !isSeasonalThrowable(char))],
+    ['Christmas', CHRISTMAS_PROJECTILES],
+    ['Thanksgiving', THANKSGIVING_PROJECTILES],
+    ['Halloween', HALLOWEEN_PROJECTILES],
+  ])('adds %s throwables at the end of their list, oldest first', (_list, entries) => {
+    const dated = entries.filter((entry) => entry.addedOn !== undefined);
+    expect(dated.filter((entry) => throwableAddedAt(entry) === null)).toEqual([]);
+
+    const firstDated = entries.findIndex((entry) => entry.addedOn !== undefined);
+    const tail = firstDated === -1 ? [] : entries.slice(firstDated);
+    expect(tail).toEqual(dated);
+    const releaseDates = dated.map((entry) => entry.addedOn);
+    expect(releaseDates).toEqual([...releaseDates].sort());
   });
 });

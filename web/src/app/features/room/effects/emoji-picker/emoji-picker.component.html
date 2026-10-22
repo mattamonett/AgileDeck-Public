@@ -20,6 +20,23 @@
     </div>
 
     @if (!searchQuery()) {
+      @if (newEmojis().length) {
+        <div class="picker-section new-section">
+          <h4>New</h4>
+          <div class="emoji-grid new-grid">
+            @for (em of newEmojis(); track em.char) {
+              <button
+                (click)="emojiSelect.emit(em.char)"
+                class="emoji-pick-btn"
+                [title]="projectileName(em.char) + seasonalLabel(em.char)"
+                [attr.aria-label]="projectileName(em.char) + ' · New' + seasonalLabel(em.char)"
+              >
+                {{ em.char }}
+              </button>
+            }
+          </div>
+        </div>
+      }
       @if (christmasEmojis().length) {
         <div class="picker-section halloween-section">
           <h4>Christmas · December only (UTC)</h4>
@@ -95,10 +112,13 @@
           <button
             (click)="emojiSelect.emit(em)"
             class="emoji-pick-btn"
-            [title]="projectileName(em) + seasonalLabel(em)"
-            [attr.aria-label]="projectileName(em) + seasonalLabel(em)"
+            [title]="projectileName(em) + (isNew(em) ? ' · New' : '') + seasonalLabel(em)"
+            [attr.aria-label]="projectileName(em) + (isNew(em) ? ' · New' : '') + seasonalLabel(em)"
           >
             {{ em }}
+            @if (isNew(em)) {
+              <span class="new-badge" aria-hidden="true"></span>
+            }
           </button>
         }
       </div>

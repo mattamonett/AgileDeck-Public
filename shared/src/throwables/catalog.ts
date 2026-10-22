@@ -22,6 +22,11 @@ export const VEGAS_PROJECTILES = [
   '🎲',
 ] as const satisfies readonly string[];
 
+/**
+ * Every throwable the picker lists, in picker order. Add new throwables at the end of this
+ * list (seasonal ones at the end of their season's list) with an `addedOn` date so the
+ * picker shows them as new.
+ */
 export const ALL_EMOJIS_WITH_TAGS = [
   ...CHRISTMAS_PROJECTILES,
   ...THANKSGIVING_PROJECTILES,
