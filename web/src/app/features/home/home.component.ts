@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ROOM_TEXT_REGEX } from '@poker/shared';
 import { clearLegacyClientIdentity, USER_NAME_STORAGE_KEY } from '@core/storage/storage-keys';
 import { SiteAgreementComponent } from '@shared/legal/site-agreement.component';
 import { SitePasswordFormComponent } from '@shared/access/site-password-form.component';
@@ -68,7 +69,7 @@ export class HomeComponent {
   submitName() {
     const trimmed = this.name.trim();
     if (!trimmed || !this.canContinue()) return;
-    if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmed)) {
+    if (!ROOM_TEXT_REGEX.test(trimmed)) {
       alert(
         'Only alphanumeric characters, spaces, hyphens, and underscores are allowed for names.',
       );
@@ -85,7 +86,7 @@ export class HomeComponent {
 
   createRoom() {
     if (!this.name || !this.canContinue()) return;
-    if (!/^[a-zA-Z0-9\s\-_]+$/.test(this.name.trim())) return;
+    if (!ROOM_TEXT_REGEX.test(this.name.trim())) return;
     if (!this.access.unlocked()) {
       this.askingPassword.set(true);
       return;
@@ -106,7 +107,7 @@ export class HomeComponent {
     const trimmedName = this.name.trim();
     const trimmedRoom = this.roomId.trim().toLowerCase();
     if (!trimmedName || !trimmedRoom) return;
-    if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmedName) || !/^[a-zA-Z0-9\s\-_]+$/.test(trimmedRoom)) {
+    if (!ROOM_TEXT_REGEX.test(trimmedName) || !ROOM_TEXT_REGEX.test(trimmedRoom)) {
       alert('Invalid characters in name or Room ID.');
       return;
     }
