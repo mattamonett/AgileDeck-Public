@@ -44,7 +44,7 @@ RUN find /app/web/dist/poker-web/browser -type f \
     -size +1023c -exec gzip -9 -n -k {} +
 
 # Production image - using unprivileged Nginx for security
-FROM nginxinc/nginx-unprivileged:1.30-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 
 # Copy build artifacts to Nginx
 COPY --from=builder /app/web/dist/poker-web/browser /usr/share/nginx/html
