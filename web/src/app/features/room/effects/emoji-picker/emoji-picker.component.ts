@@ -4,7 +4,9 @@ import { projectileName } from '../../projectile-names';
 import {
   isChristmasProjectile,
   isHalloweenProjectile,
+  isNewThrowable,
   isThanksgivingProjectile,
+  type EmojiDefinition,
 } from '@poker/shared';
 
 @Component({
@@ -36,11 +38,18 @@ export class EmojiPickerComponent {
   );
   title = input('Select Emoji');
   presets = input<readonly string[]>([]);
-  allEmojis = input<readonly { char: string; tags: string }[]>([]);
+  allEmojis = input<readonly EmojiDefinition[]>([]);
   emojiSelect = output<string>();
   closePicker = output<void>();
 
   searchQuery = signal('');
+
+  private readonly openedAt = new Date();
+  newEmojis = computed(() => this.allEmojis().filter((e) => isNewThrowable(e, this.openedAt)));
+  private readonly newChars = computed(() => new Set(this.newEmojis().map((e) => e.char)));
+  isNew(char: string): boolean {
+    return this.newChars().has(char);
+  }
 
   filteredEmojis = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();

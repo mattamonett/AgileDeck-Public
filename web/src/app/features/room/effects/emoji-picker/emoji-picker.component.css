@@ -80,6 +80,7 @@
   justify-content: center;
   align-items: center;
   color: var(--color-text);
+  position: relative;
 }
 
 .emoji-pick-btn:hover {
@@ -111,4 +112,24 @@
 }
 .halloween-grid .emoji-pick-btn {
   background: rgba(230, 118, 30, 0.13);
+}
+
+.new-section {
+  flex-shrink: 0;
+}
+.new-section h4 {
+  color: var(--color-primary);
+}
+.new-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+.new-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--glass-bg);
 }
