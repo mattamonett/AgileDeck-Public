@@ -9,7 +9,6 @@ import {
   ease,
   easeIn,
   easeOut,
-  gait,
   glow,
   keepInView,
   mix,
@@ -60,8 +59,21 @@ import {
   type StickPose,
 } from './bullettime-model';
 import {
+  GREEN,
+  PALE_GREEN,
+  bulletBubble,
+  codeSheet,
+  codeStreak,
+  impactSpark,
+} from './bullettime-props';
+import {
+  AFTER_KNOCK,
+  AGENT_GUARD,
+  ATTENTION,
   CROUCH,
+  SLIDE,
   TUCK,
+  runPose,
   add,
   blendPose,
   exchangeMotion,
@@ -87,9 +99,6 @@ const SPARKS = 4;
 const SPARK_MS = 240;
 const RIPPLES = 3;
 const WAKES = 3;
-const GREEN = 0x35e07a,
-  PALE_GREEN = 0xc8ffd8;
-const BUBBLE_H = 150;
 
 /** Everything that depends on this frame's layout rather than on time. */
 interface Layout {
@@ -119,215 +128,6 @@ function routeLength(curve: (u: number) => Point, samples = 24): number {
     previous = at;
   }
   return total;
-}
-
-/** A running stride with pumping arms; `swing` scales the arms for a stiff walk. */
-function runPose(
-  walked: number,
-  stride: number,
-  lift: number,
-  lean: number,
-  swing: number,
-): StickPose {
-  const cycle = (walked / stride) * Math.PI * 2;
-  const foot = (offset: number) => {
-    const g = gait(walked, stride, offset, lift);
-    return { x: g.x, y: FOOT + g.y };
-  };
-  const hip = { x: 0, y: STICK_HIP - 1.2 + 1.1 * Math.abs(Math.sin(cycle)) };
-  const sh = shoulderOf({ ...GUARD, hip, lean });
-  const arm = Math.sin(cycle) * swing;
-  return {
-    ...GUARD,
-    hip,
-    lean,
-    hands: [
-      add(sh, 7 * arm - 1, -9 + 2 * Math.abs(arm)),
-      add(sh, -7 * arm + 1, -9 + 2 * Math.abs(arm)),
-    ],
-    feet: [foot(0), foot(0.5)],
-    elbows: [-1, -1],
-  };
-}
-const SLIDE: StickPose = {
-  ...GUARD,
-  hip: { x: -3, y: 14 },
-  lean: -0.3,
-  nod: 0.18,
-  hands: [
-    { x: -13, y: 14 },
-    { x: 8, y: 31 },
-  ],
-  feet: [
-    { x: -7, y: FOOT },
-    { x: 12, y: FOOT },
-  ],
-};
-/** An agent standing to attention with his arms at his sides. */
-const ATTENTION: StickPose = {
-  ...GUARD,
-  lean: 0,
-  hip: { x: 0, y: STICK_HIP },
-  hands: [
-    { x: -1.5, y: 27 },
-    { x: 2, y: 27 },
-  ],
-  feet: [
-    { x: -2.5, y: FOOT },
-    { x: 2.5, y: FOOT },
-  ],
-  elbows: [1, -1],
-};
-const AGENT_GUARD: StickPose = { ...GUARD, lean: 0.04 };
-const AFTER_KNOCK: StickPose = {
-  ...GUARD,
-  hip: { x: 0, y: 24 },
-  lean: -0.5,
-  nod: -0.4,
-  hands: [
-    { x: -9, y: 50 },
-    { x: 12, y: 49 },
-  ],
-  feet: [
-    { x: 9, y: 9 },
-    { x: 4, y: 4 },
-  ],
-  elbows: [1, -1],
-  tie: 0.9,
-};
-
-/** A white-edged thought bubble drawn into a canvas texture that is disposed through `material.map`. */
-export function bulletBubble(text: string, name: string): THREE.Sprite {
-  const width = Math.round(110 + text.length * 34);
-  const material = new THREE.SpriteMaterial({
-    transparent: true,
-    depthTest: false,
-    depthWrite: false,
-  });
-  if (typeof document !== 'undefined') {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = BUBBLE_H;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.fillStyle = '#f4fff7';
-      ctx.strokeStyle = '#1f7a45';
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.roundRect(6, 6, width - 12, 104, 52);
-      ctx.fill();
-      ctx.stroke();
-      for (const [x, y, r] of [
-        [width * 0.5, 122, 9],
-        [width * 0.5 + 10, 138, 5],
-      ] as const) {
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      }
-      ctx.fillStyle = '#12502c';
-      ctx.font = 'bold 54px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, width / 2, 59);
-    }
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    material.map = texture;
-  }
-  const bubble = new THREE.Sprite(material);
-  bubble.name = name;
-  bubble.userData['text'] = text;
-  bubble.userData['aspect'] = width / BUBBLE_H;
-  bubble.renderOrder = 10;
-  bubble.visible = false;
-  return bubble;
-}
-
-/** Columns of green glyphs on a transparent sheet that scrolls down the card face. */
-function codeSheet(): THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> {
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-  });
-  if (typeof document !== 'undefined') {
-    const canvas = document.createElement('canvas');
-    canvas.width = 120;
-    canvas.height = 240;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      const glyphs = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜ0123456789';
-      ctx.font = 'bold 18px monospace';
-      ctx.textAlign = 'center';
-      let seed = 11;
-      const next = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-      for (let col = 0; col < 8; col++)
-        for (let row = 0; row < 12; row++) {
-          if (next() < 0.32) continue;
-          // Each column brightens toward its leading glyph, like falling rain.
-          const lead = (row + col * 5) % 12;
-          ctx.fillStyle =
-            lead === 0 ? '#d9ffe6' : `rgba(41, 214, 106, ${(0.35 + 0.6 * next()).toFixed(2)})`;
-          ctx.fillText(
-            glyphs.charAt(Math.floor(next() * glyphs.length)),
-            8 + col * 15,
-            18 + row * 20,
-          );
-        }
-    }
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapT = THREE.RepeatWrapping;
-    material.map = texture;
-  } else material.color.setHex(GREEN);
-  const sheet = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
-  sheet.name = 'bullettime-card-code';
-  sheet.visible = false;
-  return sheet;
-}
-
-/** A falling streak of code: a thin green trail with a bright leading head. */
-function codeStreak(name: string): THREE.Group {
-  const streak = new THREE.Group();
-  streak.name = name;
-  part(streak, `${name}-trail`, new THREE.PlaneGeometry(1, 1), glow(GREEN, 0.8), 0, 0.5, 0);
-  part(
-    streak,
-    `${name}-head`,
-    new THREE.PlaneGeometry(1, 1),
-    glow(PALE_GREEN, 1),
-    0,
-    0,
-    0.1,
-  ).scale.set(1.5, 0.16, 1);
-  streak.visible = false;
-  return streak;
-}
-
-/** An impact flash: a quick ring with a four-point star where a blow lands. */
-function impactSpark(name: string): THREE.Group {
-  const spark = new THREE.Group();
-  spark.name = name;
-  part(spark, `${name}-ring`, new THREE.RingGeometry(0.72, 1, 24), glow(PALE_GREEN, 0.9));
-  for (const turn of [0.25, 0.75]) {
-    const ray = part(
-      spark,
-      `${name}-ray-${turn}`,
-      new THREE.PlaneGeometry(1, 1),
-      glow(0xffffff, 1),
-      0,
-      0,
-      0.1,
-    );
-    ray.scale.set(2.6, 0.22, 1);
-    ray.rotation.z = Math.PI * turn;
-  }
-  spark.visible = false;
-  return spark;
 }
 
 export class BulletTimeTrick implements CharacterRoutine {

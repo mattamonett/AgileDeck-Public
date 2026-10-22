@@ -1,5 +1,5 @@
 import type { Point } from '../../flight/flight-math';
-import { clamp, ease, easeIn, easeOut, mix, mixPoint, span, type Side } from '../../kit';
+import { clamp, ease, easeIn, easeOut, gait, mix, mixPoint, span, type Side } from '../../kit';
 import {
   CLASH,
   FLURRY_LEAD,
@@ -15,7 +15,7 @@ import {
   type Exchange,
   type Fighter,
 } from './bullettime-choreography';
-import { GUARD, PIVOT, headOf, type StickPose } from './bullettime-model';
+import { GUARD, PIVOT, headOf, shoulderOf, type StickPose } from './bullettime-model';
 
 /** A figure's placement for one frame: body origin on the floor in screen space, facing and spin. */
 export interface Placement {
@@ -654,3 +654,78 @@ function takeHit(e: Exchange, rel: number, c: MoveContext): Motion {
     pose: framed(c, rel, e.len, pose),
   };
 }
+
+/** A running stride with pumping arms; `swing` scales the arms for a stiff walk. */
+export function runPose(
+  walked: number,
+  stride: number,
+  lift: number,
+  lean: number,
+  swing: number,
+): StickPose {
+  const cycle = (walked / stride) * Math.PI * 2;
+  const foot = (offset: number) => {
+    const g = gait(walked, stride, offset, lift);
+    return { x: g.x, y: FOOT + g.y };
+  };
+  const hip = { x: 0, y: STICK_HIP - 1.2 + 1.1 * Math.abs(Math.sin(cycle)) };
+  const sh = shoulderOf({ ...GUARD, hip, lean });
+  const arm = Math.sin(cycle) * swing;
+  return {
+    ...GUARD,
+    hip,
+    lean,
+    hands: [
+      add(sh, 7 * arm - 1, -9 + 2 * Math.abs(arm)),
+      add(sh, -7 * arm + 1, -9 + 2 * Math.abs(arm)),
+    ],
+    feet: [foot(0), foot(0.5)],
+    elbows: [-1, -1],
+  };
+}
+export const SLIDE: StickPose = {
+  ...GUARD,
+  hip: { x: -3, y: 14 },
+  lean: -0.3,
+  nod: 0.18,
+  hands: [
+    { x: -13, y: 14 },
+    { x: 8, y: 31 },
+  ],
+  feet: [
+    { x: -7, y: FOOT },
+    { x: 12, y: FOOT },
+  ],
+};
+/** An agent standing to attention with his arms at his sides. */
+export const ATTENTION: StickPose = {
+  ...GUARD,
+  lean: 0,
+  hip: { x: 0, y: STICK_HIP },
+  hands: [
+    { x: -1.5, y: 27 },
+    { x: 2, y: 27 },
+  ],
+  feet: [
+    { x: -2.5, y: FOOT },
+    { x: 2.5, y: FOOT },
+  ],
+  elbows: [1, -1],
+};
+export const AGENT_GUARD: StickPose = { ...GUARD, lean: 0.04 };
+export const AFTER_KNOCK: StickPose = {
+  ...GUARD,
+  hip: { x: 0, y: 24 },
+  lean: -0.5,
+  nod: -0.4,
+  hands: [
+    { x: -9, y: 50 },
+    { x: 12, y: 49 },
+  ],
+  feet: [
+    { x: 9, y: 9 },
+    { x: 4, y: 4 },
+  ],
+  elbows: [1, -1],
+  tie: 0.9,
+};

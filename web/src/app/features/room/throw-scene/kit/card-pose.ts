@@ -20,6 +20,15 @@ export function cardPoint(q: CardPose, raw: Point, b: TargetBounds): Point {
     y: b.top + b.height / 2 + x * Math.sin(a) + y * Math.cos(a) + q.y,
   };
 }
+/** Inverse of cardPoint: the card-normalized spot under a screen point for a card pose. */
+export function cardUV(q: CardPose, at: Point, b: TargetBounds): Point {
+  const a = (q.angle * Math.PI) / 180;
+  const dx = at.x - b.left - b.width / 2 - q.x,
+    dy = at.y - b.top - b.height / 2 - q.y;
+  const x = (dx * Math.cos(a) + dy * Math.sin(a)) / q.sx,
+    y = (-dx * Math.sin(a) + dy * Math.cos(a)) / q.sy;
+  return { x: x / b.width + 0.5, y: y / b.height + 0.5 };
+}
 /** A point on the live card from normalized coordinates (u across, v down). */
 export function onCard(q: CardPose, u: number, v: number, b: TargetBounds): Point {
   return cardPoint(q, { x: b.left + b.width * u, y: b.top + b.height * v }, b);

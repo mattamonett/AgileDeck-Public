@@ -1,21 +1,19 @@
 import * as THREE from 'three';
-import { seededRandom, type Point } from '../../flight/flight-math';
+import { type Point } from '../../flight/flight-math';
 import type { TargetBounds } from '../../landing/landing-geometry';
 import {
-  blobShape,
+  cardUV,
   cardTurn,
   clamp,
   ease,
   glow,
   lowestWorldY,
-  matte,
+  lowestWorldYPruned,
   mix,
   onCard,
-  outline,
   part,
   pulse,
   screenOf,
-  setStrip,
   sideOf,
   span,
   stripGeometry,
@@ -52,6 +50,10 @@ import {
   type BearPoseInput,
   type BearReach,
 } from './bear-model';
+import { BearCrumbs, BearPieWisps, BearSleepZs } from './bear-effects';
+import { BearHoneyPrints } from './bear-prints';
+import { gaitStep, mixKey, mixReach, sitHip, type BearKey } from './bear-keys';
+import { pieStage } from './bear-pie';
 
 const DEPTH = 172;
 const CARD_Z = DEPTH - 13;
@@ -64,142 +66,6 @@ const GRIP_Z = 1.1;
 const FLOOR_TILT = -Math.PI / 2 + 0.5;
 /** Head pitch at the moment of a bite, used to aim the head turn at the bitten spot. */
 const BITE_PITCH = -0.42;
-/** Each bite takes three overlapping tooth scallops out of the rim. */
-const TEETH: readonly (readonly [number, number, number])[] = [
-  [-0.3, BEAR_PIE_RADIUS + 0.4, 2.1],
-  [0, BEAR_PIE_RADIUS - 0.5, 2.5],
-  [0.3, BEAR_PIE_RADIUS + 0.4, 2.1],
-];
-
-/** Pie outline radius at angle theta: a crimped crust with the given bites taken out of it. */
-function bearPieRadius(theta: number, notches: readonly number[]): number {
-  let r = BEAR_PIE_RADIUS + 0.22 * Math.sin(theta * 20);
-  const dx = Math.cos(theta),
-    dy = Math.sin(theta);
-  for (const a of notches)
-    for (const [off, radial, rho] of TEETH) {
-      const cx = Math.cos(a + off) * radial,
-        cy = Math.sin(a + off) * radial;
-      const along = dx * cx + dy * cy,
-        disc = along * along - (cx * cx + cy * cy) + rho * rho;
-      if (disc < 0) continue;
-      r = Math.min(r, Math.max(0.3, along - Math.sqrt(disc)));
-    }
-  return r;
-}
-function radialPoints(radius: (theta: number) => number): [number, number][] {
-  return Array.from({ length: 120 }, (_, i) => {
-    const a = (i / 120) * Math.PI * 2,
-      r = radius(a);
-    return [Math.cos(a) * r, Math.sin(a) * r];
-  });
-}
-function radialPath(radius: (theta: number) => number): THREE.Path {
-  const path = new THREE.Path();
-  radialPoints(radius).forEach(([x, y], i) => (i ? path.lineTo(x, y) : path.moveTo(x, y)));
-  path.closePath();
-  return path;
-}
-
-/** One state of the pie: crust shell, crimped rim, pumpkin filling and cream, with bites removed. */
-function pieStage(parent: THREE.Object3D, index: number, notches: readonly number[]): THREE.Group {
-  const stage = new THREE.Group();
-  stage.name = `bear-pie-stage-${index}`;
-  parent.add(stage);
-  const outer = (a: number) => bearPieRadius(a, notches);
-  const inner = (a: number) => Math.min(BEAR_PIE_RADIUS - 1.15, outer(a) - 0.35);
-  const base = new THREE.ExtrudeGeometry(outline(radialPoints(outer)), {
-    depth: 1.6,
-    bevelEnabled: false,
-  });
-  base.translate(0, 0, -1.6);
-  part(stage, 'bear-pie-shell', base, matte(0xc4884a, 0.75));
-  const ring = outline(radialPoints(outer));
-  ring.holes.push(radialPath(inner));
-  const rim = new THREE.ExtrudeGeometry(ring, {
-    depth: 0.9,
-    bevelEnabled: true,
-    bevelThickness: 0.35,
-    bevelSize: 0.22,
-    bevelSegments: 2,
-  });
-  part(stage, 'bear-pie-rim', rim, matte(0xe3a85e, 0.6));
-  const filling = new THREE.ExtrudeGeometry(outline(radialPoints(inner)), {
-    depth: 0.95,
-    bevelEnabled: false,
-  });
-  part(stage, 'bear-pie-filling', filling, matte(0xd8691f, 0.45));
-  const cream = part(
-    stage,
-    'bear-pie-cream',
-    new THREE.SphereGeometry(1, 14, 10),
-    matte(0xfff6e6, 0.5),
-    0.4,
-    0.5,
-    1.3,
-  );
-  cream.scale.set(2, 1.8, 1.1);
-  return stage;
-}
-
-const sphere = new THREE.Sphere(),
-  vertex = new THREE.Vector3();
-/**
- * Lowest world-space y of the visible meshes under `root`, from their real transformed vertices
- * (as lowestWorldY), skipping meshes whose bounding sphere cannot reach below the lowest so far.
- */
-function bearLowest(root: THREE.Object3D): number {
-  root.updateMatrixWorld(true);
-  const candidates: { mesh: THREE.Mesh; bottom: number }[] = [];
-  const visit = (o: THREE.Object3D) => {
-    if (!o.visible) return;
-    if (o instanceof THREE.Mesh) {
-      const g = o.geometry;
-      if (!g.boundingSphere) g.computeBoundingSphere();
-      if (g.boundingSphere) {
-        sphere.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);
-        candidates.push({ mesh: o, bottom: sphere.center.y - sphere.radius });
-      }
-    }
-    for (const child of o.children) visit(child);
-  };
-  visit(root);
-  candidates.sort((a, b) => a.bottom - b.bottom);
-  let lowest = Infinity;
-  for (const { mesh, bottom } of candidates) {
-    if (bottom >= lowest) break;
-    const points = mesh.geometry.getAttribute('position');
-    for (let i = 0; i < points.count; i++)
-      lowest = Math.min(
-        lowest,
-        vertex.fromBufferAttribute(points, i).applyMatrix4(mesh.matrixWorld).y,
-      );
-  }
-  return lowest;
-}
-
-/** Inverse of cardPoint: the card-normalized spot under a screen point for a card pose. */
-function cardUV(q: CardPose, at: Point, b: TargetBounds): Point {
-  const a = (q.angle * Math.PI) / 180;
-  const dx = at.x - b.left - b.width / 2 - q.x,
-    dy = at.y - b.top - b.height / 2 - q.y;
-  const x = (dx * Math.cos(a) + dy * Math.sin(a)) / q.sx,
-    y = (-dx * Math.sin(a) + dy * Math.cos(a)) / q.sy;
-  return { x: x / b.width + 0.5, y: y / b.height + 0.5 };
-}
-
-/** Hip height that sets the rump's ellipsoid on the floor for a spine pitch. */
-function sitHip(pitch: number): number {
-  return Math.hypot(9.5 * Math.sin(pitch), 9 * Math.cos(pitch)) - 0.5 * Math.cos(pitch);
-}
-
-/** Foot offset and lift for the walk cycle, as the kit's gait with this bear's stride. */
-function gaitStep(walked: number, offset: number) {
-  const c = (((walked / BEAR_STRIDE + offset) % 1) + 1) % 1;
-  if (c < 0.5) return { x: BEAR_STRIDE / 4 - (BEAR_STRIDE / 2) * (c / 0.5), y: 0 };
-  const s = (c - 0.5) / 0.5;
-  return { x: -BEAR_STRIDE / 4 + (BEAR_STRIDE / 2) * ease(s), y: Math.sin(Math.PI * s) * 3 };
-}
 
 export interface BearLayout {
   readonly start: Point;
@@ -210,49 +76,6 @@ export interface BearLayout {
   readonly stand: Point;
   readonly floor: number;
 }
-interface Key {
-  readonly hip: Point;
-  readonly pitch: number;
-  readonly roll: number;
-  readonly headPitch: number;
-  readonly headTurn: number;
-  readonly headTilt: number;
-  readonly jaw: number;
-  readonly eyes: number;
-  readonly cheeks: number;
-  readonly ears: number;
-  readonly sniff: number;
-  readonly tail: number;
-  readonly breath: number;
-  readonly feet: readonly [BearReach, BearReach];
-}
-function mixReach(a: BearReach, b: BearReach, t: number, arc = 0): BearReach {
-  return {
-    x: mix(a.x, b.x, t),
-    y: mix(a.y, b.y, t) + arc * Math.sin(Math.PI * clamp(t)),
-    angle: mix(a.angle, b.angle, t),
-  };
-}
-function mixKey(a: Key, b: Key, t: number, arc = 0): Key {
-  if (t <= 0) return a;
-  if (t >= 1) return b;
-  return {
-    hip: { x: mix(a.hip.x, b.hip.x, t), y: mix(a.hip.y, b.hip.y, t) },
-    pitch: mix(a.pitch, b.pitch, t),
-    roll: mix(a.roll, b.roll, t),
-    headPitch: mix(a.headPitch, b.headPitch, t),
-    headTurn: mix(a.headTurn, b.headTurn, t),
-    headTilt: mix(a.headTilt, b.headTilt, t),
-    jaw: mix(a.jaw, b.jaw, t),
-    eyes: mix(a.eyes, b.eyes, t),
-    cheeks: mix(a.cheeks, b.cheeks, t),
-    ears: mix(a.ears, b.ears, t),
-    sniff: mix(a.sniff, b.sniff, t),
-    tail: mix(a.tail, b.tail, t),
-    breath: mix(a.breath, b.breath, t),
-    feet: [mixReach(a.feet[0], b.feet[0], t, arc), mixReach(a.feet[1], b.feet[1], t, arc)],
-  };
-}
 
 /** A paw destination; `pie` targets follow the pie and are resolved once the pie is placed. */
 interface Waypoint {
@@ -262,19 +85,6 @@ interface Waypoint {
   readonly press: number;
   readonly pie: boolean;
   readonly where: (ms: number) => BearReach;
-}
-interface Crumb {
-  readonly mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  readonly bite: number;
-  readonly shape: THREE.Vector3;
-  readonly vx: number;
-  readonly vy: number;
-  readonly spin: number;
-  readonly dx: number;
-}
-interface PrintMark {
-  readonly group: THREE.Group;
-  readonly materials: readonly THREE.MeshBasicMaterial[];
 }
 interface Measured {
   readonly key: string;
@@ -294,10 +104,10 @@ export class BearTrick implements CharacterRoutine {
   private readonly model: BearModel;
   private readonly actor: THREE.Group;
   private readonly stages: THREE.Group[] = [];
-  private readonly prints: PrintMark[] = [];
-  private readonly crumbs: Crumb[] = [];
-  private readonly zs: THREE.Mesh<THREE.ShapeGeometry, THREE.MeshBasicMaterial>[] = [];
-  private readonly wisps: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[] = [];
+  private readonly prints: BearHoneyPrints;
+  private readonly crumbs: BearCrumbs;
+  private readonly zs: BearSleepZs;
+  private readonly wisps: BearPieWisps;
   private readonly drip = part(
     this.object,
     'bear-honey-drip',
@@ -329,46 +139,10 @@ export class BearTrick implements CharacterRoutine {
     for (let s = 0; s < p.bites; s++)
       this.stages.push(pieStage(this.pie, s, p.biteAngles.slice(0, s)));
     this.pieUnder = this.measurePieUnder();
-    const r = seededRandom(`${p.phase}:bear-crumbs`);
-    for (let k = 0; k < p.bites; k++)
-      for (let i = 0; i < 4; i++) {
-        const color = i % 3 === 1 ? 0xd2691e : i % 3 ? 0xe0ac63 : 0xbd7f42;
-        const mesh = part(
-          this.object,
-          `bear-crumb-${k}-${i}`,
-          new THREE.DodecahedronGeometry(1, 0),
-          matte(color, 0.8),
-        );
-        const shape = new THREE.Vector3(0.9 + r() * 0.5, 0.6 + r() * 0.3, 0.8 + r() * 0.3);
-        this.crumbs.push({
-          mesh,
-          bite: k,
-          shape,
-          vx: (r() * 2 - 1) * 55,
-          vy: -40 - r() * 50,
-          spin: (r() * 2 - 1) * 9,
-          dx: (r() - 0.5) * 4,
-        });
-      }
-    p.prints.forEach((_, k) => this.prints.push(this.printMark(k)));
-    const z = outline([
-      [-1, 1],
-      [1, 1],
-      [1, 0.62],
-      [-0.38, -0.62],
-      [1, -0.62],
-      [1, -1],
-      [-1, -1],
-      [-1, -0.62],
-      [0.38, 0.62],
-      [-1, 0.62],
-    ]);
-    for (let i = 0; i < 3; i++)
-      this.zs.push(part(this.object, `bear-z-${i}`, new THREE.ShapeGeometry(z), glow(0x6f86c9, 0)));
-    for (let i = 0; i < 3; i++)
-      this.wisps.push(
-        part(this.object, `bear-pie-wisp-${i}`, stripGeometry(10), glow(0xfff1dc, 0)),
-      );
+    this.crumbs = new BearCrumbs(this.object, p, DEPTH);
+    this.prints = new BearHoneyPrints(this.object, p, this.drip, CARD_Z);
+    this.zs = new BearSleepZs(this.object, p, this.model.crown, DEPTH);
+    this.wisps = new BearPieWisps(this.object, p, CARD_Z);
     actor.traverse((o) => {
       if (!(o instanceof THREE.Mesh)) return;
       for (const m of Array.isArray(o.material) ? o.material : [o.material])
@@ -386,57 +160,6 @@ export class BearTrick implements CharacterRoutine {
     const under = -lowestWorldY(probe);
     probe.clear();
     return under;
-  }
-
-  /** A honey paw print: darker rim, glossy pad, four toe beans and a highlight. */
-  private printMark(k: number): PrintMark {
-    const group = new THREE.Group();
-    group.name = `bear-print-${k}`;
-    this.object.add(group);
-    const materials: THREE.MeshBasicMaterial[] = [];
-    const ink = (color: number) => {
-      const m = glow(color, 0);
-      materials.push(m);
-      return m;
-    };
-    part(
-      group,
-      'bear-print-rim',
-      new THREE.ShapeGeometry(blobShape(k * 1.7, 3, 0.1)),
-      ink(0xc27a12),
-    ).scale.set(1.75, 1.35, 1);
-    part(
-      group,
-      'bear-print-pad',
-      new THREE.ShapeGeometry(blobShape(k * 1.7 + 0.4, 3, 0.1)),
-      ink(0xf0aa2a),
-      0,
-      0,
-      0.02,
-    ).scale.set(1.45, 1.1, 1);
-    for (let t = 0; t < 4; t++) {
-      const a = Math.PI / 2 + (t - 1.5) * 0.48;
-      const toe = part(
-        group,
-        'bear-print-toe',
-        new THREE.CircleGeometry(1, 12),
-        ink(0xe59c20),
-        Math.cos(a) * 2.4,
-        Math.sin(a) * 2.25 + 0.2,
-        0.01,
-      );
-      toe.scale.set(0.58, 0.68, 1);
-    }
-    part(
-      group,
-      'bear-print-shine',
-      new THREE.CircleGeometry(1, 10),
-      ink(0xfff4c8),
-      -0.45,
-      0.35,
-      0.04,
-    ).scale.set(0.5, 0.28, 1);
-    return { group, materials };
   }
 
   cardAnimation(facing: number) {
@@ -481,10 +204,10 @@ export class BearTrick implements CharacterRoutine {
     const fade = 1 - ease((ms - p.cleanup) / 600);
     this.fadeActor(p.ending === 'waddle' ? 1 : fade);
     this.updatePie(ms, frame);
-    this.updateWisps(ms, L, frame);
-    this.updatePrints(ms, L, frame.card, pressed, fade);
-    this.updateCrumbs(ms, L, births, fade);
-    this.updateZs(ms, L, fade);
+    this.wisps.update(ms, L, frame.pie);
+    this.prints.update(ms, L, frame.card, pressed, fade);
+    this.crumbs.update(ms, L, births, fade);
+    this.zs.update(ms, L, fade);
   }
 
   /**
@@ -568,7 +291,7 @@ export class BearTrick implements CharacterRoutine {
     if (seat > 0) {
       // Rest the seat (rump, heels, belly or chin) on the floor by its real transformed geometry.
       actor.updateMatrixWorld(true);
-      actor.position.y += seat * (-L.floor - bearLowest(actor));
+      actor.position.y += seat * (-L.floor - lowestWorldYPruned(actor));
     }
     actor.updateMatrixWorld(true);
     this.pieWorld = this.pieMatrix(ms, L, card, pose);
@@ -643,14 +366,14 @@ export class BearTrick implements CharacterRoutine {
   }
 
   /** Body, head and hind feet for this moment, blended through the performance's beats. */
-  private key(ms: number, L: BearLayout, walked: number): Key {
+  private key(ms: number, L: BearLayout, walked: number): BearKey {
     const p = this.plan;
     const t = ms / p.travel;
     const moving = ms < p.travel ? 1 - ease((t - 0.9) / 0.1) : 0;
     const phase = (walked / BEAR_STRIDE) * Math.PI * 2;
     const sniff = ms < p.travel ? bearSniffing(p, t) : 0;
     const parked = this.gaitFeet(walked, 1);
-    let k: Key = {
+    let k: BearKey = {
       hip: { x: 0, y: BEAR_WALK_HIP - 0.8 * Math.abs(Math.sin(phase)) * moving },
       pitch: 0.035 * Math.sin(phase) * moving,
       roll: 0.08 * Math.sin(phase) * moving,
@@ -681,7 +404,7 @@ export class BearTrick implements CharacterRoutine {
   }
 
   /** Body pose that lets the paws reach a point on the card at screen height `y`. */
-  private pressPose(y: number, L: BearLayout, k: Key): Key {
+  private pressPose(y: number, L: BearLayout, k: BearKey): BearKey {
     const hn = clamp(((L.floor - y) / L.scale - 12) / 28);
     return {
       ...k,
@@ -703,7 +426,7 @@ export class BearTrick implements CharacterRoutine {
   }
 
   /** Rearing up and climbing the card, one sticky press at a time. */
-  private rearing(ms: number, L: BearLayout, before: Key): Key {
+  private rearing(ms: number, L: BearLayout, before: BearKey): BearKey {
     const p = this.plan;
     const q = bearCardPose(p, ms, L.side);
     if (!p.prints[0]) return before;
@@ -753,9 +476,9 @@ export class BearTrick implements CharacterRoutine {
   }
 
   /** Edge find: down on all fours, peer under the card, hook the pie out and reach for it. */
-  private findUnderEdge(ms: number, before: Key): Key {
+  private findUnderEdge(ms: number, before: BearKey): BearKey {
     const p = this.plan;
-    const crouch: Key = {
+    const crouch: BearKey = {
       ...before,
       hip: { x: 1.5, y: 17.5 },
       pitch: -0.06,
@@ -765,7 +488,7 @@ export class BearTrick implements CharacterRoutine {
       jaw: 0,
     };
     let k = mixKey(before, crouch, ease((ms - p.drop) / 420));
-    const lean: Key = {
+    const lean: BearKey = {
       ...crouch,
       hip: { x: 4, y: 16.5 },
       pitch: -0.18,
@@ -773,7 +496,7 @@ export class BearTrick implements CharacterRoutine {
       headTilt: 0.12,
     };
     k = mixKey(k, lean, ease((ms - p.hook + 300) / 300));
-    const pulled: Key = {
+    const pulled: BearKey = {
       ...lean,
       hip: { x: 0.5, y: 16.5 },
       pitch: -0.05,
@@ -782,7 +505,7 @@ export class BearTrick implements CharacterRoutine {
       jaw: 0.25,
     };
     k = mixKey(k, pulled, ease((ms - p.hook) / (p.dragged - p.hook)));
-    const reach: Key = {
+    const reach: BearKey = {
       ...pulled,
       hip: { x: -0.5, y: 15.5 },
       pitch: 0.06,
@@ -794,11 +517,16 @@ export class BearTrick implements CharacterRoutine {
   }
 
   /** Sitting with the pie: bites, chewing, the yawn, drooping and the chosen ending. */
-  private sitting(ms: number, before: Key, walked: number, parked: [BearReach, BearReach]): Key {
+  private sitting(
+    ms: number,
+    before: BearKey,
+    walked: number,
+    parked: [BearReach, BearReach],
+  ): BearKey {
     const p = this.plan,
       m = this.model;
     const pitch = 1.2;
-    const sit: Key = {
+    const sit: BearKey = {
       ...before,
       hip: { x: -3, y: sitHip(pitch) },
       pitch,
@@ -886,13 +614,18 @@ export class BearTrick implements CharacterRoutine {
     return ms >= p.doze ? this.ending(ms, k, walked, parked) : k;
   }
 
-  private ending(ms: number, before: Key, walked: number, parked: [BearReach, BearReach]): Key {
+  private ending(
+    ms: number,
+    before: BearKey,
+    walked: number,
+    parked: [BearReach, BearReach],
+  ): BearKey {
     const p = this.plan,
       m = this.model;
     const t = ease((ms - p.doze) / (p.settle - p.doze));
     const snore = Math.sin((ms - p.doze) / 520);
     if (p.ending === 'sit') {
-      const slump: Key = {
+      const slump: BearKey = {
         ...before,
         hip: { x: -2.4, y: sitHip(1.05) },
         pitch: 1.05,
@@ -907,7 +640,7 @@ export class BearTrick implements CharacterRoutine {
       return mixKey(before, slump, t);
     }
     if (p.ending === 'curl') {
-      const lie: Key = {
+      const lie: BearKey = {
         ...before,
         hip: { x: 1.5, y: 11 },
         pitch: -0.03,
@@ -926,7 +659,7 @@ export class BearTrick implements CharacterRoutine {
       return mixKey(before, lie, t, 3);
     }
     // Waddle: back up onto all fours, then plod off half asleep.
-    const stand: Key = {
+    const stand: BearKey = {
       ...before,
       hip: { x: 0, y: BEAR_WALK_HIP },
       pitch: 0,
@@ -1224,123 +957,5 @@ export class BearTrick implements CharacterRoutine {
     this.pie.matrix.compose(at, turn, size.multiplyScalar(0.4 + 0.6 * ease(ms / 220)));
     this.pie.matrixWorldNeedsUpdate = true;
     this.showStage(Math.min(p.bites - 1, bearBitesTaken(p, ms)));
-  }
-
-  private updateWisps(ms: number, L: BearLayout, frame: BearFrame) {
-    const p = this.plan;
-    const end = p.find === 'card' ? p.grab : p.hook;
-    const strength = ease(ms / 300) * (1 - ease((ms - end + 300) / 300));
-    const centre = frame.pie ? new THREE.Vector3().setFromMatrixPosition(frame.pie) : null;
-    this.wisps.forEach((wisp, i) => {
-      wisp.visible = strength > 0.01 && centre !== null;
-      if (!wisp.visible || !centre) return;
-      const baseX = centre.x + (i - 1) * 3.2 * L.scale,
-        baseY = centre.y + 3 * L.scale,
-        height = (11 + 3 * i) * L.scale;
-      const drift = ms / 380 + i * 2.1 + p.phase;
-      setStrip(
-        wisp.geometry,
-        10,
-        (t, out) =>
-          out.set(
-            baseX + Math.sin(drift + t * 5) * 1.6 * L.scale * t,
-            baseY + t * height,
-            CARD_Z + 1,
-          ),
-        (t) => (1 - t * 0.7) * 1.3 * L.scale,
-      );
-      wisp.material.opacity = 0.32 * strength * (0.75 + 0.25 * Math.sin(drift * 1.7));
-    });
-  }
-
-  private updatePrints(
-    ms: number,
-    L: BearLayout,
-    q: CardPose,
-    pressed: readonly (Point | null)[],
-    fade: number,
-  ) {
-    const p = this.plan;
-    this.prints.forEach((mark, k) => {
-      const uv = pressed[k],
-        print = p.prints[k];
-      mark.group.visible = !!uv && fade > 0 && ms < BEAR_DURATION;
-      if (!uv || !print || !mark.group.visible) return;
-      const at = onCard(q, uv.x, uv.y, L.b);
-      mark.group.position.set(at.x, -at.y, CARD_Z - 0.5 + k * 0.01);
-      mark.group.rotation.z = cardTurn(q) + L.side * print.turn;
-      mark.group.scale.setScalar(1.25 * L.scale);
-      const show = ease((ms - print.at) / 80) * fade;
-      mark.materials.forEach(
-        (m, i) => (m.opacity = (i === mark.materials.length - 1 ? 0.55 : 0.82) * show),
-      );
-    });
-    // The first print stays sticky enough to run a thin bead of honey down the card.
-    const first = pressed[0];
-    const run = first ? clamp((ms - (p.prints[0]?.at ?? 0) - 260) / 1800) : 0;
-    this.drip.visible = !!first && run > 0 && fade > 0 && ms < BEAR_DURATION;
-    if (!first || !this.drip.visible) return;
-    const length = 0.045 * ease(run);
-    setStrip(
-      this.drip.geometry,
-      8,
-      (t, out) => {
-        const at = onCard(q, first.x + 0.01 * L.side, first.y + 0.025 + t * length, L.b);
-        out.set(at.x, -at.y, CARD_Z - 0.4);
-      },
-      (t) =>
-        (t > 0.8 ? 1.25 * Math.sin(Math.PI * Math.min(1, (t - 0.8) / 0.2 + 0.25)) : 0.8 - 0.3 * t) *
-        L.scale,
-    );
-    this.drip.material.opacity = 0.85 * fade;
-  }
-
-  /** Crumbs fall from the mouth at each bite and settle on their real geometry on the floor. */
-  private updateCrumbs(ms: number, L: BearLayout, births: readonly (Point | null)[], fade: number) {
-    const g = 980;
-    this.crumbs.forEach((c) => {
-      const birth = births[c.bite],
-        at = this.plan.biteTimes[c.bite] ?? 0;
-      c.mesh.visible = !!birth && fade > 0 && ms < BEAR_DURATION;
-      if (!birth || !c.mesh.visible) return;
-      const e = (ms - at) / 1000,
-        size = 0.75 * L.scale;
-      const drop = Math.max(0, L.floor - birth.y - size);
-      const land = (-c.vy + Math.sqrt(c.vy * c.vy + 2 * g * drop)) / g;
-      const s = Math.min(e, land);
-      const slide = e > land ? c.vx * 0.12 * ease((e - land) / 0.25) : 0;
-      c.mesh.rotation.set(c.spin * s * 0.6, 0, c.spin * s);
-      c.mesh.scale.copy(c.shape).multiplyScalar(size);
-      c.mesh.position.set(
-        birth.x + c.dx * L.scale + c.vx * s * 0.6 + slide,
-        -(birth.y + c.vy * s + 0.5 * g * s * s),
-        DEPTH + 16 * L.scale,
-      );
-      c.mesh.updateMatrixWorld(true);
-      const lowest = lowestWorldY(c.mesh);
-      if (e >= land || lowest < -L.floor) c.mesh.position.y += -L.floor - lowest;
-      c.mesh.material.transparent = fade < 1;
-      c.mesh.material.opacity = fade;
-    });
-  }
-
-  private updateZs(ms: number, L: BearLayout, fade: number) {
-    const p = this.plan;
-    const crown = p.ending !== 'waddle' && ms >= p.doze + 150 ? screenOf(this.model.crown) : null;
-    this.zs.forEach((z, i) => {
-      const age = (ms - p.doze - 150 - i * 520) / 1560;
-      z.visible = !!crown && age >= 0 && fade > 0 && ms < BEAR_DURATION;
-      if (!crown || !z.visible) return;
-      const a = age % 1;
-      // Zs drift away from the card so they never sit over the value.
-      z.position.set(
-        crown.x - L.side * (3 + 14 * a) * L.scale,
-        -crown.y + (4 + 20 * a) * L.scale,
-        DEPTH + 30,
-      );
-      z.rotation.z = 0.25 * Math.sin(a * Math.PI * 2 + i) - L.side * 0.15;
-      z.scale.setScalar((1.1 + 1.3 * a) * L.scale);
-      z.material.opacity = 0.9 * Math.sin(Math.PI * a) * fade;
-    });
   }
 }

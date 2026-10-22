@@ -26,6 +26,8 @@ export const KICK_REACH = 6.5;
 export const PAT_INTERVAL = 260;
 /** Screen depth is foreshortened: a ball pushed toward the viewer sits only a little lower on screen. */
 export const DEPTH_SQUASH = 0.25;
+/** Screen gravity for flying snow and the carrot, in px per ms². */
+export const SNOWMAN_GRAVITY = 0.0011;
 
 export type SnowSculpture = 'snowman' | 'star' | 'tree';
 export type SnowBeat = 'wobble' | 'sniffle';
@@ -77,6 +79,9 @@ export interface SnowmanPlan {
 }
 
 /** Signed offset of the fallen carrot from the admiring stand, in model units (positive = toward the card). */
+/** When the sneeze bursts the sculpture. */
+export const snowmanBlastAt = (p: SnowmanPlan) => p.sneeze + 60;
+
 export const snowmanCarrotOffset = (p: SnowmanPlan) =>
   p.noseBounce ? -(18 + 12 * p.noseLand) : 9 + 5 * p.noseLand;
 
