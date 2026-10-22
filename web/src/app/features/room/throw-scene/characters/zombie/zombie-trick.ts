@@ -1,4 +1,4 @@
-import { clamp, ease as smooth } from '../../kit';
+import { clamp, ease as smooth, stretchBetweenVectors } from '../../kit';
 import { requireSceneObject } from '../../engine/scene-object';
 import * as THREE from 'three';
 import { seededRandom, type Point } from '../../flight/flight-math';
@@ -219,14 +219,6 @@ export function makeZombie(): THREE.Group {
   return zombie;
 }
 
-const up = new THREE.Vector3(0, 1, 0);
-function segment(mesh: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const delta = b.clone().sub(a);
-  mesh.position.copy(a).addScaledVector(delta, 0.5);
-  mesh.scale.y = delta.length();
-  mesh.quaternion.setFromUnitVectors(up, delta.normalize());
-}
-
 /** Fixed length upper arm and forearm, with a bent elbow; hands never detach. */
 function reach(zombie: THREE.Group, side: number, x: number, y: number, grab: number) {
   const arm = requireSceneObject(zombie, `arm-${side}`);
@@ -240,8 +232,8 @@ function reach(zombie: THREE.Group, side: number, x: number, y: number, grab: nu
   const bend = Math.sqrt(19 ** 2 - (length / 2) ** 2);
   elbow.x += delta.y * bend;
   elbow.y -= delta.x * bend;
-  segment(requireSceneObject(arm, 'upper'), shoulder, elbow);
-  segment(requireSceneObject(arm, 'lower'), elbow, hand);
+  stretchBetweenVectors(requireSceneObject(arm, 'upper'), shoulder, elbow);
+  stretchBetweenVectors(requireSceneObject(arm, 'lower'), elbow, hand);
   requireSceneObject(arm, 'hand').position.copy(hand);
   for (let i = 0; i < 3; i++)
     requireSceneObject(arm, `finger-${i}`).rotation.z = -grab * (0.7 + i * 0.2);

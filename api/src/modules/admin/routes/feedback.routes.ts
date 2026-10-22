@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
 import {
@@ -8,6 +8,7 @@ import {
   FeedbackWorkflowStatusSchema,
   UpdateFeedbackWorkflowSchema,
 } from '@poker/shared';
+import { jsonBody, JsonBodyLimit } from '../../../platform/http/json-body';
 import { createFeedbackRepliesRouter } from '../../feedback/feedback-replies.routes';
 import {
   findAdminFeedback,
@@ -70,26 +71,22 @@ export function createAdminFeedbackRouter(isAdminOrigin: (origin: string) => boo
       next(error);
     }
   });
-  router.patch(
-    '/feedback/:id',
-    express.json({ limit: '8kb', inflate: false }),
-    async (req, res, next) => {
-      const id = z.uuid().safeParse(req.params.id);
-      const change = UpdateFeedbackWorkflowSchema.safeParse(req.body);
-      if (!id.success || !change.success) {
-        res.status(400).json({
-          message: change.success
-            ? 'Invalid feedback reference.'
-            : (change.error.issues[0]?.message ?? 'Invalid workflow change.'),
-        });
-        return;
-      }
-      try {
-        res.json(await updateFeedbackWorkflow(id.data, change.data));
-      } catch (error) {
-        next(error);
-      }
-    },
-  );
+  router.patch('/feedback/:id', jsonBody(JsonBodyLimit.MESSAGE), async (req, res, next) => {
+    const id = z.uuid().safeParse(req.params.id);
+    const change = UpdateFeedbackWorkflowSchema.safeParse(req.body);
+    if (!id.success || !change.success) {
+      res.status(400).json({
+        message: change.success
+          ? 'Invalid feedback reference.'
+          : (change.error.issues[0]?.message ?? 'Invalid workflow change.'),
+      });
+      return;
+    }
+    try {
+      res.json(await updateFeedbackWorkflow(id.data, change.data));
+    } catch (error) {
+      next(error);
+    }
+  });
   return router;
 }

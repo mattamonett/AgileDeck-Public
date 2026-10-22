@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { GOAT_SCALE } from './goat-choreography';
+import { stretchBetweenVectors } from '../../kit';
 function oval(
   parent: THREE.Object3D,
   name: string,
@@ -165,13 +166,6 @@ export function makeGoats(): THREE.Group {
   goatWalk(herd, 0, 1, 0);
   return herd;
 }
-const up = new THREE.Vector3(0, 1, 0);
-function segment(o: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const v = b.clone().sub(a);
-  o.position.copy(a).add(b).multiplyScalar(0.5);
-  o.scale.y = v.length();
-  o.quaternion.setFromUnitVectors(up, v.normalize());
-}
 export function goatFoot(goat: THREE.Object3D, i: number, target: THREE.Vector3, angle = 0) {
   const leg = requireSceneObject(goat, `leg-${i}`),
     local = leg.worldToLocal(target.clone()),
@@ -186,8 +180,8 @@ export function goatFoot(goat: THREE.Object3D, i: number, target: THREE.Vector3,
         .normalize()
         .multiplyScalar((i < 2 ? -1 : 1) * Math.sqrt(Math.max(0, 81 - (d * d) / 4))),
     );
-  segment(requireSceneObject(leg, 'upper-leg'), new THREE.Vector3(), joint);
-  segment(requireSceneObject(leg, 'lower-leg'), joint, local);
+  stretchBetweenVectors(requireSceneObject(leg, 'upper-leg'), new THREE.Vector3(), joint);
+  stretchBetweenVectors(requireSceneObject(leg, 'lower-leg'), joint, local);
   requireSceneObject(leg, 'knee').position.copy(joint);
   const hoof = requireSceneObject(leg, 'hoof');
   hoof.position.copy(local);

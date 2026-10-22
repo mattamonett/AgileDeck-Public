@@ -1,10 +1,11 @@
 import type { Room, User } from '@prisma/client';
 import { NUDGE_TARGET_COOLDOWN_MS, type NudgeEvent, type NudgeLevel } from '@poker/shared';
+import { HOUR_MS } from '../../platform/time';
 import { checkRateLimit } from '../../platform/concurrency/action-cooldowns';
 
 const MAX_TRACKED_TARGETS = 10_000;
 // Levels only matter within one round, so a stale entry is safe to forget.
-const LEVEL_TTL_MS = 60 * 60_000;
+const LEVEL_TTL_MS = HOUR_MS;
 
 interface NudgeCount {
   round: number;

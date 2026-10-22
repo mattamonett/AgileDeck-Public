@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Point } from '../../flight/flight-math';
 import { requireSceneObject } from '../../engine/scene-object';
+import { stretchBetweenVectors } from '../../kit';
 function oval(
   parent: THREE.Object3D,
   name: string,
@@ -181,13 +182,6 @@ export function makeArchitect(): THREE.Group {
   return man;
 }
 
-const up = new THREE.Vector3(0, 1, 0);
-function segment(part: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const line = b.clone().sub(a);
-  part.position.copy(a).add(b).multiplyScalar(0.5);
-  part.scale.y = line.length();
-  part.quaternion.setFromUnitVectors(up, line.normalize());
-}
 export function architectLimb(root: THREE.Object3D, target: THREE.Vector3, arm: boolean) {
   const length = arm ? 22 : 19;
   const distance = target.length();
@@ -205,8 +199,12 @@ export function architectLimb(root: THREE.Object3D, target: THREE.Vector3, arm: 
         Math.sqrt(Math.max(0, length * length - (distance * distance) / 4)),
     );
   const joint = target.clone().multiplyScalar(0.5).add(bend);
-  segment(requireSceneObject(root, arm ? 'upper-arm' : 'thigh'), new THREE.Vector3(), joint);
-  segment(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
+  stretchBetweenVectors(
+    requireSceneObject(root, arm ? 'upper-arm' : 'thigh'),
+    new THREE.Vector3(),
+    joint,
+  );
+  stretchBetweenVectors(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
   requireSceneObject(root, arm ? 'elbow' : 'knee').position.copy(joint);
   requireSceneObject(root, arm ? 'hand' : 'shoe').position.copy(target);
 }

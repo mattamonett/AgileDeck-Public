@@ -16,8 +16,8 @@ import {
   type Side,
 } from '../../kit';
 
-const SNOW = 0xeef5fb,
-  SNOW_SHADE = 0xd9e7f2,
+export const SNOW = 0xeef5fb;
+const SNOW_SHADE = 0xd9e7f2,
   COAL = 0x1d1f27,
   KNIT = 0xd23a4f,
   CREAM = 0xfff0d2,

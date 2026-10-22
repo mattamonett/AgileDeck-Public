@@ -9,7 +9,7 @@ import {
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RoomStatsSchema, type RoomStats, type RoomStatsMetric } from '@poker/shared';
+import { roomApiPath, RoomStatsSchema, type RoomStats, type RoomStatsMetric } from '@poker/shared';
 import { resolveApiUrl } from '@core/api/api-url';
 import { SocketService } from '@core/socket/socket.service';
 import { SiteConfigService } from '@core/config/site-config.service';
@@ -138,7 +138,7 @@ export class RoomStatsComponent {
     const requestedSort = this.sort();
     try {
       const response = await fetch(
-        `${resolveApiUrl()}/api/rooms/${encodeURIComponent(this.roomId())}/stats?page=${this.page()}&sort=${requestedSort}`,
+        `${resolveApiUrl()}${roomApiPath(this.roomId(), 'stats')}?page=${this.page()}&sort=${requestedSort}`,
         {
           credentials: 'include',
           cache: 'no-store',

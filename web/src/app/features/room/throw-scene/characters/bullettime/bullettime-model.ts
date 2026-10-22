@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { bone, flat, makeLimb, part, reach, type Limb } from '../../kit';
+import { stretchBetween, flat, makeLimb, part, reach, type Limb } from '../../kit';
 import type { Point } from '../../flight/flight-math';
 import {
   bulletTimePlan,
@@ -225,7 +225,7 @@ export function stickPose(f: StickFigure, q: StickPose) {
   const s = shoulderOf(q),
     h = headOf(q);
   for (const mesh of f.torso)
-    bone(mesh, q.hip.x, q.hip.y, s.x, s.y, mesh === f.torso[0] ? 0 : INK_Z);
+    stretchBetween(mesh, q.hip.x, q.hip.y, s.x, s.y, mesh === f.torso[0] ? 0 : INK_Z);
   f.head.position.set(h.x, h.y, 0);
   f.arms.forEach((arm, i) => poseLimb(arm, s, q.hands[i] ?? s, q.elbows[i] ?? -1));
   f.legs.forEach((leg, i) => poseLimb(leg, q.hip, q.feet[i] ?? q.hip, q.knees[i] ?? 1));

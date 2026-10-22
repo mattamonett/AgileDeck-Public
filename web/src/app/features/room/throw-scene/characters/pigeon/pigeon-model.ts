@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import type { Point } from '../../flight/flight-math';
 import { PIGEON_SCALE, pigeonEase, type PigeonPlan } from './pigeon-choreography';
+import { stretchBetween } from '../../kit';
 
 function oval(
   parent: THREE.Object3D,
@@ -129,14 +130,6 @@ export function makePigeon(): THREE.Group {
   pigeonFlap(bird, 0, false);
   return bird;
 }
-const up = new THREE.Vector3(0, 1, 0);
-const vector = new THREE.Vector3();
-function bone(part: THREE.Object3D, ax: number, ay: number, bx: number, by: number) {
-  vector.set(bx - ax, by - ay, 0);
-  part.position.set((ax + bx) / 2, (ay + by) / 2, 0);
-  part.scale.y = vector.length();
-  part.quaternion.setFromUnitVectors(up, vector.normalize());
-}
 export function pigeonFlap(bird: THREE.Group, ms: number, flying: boolean, speed = 1, kick = 0) {
   requireSceneObject(bird, 'pigeon-body').position.y = -kick * 2.5;
   for (const side of [-1, 1]) {
@@ -155,8 +148,8 @@ export function pigeonFlap(bird: THREE.Group, ms: number, flying: boolean, speed
     const bend = Math.sqrt(Math.max(0, 81 - (length * length) / 4));
     const ex = px / 2 + (py / length) * bend;
     const ey = py / 2 - (px / length) * bend;
-    bone(requireSceneObject(leg, 'upper-leg'), 0, 0, ex, ey);
-    bone(requireSceneObject(leg, 'lower-leg'), ex, ey, px, py);
+    stretchBetween(requireSceneObject(leg, 'upper-leg'), 0, 0, ex, ey);
+    stretchBetween(requireSceneObject(leg, 'lower-leg'), ex, ey, px, py);
     requireSceneObject(leg, 'knee').position.set(ex, ey, 0);
     requireSceneObject(leg, 'talon').position.set(px, py, 0);
   }

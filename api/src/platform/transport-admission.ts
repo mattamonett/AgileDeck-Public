@@ -1,3 +1,4 @@
+import { MINUTE_MS } from './time';
 import {
   recordRateLimitHit,
   recordCookieRateLimitHit,
@@ -9,7 +10,6 @@ import { getClientIp } from './http/client-ip';
 import { decodeVisitorCookie, VISITOR_COOKIE_NAME } from './http/visitor-session';
 import { WindowBudget } from './concurrency/window-budget';
 
-const MINUTE_MS = 60_000;
 const ATTEMPTS_PER_NETWORK_PER_MINUTE = 120;
 const ATTEMPTS_PER_VISITOR_PER_MINUTE = 30;
 const ATTEMPTS_PER_MINUTE = 1000;

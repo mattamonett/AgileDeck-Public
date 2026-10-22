@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import { Router } from 'express';
 import {
   AdminDeleteMemberSchema,
   AdminDeleteRoomSchema,
@@ -7,6 +7,7 @@ import {
   AdminRoomMemberQuerySchema,
   AdminRoomQuerySchema,
 } from '@poker/shared';
+import { jsonBody, JsonBodyLimit } from '../../../platform/http/json-body';
 import { deleteAdminMember, deleteAdminRoom } from '../admin-deletion.service';
 import { findAdminRoom, listAdminRooms } from '../room-admin.service';
 
@@ -47,31 +48,23 @@ export function createRoomsRouter(): Router {
       next(error);
     }
   });
-  router.delete(
-    '/rooms/:id',
-    express.json({ limit: '4kb', inflate: false }),
-    async (req, res, next) => {
-      const id = AdminRoomIdSchema.safeParse(req.params.id);
-      const confirmation = AdminDeleteRoomSchema.safeParse(req.body);
-      if (!id.success || !confirmation.success) {
-        res.status(400).json({ message: 'Invalid room deletion confirmation.' });
-        return;
-      }
-      try {
-        await deleteAdminRoom(
-          id.data,
-          confirmation.data.name,
-          confirmation.data.approvedMemberCount,
-        );
-        res.status(204).end();
-      } catch (error) {
-        next(error);
-      }
-    },
-  );
+  router.delete('/rooms/:id', jsonBody(JsonBodyLimit.COMMAND), async (req, res, next) => {
+    const id = AdminRoomIdSchema.safeParse(req.params.id);
+    const confirmation = AdminDeleteRoomSchema.safeParse(req.body);
+    if (!id.success || !confirmation.success) {
+      res.status(400).json({ message: 'Invalid room deletion confirmation.' });
+      return;
+    }
+    try {
+      await deleteAdminRoom(id.data, confirmation.data.name, confirmation.data.approvedMemberCount);
+      res.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  });
   router.delete(
     '/rooms/:id/members/:reference',
-    express.json({ limit: '4kb', inflate: false }),
+    jsonBody(JsonBodyLimit.COMMAND),
     async (req, res, next) => {
       const id = AdminRoomIdSchema.safeParse(req.params.id);
       const reference = AdminMemberReferenceSchema.safeParse(req.params.reference);

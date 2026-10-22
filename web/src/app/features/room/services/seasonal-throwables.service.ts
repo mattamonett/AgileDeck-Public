@@ -1,5 +1,6 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import {
+  ApiPath,
   ChristmasAvailabilitySchema,
   isChristmasProjectile,
   HalloweenAvailabilitySchema,
@@ -43,7 +44,7 @@ export class SeasonalThrowablesService {
 
   async refresh(): Promise<void> {
     try {
-      const response = await fetch(`${this.socket.getApiUrl()}/api/config`, {
+      const response = await fetch(this.socket.getApiUrl() + ApiPath.SEASONAL_CONFIG, {
         cache: 'no-store',
         credentials: 'include',
         signal: AbortSignal.any([this.abort.signal, AbortSignal.timeout(10_000)]),

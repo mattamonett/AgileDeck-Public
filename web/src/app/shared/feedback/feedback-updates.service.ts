@@ -1,6 +1,6 @@
 import { Injectable, effect, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { OwnFeedbackUpdatesSchema } from '@poker/shared';
+import { ApiPath, OwnFeedbackUpdatesSchema } from '@poker/shared';
 import { interval } from 'rxjs';
 import { resolveApiUrl } from '@core/api/api-url';
 
@@ -35,7 +35,7 @@ export class FeedbackUpdatesService {
   async refresh(): Promise<void> {
     const generation = ++this.generation;
     try {
-      const response = await fetch(this.apiUrl + '/api/feedback/mine/updates', {
+      const response = await fetch(`${this.apiUrl}${ApiPath.FEEDBACK}/mine/updates`, {
         credentials: 'include',
         cache: 'no-store',
       });

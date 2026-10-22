@@ -17,6 +17,42 @@ export function lowestWorldY(root: THREE.Object3D): number {
   });
   return lowest;
 }
+const prunedSphere = new THREE.Sphere(),
+  prunedVertex = new THREE.Vector3();
+/**
+ * Lowest world-space y of the visible meshes under `root`, from their real transformed vertices
+ * (as lowestWorldY), skipping meshes whose bounding sphere cannot reach below the lowest so far.
+ */
+export function lowestWorldYPruned(root: THREE.Object3D): number {
+  root.updateMatrixWorld(true);
+  const candidates: { mesh: THREE.Mesh; bottom: number }[] = [];
+  const visit = (o: THREE.Object3D) => {
+    if (!o.visible) return;
+    if (o instanceof THREE.Mesh) {
+      const g = o.geometry;
+      if (!g.boundingSphere) g.computeBoundingSphere();
+      if (g.boundingSphere) {
+        prunedSphere.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);
+        candidates.push({ mesh: o, bottom: prunedSphere.center.y - prunedSphere.radius });
+      }
+    }
+    for (const child of o.children) visit(child);
+  };
+  visit(root);
+  candidates.sort((a, b) => a.bottom - b.bottom);
+  let lowest = Infinity;
+  for (const { mesh, bottom } of candidates) {
+    if (bottom >= lowest) break;
+    const points = mesh.geometry.getAttribute('position');
+    for (let i = 0; i < points.count; i++)
+      lowest = Math.min(
+        lowest,
+        prunedVertex.fromBufferAttribute(points, i).applyMatrix4(mesh.matrixWorld).y,
+      );
+  }
+  return lowest;
+}
+
 function visibleInTree(o: THREE.Object3D, root: THREE.Object3D): boolean {
   for (let at: THREE.Object3D | null = o; at; at = at.parent) {
     if (!at.visible) return false;

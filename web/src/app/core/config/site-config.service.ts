@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import {
+  ApiPath,
   DEFAULT_LEGAL_UPDATED,
   DEFAULT_SITE_CONFIG,
   defaultPrivacyNotice,
@@ -34,7 +35,7 @@ export class SiteConfigService {
 
   async load(): Promise<void> {
     try {
-      const response = await fetch(`${resolveApiUrl()}/api/site-config`, {
+      const response = await fetch(resolveApiUrl() + ApiPath.SITE_CONFIG, {
         cache: 'no-store',
         credentials: 'include',
         signal: AbortSignal.timeout(10_000),

@@ -8,6 +8,7 @@ import {
   patchState,
 } from '@ngrx/signals';
 import {
+  roomApiPath,
   GameEvents,
   IssueStatus,
   type Issue,
@@ -67,7 +68,7 @@ export const IssuesStore = signalStore(
     let contextGeneration = 0;
     let controller: AbortController | undefined;
     function url(context: { roomId: string; userId: string }, id?: string) {
-      return `${sockets.getApiUrl()}/api/rooms/${encodeURIComponent(context.roomId)}/issues${id ? '/' + encodeURIComponent(id) : ''}?userId=${encodeURIComponent(context.userId)}`;
+      return `${sockets.getApiUrl()}${roomApiPath(context.roomId, 'issues')}${id ? '/' + encodeURIComponent(id) : ''}?userId=${encodeURIComponent(context.userId)}`;
     }
 
     async function refresh() {

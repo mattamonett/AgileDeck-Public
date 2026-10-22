@@ -1,9 +1,10 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { z } from 'zod';
+import { HOUR_MS } from '../../platform/time';
 import { AdminError } from './admin-errors';
 
 /** Member references in the admin page stop working after an hour. */
-const REFERENCE_TTL_MS = 60 * 60_000;
+const REFERENCE_TTL_MS = HOUR_MS;
 
 const key = randomBytes(32);
 const payloadSchema = z.strictObject({

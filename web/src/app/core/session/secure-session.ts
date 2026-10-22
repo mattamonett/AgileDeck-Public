@@ -1,3 +1,5 @@
+import { requestVisitorSession } from './visitor-session';
+
 const REQUEST_TIMEOUT_MS = 10_000;
 const INITIAL_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 10_000;
@@ -27,9 +29,7 @@ export async function initializeSecureSession(
     const requestController = new AbortController();
     const timeout = setTimeout(() => requestController.abort(), REQUEST_TIMEOUT_MS);
     try {
-      const response = await fetch(`${apiUrl}/api/init`, {
-        credentials: 'include',
-        cache: 'no-store',
+      const response = await requestVisitorSession(apiUrl, {
         signal: AbortSignal.any([signal, requestController.signal]),
       });
       if (!response.ok) throw new Error(`Session initialization returned HTTP ${response.status}`);

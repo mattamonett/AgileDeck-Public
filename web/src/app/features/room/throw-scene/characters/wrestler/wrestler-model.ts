@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { WRESTLER_SCALE } from './wrestler-choreography';
+import { stretchBetweenVectors } from '../../kit';
 function bone(parent: THREE.Object3D, name: string, radius: number, color: number) {
   const part = new THREE.Mesh(
     new THREE.CylinderGeometry(radius, radius * 1.05, 1, 14),
@@ -222,13 +223,6 @@ export function makeWrestler(): THREE.Group {
   return man;
 }
 
-const up = new THREE.Vector3(0, 1, 0);
-function segment(part: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
-  const line = b.clone().sub(a);
-  part.position.copy(a).add(b).multiplyScalar(0.5);
-  part.scale.y = line.length();
-  part.quaternion.setFromUnitVectors(up, line.normalize());
-}
 export function wrestlerLimb(
   root: THREE.Object3D,
   target: THREE.Vector3,
@@ -252,8 +246,12 @@ export function wrestlerLimb(
     );
   if (arm && distance > 1e-6) bend.applyAxisAngle(target.clone().normalize(), Math.PI * bendTurn);
   const joint = target.clone().multiplyScalar(0.5).add(bend);
-  segment(requireSceneObject(root, arm ? 'upper-arm' : 'thigh'), new THREE.Vector3(), joint);
-  segment(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
+  stretchBetweenVectors(
+    requireSceneObject(root, arm ? 'upper-arm' : 'thigh'),
+    new THREE.Vector3(),
+    joint,
+  );
+  stretchBetweenVectors(requireSceneObject(root, arm ? 'forearm' : 'shin'), joint, target);
   requireSceneObject(root, arm ? 'elbow' : 'knee').position.copy(joint);
   requireSceneObject(root, arm ? 'hand' : 'boot').position.copy(target);
 }

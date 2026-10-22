@@ -1,5 +1,7 @@
-import { Router, json, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
+import { MINUTE_MS, DAY_MS } from '../../platform/time';
+import { jsonBody, JsonBodyLimit } from '../../platform/http/json-body';
 import { AbuseLimitError } from '../../platform/db/abuse-quota';
 import { WindowBudget } from '../../platform/concurrency/window-budget';
 import {
@@ -25,8 +27,6 @@ import { responseLocal } from '../../platform/http/response-local';
 import { getSiteConfig } from '../../config/site-config';
 import { acceptsCurrentAgreement } from '../site/site-agreement';
 
-const MINUTE_MS = 60_000;
-const DAY_MS = 24 * 60 * MINUTE_MS;
 const NETWORK_VOTES_PER_MINUTE = 60;
 
 const PageCursorSchema = z.uuid().optional();
@@ -83,7 +83,7 @@ export function createFeedbackRouter(isOriginAllowed: (origin: string) => boolea
       isOriginAllowed,
     ),
   );
-  router.use(json({ limit: '4kb', inflate: false }));
+  router.use(jsonBody(JsonBodyLimit.COMMAND));
 
   router.get('/mine', async (req, res) => {
     try {
@@ -126,51 +126,19 @@ export function createFeedbackRouter(isOriginAllowed: (origin: string) => boolea
 
   router.get('/', async (req, res) => {
     try {
-      const rawCategory = req.query.category;
-      let category: FeedbackCategory | undefined;
-      if (rawCategory !== undefined) {
-        const parsed = FeedbackCategorySchema.safeParse(rawCategory);
-        if (!parsed.success) {
-          res.status(400).json({ message: 'Invalid feedback type.' });
-          return;
-        }
-        category = parsed.data;
-      }
-      const parsedSort = FeedbackSortSchema.safeParse(req.query.sort ?? 'newest');
-      if (!parsedSort.success) {
-        res.status(400).json({ message: 'Invalid feedback sort.' });
+      const query = parseFeedbackListQuery(req.query);
+      if (!query.ok) {
+        res.status(400).json({ message: query.message });
         return;
       }
-      const parsedClosed = FeedbackIncludeClosedSchema.safeParse(req.query.includeClosed);
-      if (!parsedClosed.success) {
-        res.status(400).json({ message: 'Invalid closed feedback filter.' });
-        return;
-      }
-      const sort = parsedSort.data;
-      if (sort === 'top' && category === undefined) {
-        res.status(400).json({ message: 'A feedback type is required for top sorting.' });
-        return;
-      }
-      const cursor = PageCursorSchema.safeParse(req.query.cursor);
-      if (!cursor.success) {
-        res.status(400).json({ message: 'Invalid page cursor.' });
-        return;
-      }
-      res.json(
-        await feedbackService.listPublishedFeedback(getVisitorId(res), {
-          category,
-          sort,
-          includeClosed: parsedClosed.data,
-          cursor: cursor.data,
-        }),
-      );
+      res.json(await feedbackService.listPublishedFeedback(getVisitorId(res), query.value));
     } catch (error) {
       respondFailure(res, error);
     }
   });
 
   const voteLimiter = limiter({
-    windowMs: 60_000,
+    windowMs: MINUTE_MS,
     limit: 30,
     keyGenerator: (_req, res) => getVisitorId(res),
   });
@@ -225,7 +193,7 @@ export function createFeedbackRouter(isOriginAllowed: (origin: string) => boolea
   });
 
   const minuteLimiter = limiter({
-    windowMs: 60_000,
+    windowMs: MINUTE_MS,
     limit: 1,
     keyGenerator: (_req, res) => getVisitorId(res),
     message: { message: 'Please wait a minute before posting again.' },
@@ -291,6 +259,37 @@ export function createFeedbackRouter(isOriginAllowed: (origin: string) => boolea
     },
   );
   return router;
+}
+
+type ParsedQuery<T> =
+  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly message: string };
+
+function invalid(message: string): ParsedQuery<never> {
+  return { ok: false, message };
+}
+
+/** Parses and cross-checks the public feedback list filters. */
+function parseFeedbackListQuery(
+  query: Request['query'],
+): ParsedQuery<feedbackService.PublishedFeedbackQuery> {
+  let category: FeedbackCategory | undefined;
+  if (query.category !== undefined) {
+    const parsed = FeedbackCategorySchema.safeParse(query.category);
+    if (!parsed.success) return invalid('Invalid feedback type.');
+    category = parsed.data;
+  }
+  const sort = FeedbackSortSchema.safeParse(query.sort ?? 'newest');
+  if (!sort.success) return invalid('Invalid feedback sort.');
+  const includeClosed = FeedbackIncludeClosedSchema.safeParse(query.includeClosed);
+  if (!includeClosed.success) return invalid('Invalid closed feedback filter.');
+  if (sort.data === 'top' && category === undefined)
+    return invalid('A feedback type is required for top sorting.');
+  const cursor = PageCursorSchema.safeParse(query.cursor);
+  if (!cursor.success) return invalid('Invalid page cursor.');
+  return {
+    ok: true,
+    value: { category, sort: sort.data, includeClosed: includeClosed.data, cursor: cursor.data },
+  };
 }
 
 function respondFailure(res: Response, error: unknown): void {

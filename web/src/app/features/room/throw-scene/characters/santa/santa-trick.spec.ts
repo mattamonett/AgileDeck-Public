@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { makeSanta, santaModel } from './santa-model';
-import { SANTA_GREETING, SantaTrick } from './santa-trick';
+import { SANTA_GREETING } from './santa-greeting';
+import { SantaTrick } from './santa-trick';
 import {
   SANTA_DURATION,
   santaCardPose,

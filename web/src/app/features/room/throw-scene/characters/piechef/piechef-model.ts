@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { piechefPlan, type PiechefPlan } from './piechef-choreography';
-import { bone, makeLimb, matte, oval, part, reach, type Limb } from '../../kit';
+import { stretchBetween, makeLimb, matte, oval, part, reach, type Limb } from '../../kit';
 
 const JACKET = 0xf8f5ee,
   JACKET_SHADE = 0xe2dccf,
@@ -300,7 +300,7 @@ function makeApron(body: THREE.Group) {
       new THREE.CylinderGeometry(0.45, 0.45, 1, 6),
       matte(APRON_DARK, 0.8),
     );
-    bone(strap, 10.1, 19.6, 4.2, 25, z);
+    stretchBetween(strap, 10.1, 19.6, 4.2, 25, z);
   }
   const apron = new THREE.Group();
   apron.name = 'piechef-apron';

@@ -1,8 +1,9 @@
 import { Injectable, signal } from '@angular/core';
-import { AdminSessionStatusSchema, type AdminSessionStatus } from '@poker/shared';
+import { ApiPath, AdminSessionStatusSchema, type AdminSessionStatus } from '@poker/shared';
 import type { UnlockResult } from '@core/access/site-access.service';
 import { apiErrorMessage, readJsonResponse } from '@core/api/api-request';
 import { resolveApiUrl } from '@core/api/api-url';
+import { requestVisitorSession } from '@core/session/visitor-session';
 
 /** What the admin page can show: the API decides each state. */
 export type AdminAccess = 'checking' | 'off' | 'unreachable' | 'signed-out' | 'signed-in';
@@ -23,7 +24,7 @@ export class AdminSessionService {
 
   /** An admin API request carrying the admin cookie. */
   async fetch(path: string, init: RequestInit = {}): Promise<Response> {
-    const response = await fetch(`${resolveApiUrl()}/api/admin${path}`, {
+    const response = await fetch(`${resolveApiUrl()}${ApiPath.ADMIN}${path}`, {
       ...init,
       cache: 'no-store',
       credentials: 'include',
@@ -40,7 +41,7 @@ export class AdminSessionService {
   /** Asks the API whether the admin page is on and this browser is signed in. */
   async refresh(): Promise<void> {
     try {
-      const response = await fetch(`${resolveApiUrl()}/api/admin/session`, {
+      const response = await fetch(`${resolveApiUrl()}${ApiPath.ADMIN}/session`, {
         cache: 'no-store',
         credentials: 'include',
       });
@@ -63,8 +64,8 @@ export class AdminSessionService {
     const apiUrl = resolveApiUrl();
     try {
       // The admin cookie is bound to the browser ID, so make sure there is one.
-      await fetch(`${apiUrl}/api/init`, { cache: 'no-store', credentials: 'include' });
-      const response = await fetch(`${apiUrl}/api/admin/session`, {
+      await requestVisitorSession(apiUrl);
+      const response = await fetch(`${apiUrl}${ApiPath.ADMIN}/session`, {
         method: 'POST',
         cache: 'no-store',
         credentials: 'include',
@@ -89,7 +90,7 @@ export class AdminSessionService {
 
   async signOut(): Promise<void> {
     try {
-      await fetch(`${resolveApiUrl()}/api/admin/session`, {
+      await fetch(`${resolveApiUrl()}${ApiPath.ADMIN}/session`, {
         method: 'DELETE',
         cache: 'no-store',
         credentials: 'include',

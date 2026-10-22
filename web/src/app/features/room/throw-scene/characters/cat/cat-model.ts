@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Point } from '../../flight/flight-math';
 import { requireSceneObject } from '../../engine/scene-object';
+import { stretchBetween } from '../../kit';
 
 export const CAT_CLAW_REACH = 6.3;
 function oval(
@@ -31,14 +32,6 @@ function boneMesh(parent: THREE.Object3D, name: string, color: number, radius: n
   mesh.name = name;
   parent.add(mesh);
   return mesh;
-}
-const up = new THREE.Vector3(0, 1, 0);
-const direction = new THREE.Vector3();
-function segment(object: THREE.Object3D, ax: number, ay: number, bx: number, by: number) {
-  direction.set(bx - ax, by - ay, 0);
-  object.position.set((ax + bx) / 2, (ay + by) / 2, 0);
-  object.scale.y = direction.length();
-  object.quaternion.setFromUnitVectors(up, direction.normalize());
 }
 export function makeCat(): THREE.Group {
   const cat = new THREE.Group();
@@ -159,7 +152,7 @@ export function makeCat(): THREE.Group {
     const joint = new THREE.Group();
     joint.name = 'tail-joint-' + i;
     const piece = boneMesh(joint, 'tail-bone', i === 2 ? 0xf3d4a4 : 0xdba05f, 2.5 - i * 0.3);
-    segment(piece, 0, 0, 0, length);
+    stretchBetween(piece, 0, 0, 0, length);
     oval(joint, 0xdba05f, 0, 0, 0, 2.6 - i * 0.3, 2.6 - i * 0.3, 2.6 - i * 0.3);
     if (i > 0) joint.position.y = i === 1 ? 10 : 8;
     parent.add(joint);
@@ -201,8 +194,8 @@ export function catRig(
     const side = i < 2 ? 1 : -1;
     const ex = px / 2 - ((side * py) / Math.max(0.001, length)) * bend;
     const ey = py / 2 + ((side * px) / Math.max(0.001, length)) * bend;
-    segment(requireSceneObject(leg, 'upper-leg'), 0, 0, ex, ey);
-    segment(requireSceneObject(leg, 'lower-leg'), ex, ey, px, py);
+    stretchBetween(requireSceneObject(leg, 'upper-leg'), 0, 0, ex, ey);
+    stretchBetween(requireSceneObject(leg, 'lower-leg'), ex, ey, px, py);
     requireSceneObject(leg, 'knee').position.set(ex, ey, 0);
     const paw = requireSceneObject(leg, 'paw');
     paw.position.set(px, py, 0);

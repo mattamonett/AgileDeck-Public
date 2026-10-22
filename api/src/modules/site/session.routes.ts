@@ -1,5 +1,7 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
+import { ApiPath } from '@poker/shared';
+import { DAY_MS } from '../../platform/time';
 import { allowCredentialedOrigin, type OriginCheck } from '../../platform/http/origin-policy';
 import {
   decodeVisitorCookie,
@@ -8,12 +10,12 @@ import {
   VISITOR_COOKIE_NAME,
 } from '../../platform/http/visitor-session';
 
-const VISITOR_COOKIE_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+const VISITOR_COOKIE_MAX_AGE_MS = 365 * DAY_MS;
 
 /** GET /api/init issues the signed, HttpOnly visitor cookie every other route relies on. */
 export function createSessionRouter(isOriginAllowed: OriginCheck, secureCookies: boolean): Router {
   const router = Router();
-  router.get('/api/init', (req, res) => {
+  router.get(ApiPath.INIT, (req, res) => {
     allowCredentialedOrigin(req, res, isOriginAllowed);
     const visitorId =
       decodeVisitorCookie(req.cookies[VISITOR_COOKIE_NAME]).visitorId ?? crypto.randomUUID();

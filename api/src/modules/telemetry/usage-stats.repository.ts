@@ -11,6 +11,7 @@ import {
   type RoomMood,
   type UsageKey,
 } from '@poker/shared';
+import { DAY_MS } from '../../platform/time';
 import prisma from '../../platform/db/prisma';
 import { getSiteConfig } from '../../config/site-config';
 import { parseRoomMood } from '../rooms/room-appearance';
@@ -20,8 +21,6 @@ export interface UsageBatchEntry {
   metric: UsageKey;
   count: number;
 }
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function usageDay(now = new Date()): string {
   return now.toISOString().slice(0, 10);

@@ -1,3 +1,5 @@
+import { MINUTE_MS } from '../time';
+
 /** Bounded, expiring request counters for work that must not reach the database. */
 export class WindowBudget {
   private readonly entries = new Map<string, { count: number; expires: number }>();
@@ -33,7 +35,7 @@ export class WindowBudget {
   private sweep(now: number): void {
     for (const [entryKey, entry] of this.entries)
       if (entry.expires <= now) this.entries.delete(entryKey);
-    this.nextSweep = now + Math.min(this.windowMs, 60_000);
+    this.nextSweep = now + Math.min(this.windowMs, MINUTE_MS);
   }
 
   /**

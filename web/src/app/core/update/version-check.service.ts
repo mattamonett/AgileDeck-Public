@@ -1,4 +1,4 @@
-import { VersionSchema } from '@poker/shared';
+import { ApiPath, VersionSchema } from '@poker/shared';
 import { resolveApiUrl } from '../api/api-url';
 import { DestroyRef, Injectable, inject, isDevMode, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -62,7 +62,7 @@ export class VersionCheckService {
   /** The API build version, or a status label when it cannot be read. */
   async getApiVersion(): Promise<string> {
     try {
-      const response = await fetch(`${resolveApiUrl()}/api/version`);
+      const response = await fetch(resolveApiUrl() + ApiPath.VERSION);
       if (!response.ok) return 'Unknown';
       const parsed = VersionSchema.safeParse(await response.json());
       return parsed.success ? parsed.data.version : 'Unknown';

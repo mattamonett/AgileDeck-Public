@@ -1,5 +1,7 @@
-import { json, Router, type NextFunction, type Request, type Response } from 'express';
-import { SiteAccessRequestSchema, type SiteAccessStatus } from '@poker/shared';
+import { Router, type NextFunction, type Request, type Response } from 'express';
+import { ApiPath, SiteAccessRequestSchema, type SiteAccessStatus } from '@poker/shared';
+import { MINUTE_MS } from '../../platform/time';
+import { jsonBody, JsonBodyLimit } from '../../platform/http/json-body';
 import { AbuseLimitError, claimDailyQuotas } from '../../platform/db/abuse-quota';
 import { httpClientKey } from '../../platform/http/client-ip';
 import {
@@ -15,7 +17,7 @@ import { limiter, requireAllowedOrigin, requireVisitor } from '../../platform/ht
 
 /** Password attempts per network: a short window, then a durable daily budget. */
 export const SITE_ACCESS_ATTEMPTS_PER_WINDOW = 10;
-const SITE_ACCESS_WINDOW_MS = 15 * 60_000;
+const SITE_ACCESS_WINDOW_MS = 15 * MINUTE_MS;
 export const SITE_ACCESS_ATTEMPTS_PER_NETWORK_DAY = 30;
 export const SITE_ACCESS_ATTEMPTS_PER_DAY = 1000;
 
@@ -30,7 +32,7 @@ function isUnlocked(req: Request): boolean {
 
 /** The admin API has its own password, so an operator can reach it on a locked site. */
 function isAdminPath(path: string): boolean {
-  return path === '/api/admin' || path.startsWith('/api/admin/');
+  return path === ApiPath.ADMIN || path.startsWith(`${ApiPath.ADMIN}/`);
 }
 
 /**
@@ -90,7 +92,7 @@ export function createSiteAccessRouter(
       if (!requireVisitor(req, res)) return;
       next();
     },
-    json({ limit: '1kb', inflate: false }),
+    jsonBody(JsonBodyLimit.PASSWORD),
     async (req, res, next) => {
       try {
         const visitorId = requireVisitor(req, res);

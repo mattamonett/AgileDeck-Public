@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { requireSceneObject } from '../../engine/scene-object';
 import { reaperEase } from './reaper-choreography';
+import { stretchBetween } from '../../kit';
 
 const planes = new WeakMap<THREE.Group, THREE.Plane>();
 function oval(
@@ -31,18 +32,6 @@ function bone(parent: THREE.Object3D, name: string, radius: number, color: numbe
   parent.add(mesh);
   return mesh;
 }
-const up = new THREE.Vector3(0, 1, 0);
-const a = new THREE.Vector3();
-const b = new THREE.Vector3();
-const direction = new THREE.Vector3();
-function segment(object: THREE.Object3D, ax: number, ay: number, bx: number, by: number, z = 0) {
-  a.set(ax, ay, z);
-  b.set(bx, by, z);
-  direction.subVectors(b, a);
-  object.position.copy(a).addScaledVector(direction, 0.5);
-  object.scale.y = direction.length();
-  object.quaternion.setFromUnitVectors(up, direction.normalize());
-}
 function hand(parent: THREE.Object3D, name: string) {
   const palm = new THREE.Group();
   palm.name = name;
@@ -52,10 +41,10 @@ function hand(parent: THREE.Object3D, name: string) {
     finger.name = 'finger';
     finger.position.set(-2.4 + i * 1.6, -2, 1);
     const upper = bone(finger, 'finger-bone', 0.65, 0xe8dcb7);
-    segment(upper, 0, 0, 0, -3.5);
+    stretchBetween(upper, 0, 0, 0, -3.5);
     oval(finger, 0xc5b890, 0, -3.5, 0, 0.9, 0.9, 0.9);
     const tip = bone(finger, 'fingertip', 0.55, 0xd7c79d);
-    segment(tip, 0, -3.5, 1.1, -5.7);
+    stretchBetween(tip, 0, -3.5, 1.1, -5.7);
     palm.add(finger);
   }
   oval(palm, 0xdaceaa, -3.1, -0.3, 1, 1, 2.7, 1).rotation.z = -0.5;
@@ -126,14 +115,14 @@ export function makeGrimReaper(): THREE.Group {
   arm.position.set(12, 12, 7);
   bone(arm, 'scythe-upperarm', 4.8, 0x292b38);
   bone(arm, 'scythe-forearm', 4, 0x202332);
-  segment(requireSceneObject(arm, 'scythe-upperarm'), 0, 0, -Math.sqrt(21), -10);
-  segment(requireSceneObject(arm, 'scythe-forearm'), -Math.sqrt(21), -10, 0, -20);
+  stretchBetween(requireSceneObject(arm, 'scythe-upperarm'), 0, 0, -Math.sqrt(21), -10);
+  stretchBetween(requireSceneObject(arm, 'scythe-forearm'), -Math.sqrt(21), -10, 0, -20);
   oval(arm, 0x30323f, -Math.sqrt(21), -10, 0, 4.8, 4.8, 4.8);
   const sickle = new THREE.Group();
   sickle.name = 'sickle';
   sickle.position.set(0, -20, 2);
   const staff = bone(sickle, 'scythe-staff', 1.7, 0x5c443b);
-  segment(staff, 0, -44, 0, 28);
+  stretchBetween(staff, 0, -44, 0, 28);
   for (let i = 0; i < 5; i++) {
     const wrap = new THREE.Mesh(
       new THREE.TorusGeometry(2, 0.4, 5, 12),
@@ -203,8 +192,8 @@ export function reaperHand(reaper: THREE.Group, ms: number, strength: number) {
   const ey = hy / 2 + (hx / length) * bend;
   const arm = requireSceneObject(reaper, 'free-arm');
   arm.rotation.z = 0;
-  segment(requireSceneObject(arm, 'free-upperarm'), 0, 0, ex, ey);
-  segment(requireSceneObject(arm, 'free-forearm'), ex, ey, hx, hy);
+  stretchBetween(requireSceneObject(arm, 'free-upperarm'), 0, 0, ex, ey);
+  stretchBetween(requireSceneObject(arm, 'free-forearm'), ex, ey, hx, hy);
   requireSceneObject(arm, 'free-elbow').position.set(ex, ey, 0);
   const palm = requireSceneObject(arm, 'harvest-hand');
   palm.position.set(hx, hy, 2);

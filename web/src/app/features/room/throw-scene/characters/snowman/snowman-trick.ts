@@ -1,29 +1,22 @@
 import * as THREE from 'three';
-import { seededRandom, type Point } from '../../flight/flight-math';
+import { type Point } from '../../flight/flight-math';
 import type { TargetBounds } from '../../landing/landing-geometry';
 import {
   cardFit,
   clamp,
   ease,
-  glow,
   keepInView,
   localTarget,
   lowestWorldY,
-  matte,
   mix,
   mixPoint,
   onCard,
-  outline,
-  part,
   pulse,
   reach,
   screenOf,
-  setStrip,
   sideOf,
   sideRoute,
   span,
-  stripGeometry,
-  type CardPose,
   type CharacterRoutine,
   type Limb,
   type Side,
@@ -32,6 +25,8 @@ import {
   DEPTH_SQUASH,
   KICK_REACH,
   PAT_INTERVAL,
+  SNOWMAN_GRAVITY,
+  snowmanBlastAt,
   SNOWMAN_DURATION,
   STEP_BACK,
   snowmanBallRadius,
@@ -58,19 +53,19 @@ import {
   snowmanPose,
   type SnowmanModel,
   type SnowmanPose,
-  quadGeometry,
-  flakeGeometry,
-  starGeometry,
 } from './snowman-model';
+import { SnowmanBurst } from './snowman-burst';
+import { SnowmanFrost } from './snowman-frost';
+import {
+  buildSculpture,
+  buildSnowball,
+  type SculpturePiece,
+  type SculptureVolume,
+} from './snowman-sculpture';
 
 const DEPTH = 176;
 const ROUTE = 64;
 const SPIN_STEPS = 48;
-/** Screen gravity for flying snow and the carrot, in px per ms². */
-const GRAVITY = 0.0011;
-const SNOW = 0xeef5fb,
-  PEBBLE = 0x2a2c33;
-const FROST_SEGMENTS = 64;
 
 function mixAngle(a: number, b: number, t: number): number {
   let d = b - a;
@@ -108,97 +103,6 @@ interface BallState {
   readonly rx: number;
   readonly ry: number;
 }
-interface Piece {
-  readonly group: THREE.Group;
-  readonly keys: readonly (readonly [number, number])[];
-  readonly marker: THREE.Object3D | null;
-}
-interface Puff {
-  readonly mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
-  readonly a: number;
-  readonly b: number;
-  readonly c: number;
-}
-interface Chunk {
-  readonly mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  readonly volume: number;
-  readonly ox: number;
-  readonly oy: number;
-  readonly vx: number;
-  readonly vy: number;
-  readonly depth: number;
-  readonly spin: THREE.Vector3;
-}
-interface FrostSegment {
-  readonly a: readonly [number, number];
-  readonly b: readonly [number, number];
-  readonly birth: number;
-  readonly length: number;
-  readonly width: number;
-}
-
-/** Branching frost from the near edge and the bottom edge, in card units (u across from the near edge, v down). */
-function frostPattern(seed: number): FrostSegment[] {
-  const r = seededRandom(`${seed}:snowman-frost`);
-  const H = 1.45;
-  const segments: FrostSegment[] = [];
-  // Near the edges only: the value in the centre of the card stays clear.
-  const allowed = (x: number, y: number) =>
-    x >= 0 && x <= 0.95 && y >= 0.03 * H && y <= H && (x <= 0.27 || y >= 0.66 * H);
-  const grow = (
-    x: number,
-    y: number,
-    angle: number,
-    length: number,
-    depth: number,
-    birth: number,
-  ) => {
-    const parts = depth === 0 ? 3 : 2;
-    let px = x,
-      py = y,
-      at = birth;
-    for (let k = 0; k < parts && segments.length < FROST_SEGMENTS; k++) {
-      const l = length / parts,
-        a = angle + (r() - 0.5) * 0.35;
-      const nx = px + Math.cos(a) * l,
-        ny = py + Math.sin(a) * l;
-      if (!allowed(nx, ny)) return;
-      segments.push({
-        a: [px, py / H],
-        b: [nx, ny / H],
-        birth: at,
-        length: l,
-        width: [1.3, 0.85, 0.6][depth] ?? 0.6,
-      });
-      at += l;
-      if (depth < 2)
-        for (const turn of [-1, 1])
-          if (r() < 0.75 && segments.length < FROST_SEGMENTS)
-            grow(
-              nx,
-              ny,
-              a + turn * (0.95 + r() * 0.2),
-              length * (0.42 + r() * 0.12),
-              depth + 1,
-              at,
-            );
-      px = nx;
-      py = ny;
-    }
-  };
-  for (let k = 0; k < 5; k++)
-    grow(0, H * (0.1 + 0.19 * k + r() * 0.06), (r() - 0.5) * 0.9, 0.2 + r() * 0.07, 0, 0);
-  for (let k = 0; k < 2; k++)
-    grow(
-      0.08 + k * 0.2 + r() * 0.12,
-      H,
-      -Math.PI / 2 + (r() - 0.5) * 0.8,
-      0.18 + r() * 0.06,
-      0,
-      0.03,
-    );
-  return segments;
-}
 
 export class SnowmanTrick implements CharacterRoutine {
   readonly object = new THREE.Group();
@@ -209,20 +113,12 @@ export class SnowmanTrick implements CharacterRoutine {
   private readonly ball = new THREE.Group();
   private readonly spin = new THREE.Group();
   private readonly sculpture = new THREE.Group();
-  private readonly pieces: Piece[] = [];
+  private readonly pieces: readonly SculpturePiece[];
   /** Sculpture volumes as [x, y, radius] in sculpture units: where the chunks come from. */
-  private readonly volumes: (readonly [number, number, number])[] = [];
+  private readonly volumes: readonly SculptureVolume[];
   private readonly flat: number;
-  private readonly mound: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
-  private readonly chunks: Chunk[] = [];
-  private readonly spray: Puff[] = [];
-  private readonly powder: Puff[] = [];
-  private readonly patPuffs: Puff[] = [];
-  private readonly flakes: Puff[] = [];
-  private readonly frost: FrostSegment[];
-  private readonly frostHalo: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
-  private readonly frostCore: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
-  private readonly rims: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[] = [];
+  private readonly burst: SnowmanBurst;
+  private readonly frost: SnowmanFrost;
   /** The carrot once it has left the face: flies, rests on the floor, is kicked up, caught and refitted. */
   readonly carrot: THREE.Group;
   private readonly routeX = new Float64Array(ROUTE + 1);
@@ -250,312 +146,28 @@ export class SnowmanTrick implements CharacterRoutine {
     this.plan = this.model.plan;
     this.duration = SNOWMAN_DURATION * this.plan.pace;
     this.object.name = 'snowman-sculpting';
-    this.blastAt = this.plan.sneeze + 60;
+    this.blastAt = snowmanBlastAt(this.plan);
     const p = this.plan;
-    const r = seededRandom(`${p.phase}:snowman-snow`);
 
     // The pushed snowball: lumps, a twig and a holly leaf make its rolling visible.
     this.ball.name = 'snowman-snowball';
     this.spin.name = 'snowman-snowball-spin';
     this.object.add(this.ball);
     this.ball.add(this.spin);
-    part(this.spin, 'snowball-snow', new THREE.SphereGeometry(1, 22, 16), matte(SNOW, 0.95));
-    for (let i = 0; i < 4; i++) {
-      const a = i * 1.7 + 0.4,
-        e = (i % 2 ? 0.5 : -0.35) + i * 0.1;
-      const lump = part(
-        this.spin,
-        'snowball-lump',
-        new THREE.SphereGeometry(1, 8, 6),
-        matte(0xd2e2ee, 0.95),
-        Math.cos(a) * Math.cos(e) * 0.93,
-        Math.sin(e) * 0.93,
-        Math.sin(a) * Math.cos(e) * 0.93,
-      );
-      lump.scale.set(0.22, 0.16, 0.2);
-    }
-    const twig = part(
-      this.spin,
-      'snowball-twig',
-      new THREE.CylinderGeometry(0.035, 0.05, 0.62, 5),
-      matte(0x6e4a2c, 0.9),
-      0.55,
-      0.62,
-      0.45,
-    );
-    twig.rotation.set(0.6, 0, -0.75);
-    const leaf = part(
-      this.spin,
-      'snowball-holly',
-      new THREE.ShapeGeometry(
-        outline([
-          [0, 0],
-          [0.12, 0.1],
-          [0.3, 0.06],
-          [0.36, 0.18],
-          [0.5, 0.12],
-          [0.42, 0],
-          [0.5, -0.12],
-          [0.36, -0.18],
-          [0.3, -0.06],
-          [0.12, -0.1],
-        ]),
-      ),
-      matte(0x2f7a3c, 0.6),
-      -0.3,
-      0.2,
-      0.95,
-    );
-    leaf.rotation.set(0, -0.3, 0.4);
-    part(
-      this.spin,
-      'snowball-berry',
-      new THREE.SphereGeometry(0.08, 8, 6),
-      matte(0xc8243a, 0.4),
-      -0.3,
-      0.2,
-      1.0,
-    );
+    buildSnowball(this.spin);
 
     this.sculpture.name = 'snowman-sculpture';
     this.object.add(this.sculpture);
-    this.flat = this.buildSculpture();
-    this.mound = part(
-      this.object,
-      'snowman-mound',
-      new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-      matte(SNOW, 0.95),
-    );
+    const sculpted = buildSculpture(this.sculpture, this.plan);
+    this.flat = sculpted.flat;
+    this.pieces = sculpted.pieces;
+    this.volumes = sculpted.volumes;
+    this.burst = new SnowmanBurst(this.object, p, this.sculpture, this.volumes, DEPTH);
 
-    for (let i = 0; i < 12; i++) {
-      const mesh = part(
-        this.object,
-        `snowman-chunk-${i}`,
-        new THREE.IcosahedronGeometry(1, 0),
-        matte(i % 3 ? SNOW : 0xdce9f3, 0.95),
-      );
-      mesh.scale.set(1, 0.8, 0.9);
-      this.chunks.push({
-        mesh,
-        volume: i % Math.max(1, this.volumes.length),
-        ox: r() - 0.5,
-        oy: r() - 0.5,
-        vx: 0.03 + r() * 0.11,
-        vy: -(0.07 + r() * 0.17),
-        depth: r() * 12 - 4,
-        spin: new THREE.Vector3(r() * 12 - 6, r() * 12 - 6, r() * 14 - 7),
-      });
-    }
-    const puff = (
-      list: Puff[],
-      name: string,
-      count: number,
-      color: number,
-      geometry: () => THREE.BufferGeometry,
-    ) => {
-      for (let i = 0; i < count; i++)
-        list.push({
-          mesh: part(this.object, `${name}-${i}`, geometry(), glow(color, 0)),
-          a: r(),
-          b: r(),
-          c: r(),
-        });
-    };
-    puff(this.spray, 'snowman-sneeze-spray', 7, 0xe6f4fc, () => new THREE.CircleGeometry(1, 16));
-    puff(this.powder, 'snowman-powder', 10, 0xeef8ff, () => new THREE.CircleGeometry(1, 16));
-    puff(this.patPuffs, 'snowman-pat-puff', 3, 0xf2f9ff, () => new THREE.CircleGeometry(1, 12));
-    puff(this.flakes, 'snowman-flake', 6, 0xcfe8f7, flakeGeometry);
-
-    this.frost = frostPattern(p.phase);
-    this.frostHalo = part(
-      this.object,
-      'snowman-frost-halo',
-      quadGeometry(FROST_SEGMENTS),
-      glow(0x86c6e2, 0),
-    );
-    this.frostCore = part(
-      this.object,
-      'snowman-frost-core',
-      quadGeometry(FROST_SEGMENTS),
-      glow(0xf6fdff, 0),
-    );
-    for (let i = 0; i < 2; i++)
-      this.rims.push(
-        part(this.object, `snowman-frost-rim-${i}`, stripGeometry(16), glow(0xbfe5f5, 0)),
-      );
+    this.frost = new SnowmanFrost(this.object, p.phase, DEPTH);
 
     this.carrot = buildCarrot(this.object, 'snowman-loose-carrot');
     this.carrot.visible = false;
-  }
-
-  /** Builds the authored sculpture on the snowball; returns how much the snowball is pressed flat. */
-  private buildSculpture(): number {
-    const p = this.plan,
-      R = p.ballEnd;
-    const add = (
-      name: string,
-      x: number,
-      y: number,
-      keys: readonly (readonly [number, number])[],
-      marker: THREE.Vector3 | null,
-    ) => {
-      const group = new THREE.Group();
-      group.name = name;
-      group.position.set(x, y, 0);
-      this.sculpture.add(group);
-      let m: THREE.Object3D | null = null;
-      if (marker) {
-        m = new THREE.Object3D();
-        m.name = `${name}-pat`;
-        m.position.copy(marker);
-        group.add(m);
-      }
-      const piece = { group, keys, marker: m };
-      this.pieces.push(piece);
-      return group;
-    };
-    const pebble = (parent: THREE.Object3D, x: number, y: number, z: number, size: number) =>
-      part(
-        parent,
-        'sculpture-pebble',
-        new THREE.SphereGeometry(size, 8, 6),
-        matte(PEBBLE, 0.5),
-        x,
-        y,
-        z,
-      );
-    if (p.sculpture === 'snowman') {
-      // A tiny portrait of Flurry himself.
-      const r1 = 0.66 * R,
-        c1 = 2 * R + 0.8 * r1,
-        r2 = 0.46 * R,
-        c2 = c1 + r1 + 0.8 * r2;
-      this.volumes.push([0, R, R], [0, c1, r1], [0, c2, r2]);
-      part(
-        add('sculpture-body', 0, c1, [[0, 1]], new THREE.Vector3(-0.5 * r1, 0.866 * r1, 0)),
-        'sculpture-body-ball',
-        new THREE.SphereGeometry(r1, 18, 12),
-        matte(SNOW, 0.95),
-      );
-      part(
-        add('sculpture-head', 0, c2, [[1, 1]], new THREE.Vector3(-0.5 * r2, 0.866 * r2, 0)),
-        'sculpture-head-ball',
-        new THREE.SphereGeometry(r2, 16, 12),
-        matte(SNOW, 0.95),
-      );
-      const face = add('sculpture-face', 0, c2, [[2, 1]], null);
-      for (const az of [-0.35, 0.35])
-        pebble(face, Math.sin(az) * r2 * 0.95, r2 * 0.25, Math.cos(az) * r2 * 0.92, 0.1 * R);
-      const nose = part(
-        face,
-        'sculpture-nose',
-        new THREE.ConeGeometry(0.09 * R, 0.4 * R, 8),
-        matte(0xf07a22, 0.6),
-        0.1 * R,
-        0,
-        r2 * 1.05,
-      );
-      nose.rotation.set(Math.PI / 2, 0, 0);
-      const arms = add('sculpture-arms', 0, c1, [[3, 1]], null);
-      for (const s of [-1, 1]) {
-        const twig = part(
-          arms,
-          'sculpture-twig',
-          new THREE.CylinderGeometry(0.035 * R, 0.05 * R, 0.85 * r1, 5),
-          matte(0x6e4a2c, 0.9),
-          s * r1 * 1.25,
-          r1 * 0.45,
-          0,
-        );
-        twig.rotation.z = -s * 0.85;
-      }
-      const buttons = add('sculpture-buttons', 0, c1, [[4, 1]], null);
-      for (const y of [0.25, -0.2]) pebble(buttons, 0, y * r1, r1 * 0.97, 0.08 * R);
-      return 0;
-    }
-    if (p.sculpture === 'star') {
-      const flat = 0.4,
-        top = 2 * R * (1 - flat),
-        S = 1.05 * R;
-      this.volumes.push(
-        [0, R * (1 - flat), R],
-        [0, top + 0.7 * S, 0.7 * S],
-        [-0.85 * R, top, 0.3 * R],
-        [0.85 * R, top, 0.3 * R],
-      );
-      const star = add(
-        'sculpture-star',
-        0,
-        top - 0.15 * R,
-        [
-          [1, 0.6],
-          [2, 1],
-        ],
-        new THREE.Vector3(-0.45 * S, 0.81 * S + 0.25 * S, 0.27 * R),
-      );
-      part(star, 'sculpture-star-snow', starGeometry(S, 0.5 * R), matte(SNOW, 0.9), 0, 0.81 * S, 0);
-      const snowballs = add('sculpture-snowballs', 0, 0, [[3, 1]], null);
-      for (const s of [-1, 1])
-        part(
-          snowballs,
-          'sculpture-small-ball',
-          new THREE.SphereGeometry(0.28 * R, 12, 8),
-          matte(SNOW, 0.95),
-          s * 0.85 * R,
-          1.02 * R + 0.2 * R,
-          0.1 * R,
-        );
-      pebble(
-        add('sculpture-sparkle', 0, top - 0.15 * R + 0.81 * S, [[4, 1]], null),
-        0,
-        0,
-        0.3 * R,
-        0.09 * R,
-      );
-      return flat;
-    }
-    const flat = 0.25;
-    const cones: readonly (readonly [number, number, number])[] = [
-      [0.95 * R, 1.15 * R, 2 * R * (1 - flat) - 0.15 * R],
-      [0.72 * R, 0.95 * R, 0],
-      [0.5 * R, 0.8 * R, 0],
-    ];
-    let y = 0;
-    this.volumes.push([0, R * (1 - flat), R]);
-    cones.forEach(([radius, height, base], k) => {
-      y = k ? y + (cones[k - 1]?.[1] ?? 0) * 0.62 : base;
-      const cone = new THREE.ConeGeometry(radius, height, 12, 1);
-      cone.translate(0, height / 2, 0);
-      part(
-        add(
-          `sculpture-tier-${k}`,
-          0,
-          y,
-          [[k, 1]],
-          new THREE.Vector3(-0.45 * radius, 0.55 * height, 0),
-        ),
-        `sculpture-tier-${k}-snow`,
-        cone,
-        matte(SNOW, 0.9),
-      );
-      this.volumes.push([0, y + height * 0.35, radius * 0.8]);
-    });
-    const crown = y + (cones[2]?.[1] ?? 0);
-    part(
-      add('sculpture-topper', 0, crown, [[3, 1]], null),
-      'sculpture-topper-ball',
-      new THREE.SphereGeometry(0.2 * R, 10, 8),
-      matte(SNOW, 0.95),
-    );
-    const ornaments = add('sculpture-ornaments', 0, 0, [[4, 1]], null);
-    [
-      [-0.35, 2.05],
-      [0.3, 2.55],
-      [-0.1, 3.05],
-    ].forEach(([u, v]) =>
-      pebble(ornaments, (u ?? 0) * R, (v ?? 0) * R - 0.15 * R, 0.55 * R, 0.08 * R),
-    );
-    return flat;
   }
 
   cardAnimation(facing: number) {
@@ -939,9 +551,8 @@ export class SnowmanTrick implements CharacterRoutine {
     }
     actor.updateMatrixWorld(true);
     const fade = 1 - ease((ms - (SNOWMAN_DURATION - 650)) / 550);
-    this.updateFallout(ms, g, fade);
-    this.updatePuffs(ms, g, fade);
-    this.updateFrost(ms, g, q, fade);
+    this.burst.update(ms, g, fade, this.noseTip(g.sc), (k) => this.patPuffPoint(k, g));
+    this.frost.update(snowmanFrost(this.plan, ms), g, q, fade);
   }
 
   // ---------------------------------------------------------------- snowball and sculpture
@@ -986,7 +597,7 @@ export class SnowmanTrick implements CharacterRoutine {
     }
   }
 
-  private pieceScale(piece: Piece, ms: number): number {
+  private pieceScale(piece: SculpturePiece, ms: number): number {
     let target = 0,
       previous = 0,
       from = -Infinity;
@@ -1220,8 +831,8 @@ export class SnowmanTrick implements CharacterRoutine {
       const dt = Math.max(1, t1 - t0),
         k = Math.max(0, Math.min(dt, ms - t0));
       const vx = (to.x - from.x) / dt,
-        vy = (to.y - from.y - 0.5 * GRAVITY * dt * dt) / dt;
-      return { x: from.x + vx * k, y: from.y + vy * k + 0.5 * GRAVITY * k * k };
+        vy = (to.y - from.y - 0.5 * SNOWMAN_GRAVITY * dt * dt) / dt;
+      return { x: from.x + vx * k, y: from.y + vy * k + 0.5 * SNOWMAN_GRAVITY * k * k };
     };
     let centre: Point,
       z = DEPTH + 6;
@@ -1285,130 +896,15 @@ export class SnowmanTrick implements CharacterRoutine {
 
   // ---------------------------------------------------------------- fallout and effects
 
-  private updateFallout(ms: number, g: Stage, fade: number) {
-    const p = this.plan,
-      sc = g.sc;
-    const age = ms - this.blastAt;
-    const blown = age >= 0 && fade > 0;
-    const R = p.ballEnd;
-    // The sad little heap left where the sculpture stood.
-    this.mound.visible = blown;
-    this.mound.position.set(g.base.x, -g.floor, DEPTH + 2);
-    this.mound.scale.set(R * 1.15 * sc, R * 0.42 * sc * ease(age / 160 + 0.3), R * 0.85 * sc);
-    this.mound.material.transparent = true;
-    this.mound.material.opacity = fade;
-    for (const chunk of this.chunks) {
-      chunk.mesh.visible = blown;
-      if (!blown) continue;
-      const [vx0, vy0, vr] = this.volumes[chunk.volume] ?? [0, R, R];
-      this.scratch.set(vx0 + chunk.ox * vr, vy0 + chunk.oy * vr, 0);
-      this.sculpture.localToWorld(this.scratch);
-      const born = { x: this.scratch.x, y: -this.scratch.y };
-      const size = vr * (0.3 + 0.25 * Math.abs(chunk.ox + chunk.oy)) * sc;
-      const vx = g.side * chunk.vx * p.strength + chunk.ox * 0.06,
-        vy = chunk.vy * p.strength;
-      const floor = g.floor + chunk.depth * g.fit;
-      const land = (-vy + Math.sqrt(vy * vy + 2 * GRAVITY * Math.max(0, floor - born.y))) / GRAVITY;
-      const k = Math.min(age, land);
-      const slide = age > land ? vx * 60 * (1 - Math.exp(-(age - land) / 60)) : 0;
-      const x = born.x + vx * k + slide;
-      const turn = Math.min(age, land) / 1000;
-      chunk.mesh.rotation.set(chunk.spin.x * turn, chunk.spin.y * turn, chunk.spin.z * turn);
-      chunk.mesh.scale.set(size, size * 0.8, size * 0.9);
-      chunk.mesh.position.set(x, 0, DEPTH + 1 + chunk.depth * 0.1);
-      chunk.mesh.updateMatrixWorld(true);
-      const low = lowestWorldY(chunk.mesh);
-      const flying = -(born.y + vy * age + 0.5 * GRAVITY * age * age);
-      // Never below the floor: once it touches down it rests on its own lowest point.
-      chunk.mesh.position.y = Math.max(flying, -floor - low);
-      chunk.mesh.material.transparent = true;
-      chunk.mesh.material.opacity = fade;
-    }
-  }
-
-  private updatePuffs(ms: number, g: Stage, fade: number) {
-    const p = this.plan,
-      sc = g.sc,
-      fit = g.fit;
-    const R = p.ballEnd;
-    // Sneeze spray from the nose tip toward the sculpture.
+  /** Where the carrot tip, still on the face, points the sneeze from. */
+  private noseTip(sc: number): Point {
     const axis = this.scratch.set(0, 1, 0).applyQuaternion(this.launchQuat);
-    const nose = {
+    return {
       x: this.launchPos.x + axis.x * CARROT_LENGTH * sc,
       y: -(this.launchPos.y + axis.y * CARROT_LENGTH * sc),
     };
-    const target = { x: g.base.x, y: g.floor - R * sc * 1.6 };
-    const heading = Math.atan2(target.y - nose.y, target.x - nose.x);
-    this.spray.forEach((puff, i) => {
-      const t = ms - p.sneeze;
-      puff.mesh.visible = t >= 0 && t < 750 && fade > 0;
-      if (!puff.mesh.visible) return;
-      const a = heading + (i / (this.spray.length - 1) - 0.5) * 0.7;
-      const v = (0.35 + 0.15 * puff.a) * p.strength,
-        d = v * 180 * (1 - Math.exp(-t / 180));
-      puff.mesh.position.set(
-        nose.x + Math.cos(a) * d,
-        -(nose.y + Math.sin(a) * d) + 0.01 * t * puff.b,
-        DEPTH + 12,
-      );
-      puff.mesh.scale.setScalar((1.5 + 0.012 * t) * fit * (0.8 + 0.4 * puff.c));
-      puff.mesh.material.opacity = 0.75 * (1 - t / 750);
-    });
-    // Powder from the burst sculpture drifts out and slowly settles.
-    this.powder.forEach((puff, i) => {
-      const t = ms - this.blastAt;
-      puff.mesh.visible = t >= 0 && t < 1800 && fade > 0;
-      if (!puff.mesh.visible) return;
-      const [vx0, vy0, vr] = this.volumes[i % Math.max(1, this.volumes.length)] ?? [0, R, R];
-      this.scratch.set(vx0 + (puff.a - 0.5) * vr, vy0 + (puff.b - 0.5) * vr, 0);
-      this.sculpture.localToWorld(this.scratch);
-      const drift = g.side * (0.05 + 0.08 * puff.c) * p.strength * 220 * (1 - Math.exp(-t / 220));
-      const rise = 14 * fit * (1 - Math.exp(-t / 260)) - 0.012 * t * fit;
-      puff.mesh.position.set(
-        this.scratch.x + drift + Math.sin(t / 300 + i) * 3 * fit,
-        this.scratch.y + rise,
-        DEPTH + 10,
-      );
-      puff.mesh.scale.setScalar((2 + 0.005 * t) * fit * (0.8 + 0.5 * puff.a));
-      puff.mesh.material.opacity = 0.65 * (1 - t / 1800);
-    });
-    // Little puffs where each pat lands.
-    const k = Math.max(
-      0,
-      Math.min(p.pats - 1, Math.round((ms - snowmanPatContact(p, 0)) / PAT_INTERVAL)),
-    );
-    const age = ms - snowmanPatContact(p, k);
-    this.patPuffs.forEach((puff, i) => {
-      puff.mesh.visible = age >= 0 && age < 380 && ms < this.blastAt;
-      if (!puff.mesh.visible) return;
-      const marker = this.patPuffPoint(k, g);
-      const a = -Math.PI / 2 + (i - 1) * 0.9 + puff.a * 0.3;
-      const d = (3 + 8 * ease(age / 380)) * fit;
-      puff.mesh.position.set(marker.x + Math.cos(a) * d, -(marker.y + Math.sin(a) * d), DEPTH + 12);
-      puff.mesh.scale.setScalar((1 + 1.6 * ease(age / 380)) * fit);
-      puff.mesh.material.opacity = 0.7 * (1 - age / 380);
-    });
-    // Snowflakes drift down after the burst and settle on the floor.
-    this.flakes.forEach((flake, i) => {
-      const t = ms - this.blastAt - 80;
-      flake.mesh.visible = t >= 0 && fade > 0;
-      if (!flake.mesh.visible) return;
-      const startX = g.base.x + (flake.a - 0.5) * 60 * fit + g.side * 10 * fit,
-        startY = g.floor - (34 + 30 * flake.b) * fit;
-      const floor = g.floor - 1.5 * fit + flake.c * 6 * fit;
-      const y = Math.min(floor, startY + 0.02 * t);
-      const settled = y >= floor;
-      const sway = settled ? Math.sin((floor - startY) / 0.02 / 320 + i) : Math.sin(t / 320 + i);
-      flake.mesh.position.set(
-        startX + sway * 6 * fit + g.side * 0.006 * Math.min(t, (floor - startY) / 0.02),
-        -y,
-        DEPTH + 11,
-      );
-      flake.mesh.rotation.z = settled ? 0.5 * i : t / 600 + i;
-      flake.mesh.scale.setScalar((1.6 + flake.c) * fit);
-      flake.mesh.material.opacity = 0.9 * fade;
-    });
   }
+
   private patPuffPoint(k: number, g: Stage): Point {
     let marker: THREE.Object3D | null = null;
     for (const piece of this.pieces)
@@ -1419,62 +915,5 @@ export class SnowmanTrick implements CharacterRoutine {
       x: g.base.x - g.side * 0.34 * R * g.sc,
       y: g.floor - 1.9 * R * (1 - this.flat) * g.sc,
     };
-  }
-
-  private updateFrost(ms: number, g: Stage, q: CardPose, fade: number) {
-    const p = this.plan;
-    const grown = snowmanFrost(p, ms);
-    const front = grown * 0.36;
-    const live = grown > 0 && fade > 0;
-    const near = (u: number) => (g.side > 0 ? u : 1 - u);
-    for (const [mesh, scale, z] of [
-      [this.frostHalo, 2.2, DEPTH - 12],
-      [this.frostCore, 1, DEPTH - 11.9],
-    ] as const) {
-      mesh.visible = live;
-      if (!live) continue;
-      const positions = mesh.geometry.getAttribute('position');
-      for (let i = 0; i < FROST_SEGMENTS; i++) {
-        const seg = this.frost[i];
-        const f = seg ? clamp((front - seg.birth) / seg.length) : 0;
-        if (!seg || f <= 0) {
-          for (let v = 0; v < 4; v++) positions.setXYZ(i * 4 + v, 0, 0, z);
-          continue;
-        }
-        const a = onCard(q, near(seg.a[0]), seg.a[1], g.b),
-          b = onCard(q, near(mix(seg.a[0], seg.b[0], f)), mix(seg.a[1], seg.b[1], f), g.b);
-        const dx = b.x - a.x,
-          dy = b.y - a.y,
-          l = Math.hypot(dx, dy) || 1;
-        const w = (seg.width * scale * g.fit) / 2;
-        const nx = (-dy / l) * w,
-          ny = (dx / l) * w;
-        positions.setXYZ(i * 4, a.x + nx, -(a.y + ny), z);
-        positions.setXYZ(i * 4 + 1, a.x - nx, -(a.y - ny), z);
-        positions.setXYZ(i * 4 + 2, b.x + nx * 0.6, -(b.y + ny * 0.6), z);
-        positions.setXYZ(i * 4 + 3, b.x - nx * 0.6, -(b.y - ny * 0.6), z);
-      }
-      positions.needsUpdate = true;
-      mesh.geometry.computeBoundingSphere();
-      mesh.material.opacity = (scale > 1 ? 0.55 : 0.95) * fade;
-    }
-    // A frosted rim creeps up the near edge and along the bottom from the corner.
-    this.rims.forEach((rim, i) => {
-      rim.visible = live;
-      if (!live) return;
-      setStrip(
-        rim.geometry,
-        16,
-        (s, out) => {
-          const at =
-            i === 0
-              ? onCard(q, near(0.012), 0.99 - s * 0.95 * grown, g.b)
-              : onCard(q, near(0.01 + s * 0.45 * grown), 0.988, g.b);
-          out.set(at.x, -at.y, DEPTH - 12.1);
-        },
-        (s) => (3.2 - 1.6 * s) * g.fit,
-      );
-      rim.material.opacity = 0.5 * fade;
-    });
   }
 }
